@@ -9,12 +9,12 @@ Aplicación de eventos culturales
 ![GPL v3 License](https://img.shields.io/badge/License-GPL%20v3-blue.svg)
 
 ## Wiki
-[Enlace wiki]()
+[Enlace wiki](https://www.notion.so/2a16e2716279808f908aee87502e82a6?v=2a16e271627981578226000c88283d4e&source=copy_link)
 
 ## Autores
 
 - [@Evaremu](https://github.com/Evaremu)
-- [@aperezm111](https://github.com/aperezm111)
+- [@aperezm111](https://github.com/aperezm1)
 - [@dmunozc04-albarregas](https://github.com/dmunozc04-albarregas)
 
 ## Licencia
