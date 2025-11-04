@@ -4,7 +4,6 @@
   <img src="https://raw.githubusercontent.com/aperezm1/EventvsMerida/main/logo_eventvs_merida.jpeg" alt="Logo de Eventvs Mérida" width="150">
 </div>
 
-
 <p align="center">
   Aplicación móvil que centraliza toda la información cultural y de ocio de Mérida en un solo espacio digital.
 </p>
@@ -20,7 +19,9 @@
 
 <h2 align="center">Desarrolladores</h2>
 
-<table style="margin-left:auto; margin-right:auto;">
+<div align="center">
+
+<table>
   <tr>
     <td align="center" style="padding: 10px;">
       <img src="https://avatars.githubusercontent.com/u/190772658?v=4" width="100px" alt=""/><br />
@@ -40,21 +41,22 @@
   </tr>
 </table>
 
+</div>
 
 <div align="center">
 <h2>Licencia</h2>
 
-Este proyecto está bajo la licencia **GNU General Public License v3 (GPL v3)** - acceda el fichero [LICENSE](https://github.com/aperezm1/EventvsMerida/blob/main/LICENSE) para más detalles.
+Este proyecto está bajo la licencia <b>GNU General Public License v3 (GPL v3)</b> - acceda el fichero [LICENSE](https://github.com/aperezm1/EventvsMerida/blob/main/LICENSE) para más detalles.
 
 📄 Resumen de la licencia GPL v3:
 
-✅ Uso comercial permitido
-✅ Modificación permitida
-✅ Distribución permitida
-✅ Uso privado permitido
-✅ Uso de patentes permitido
-⚠️ Debes divulgar el código fuente
-⚠️ Debes mantener la licencia y los avisos de copyright
-❌ Sin responsabilidad
-❌ Sin garantía
+✅ Uso comercial permitido  
+✅ Modificación permitida  
+✅ Distribución permitida  
+✅ Uso privado permitido  
+✅ Uso de patentes permitido  
+⚠️ Debes divulgar el código fuente  
+⚠️ Debes mantener la licencia y los avisos de copyright  
+❌ Sin responsabilidad  
+❌ Sin garantía  
 </div>
