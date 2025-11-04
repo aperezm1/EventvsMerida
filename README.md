@@ -3,7 +3,7 @@
 Aplicación de eventos culturales
 
 <div align="center">
-  <img src="https://github.com/aperezm1/EventvsMerida/blob/main/logo.jpeg" alt="Logo de Eventvs Mérida" width="150">
+  <img src="https://github.com/aperezm1/EventvsMerida/blob/main/logo_eventvs_merida.jpeg" alt="Logo de Eventvs Mérida" width="150">
 </div>
 
 ![GPL v3 License](https://img.shields.io/badge/License-GPL%20v3-blue.svg)
