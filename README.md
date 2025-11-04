@@ -1,7 +1,7 @@
 <h2 align="center">Eventvs Mérida</h2>
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/aperezm1/EventvsMerida/main/logo_eventvs_merida.jpeg alt="Logo de Eventvs Mérida" width="150">
+  <img src="https://raw.githubusercontent.com/aperezm1/EventvsMerida/main/logo_eventvs_merida.jpeg" alt="Logo de Eventvs Mérida" width="150">
 </div>
 
 
