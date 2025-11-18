@@ -11,7 +11,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Licencia-GPLv3-blue.svg" alt="Licencia: GPL v3" />
   <img src="https://img.shields.io/badge/Estado-En%20desarrollo-yellow" alt="Estado del proyecto" />
-  <img src="https://img.shields.io/badge/Backend%20con-Java-007396?logo=openjdk" alt="Backend con Java" />
+<img src="https://img.shields.io/badge/Backend-Spring%20Boot-6DB33F?logo=springboot&logoColor=white">
   <img src="https://img.shields.io/badge/interfaz%20con-Flutter-02569B?logo=flutter" alt="Interfaz con Flutter" />
   <img src="https://img.shields.io/github/last-commit/aperezm1/EventvsMerida" alt="Último commit" />
   <img src="https://img.shields.io/badge/Plataforma-Móvil-red" alt="Plataforma móvil" />
