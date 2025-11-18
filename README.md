@@ -17,6 +17,9 @@
   <img src="https://img.shields.io/badge/Plataforma-Móvil-red" alt="Plataforma móvil" />
 </p>
 
+<h2 align="center">Enlaces</h2>
+<a href="https://www.figma.com/design/7KZIZqLMFp8ICrSPDZ2oKz/Prototipo----Eventvs-M%C3%A9rida?node-id=0-1&t=dXFZVgvSh53g5oPN-1">Figma</a>
+
 <h2 align="center">Desarrolladores</h2>
 
 <div align="center">
