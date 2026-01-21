@@ -45,5 +45,11 @@ public class Evento {
     @JoinColumn(name = "id_usuario", nullable = false)
     private Usuario idUsuario;
 
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @OnDelete(action = OnDeleteAction.SET_DEFAULT)
+    @JoinColumn(name = "id_categoria", nullable = false)
+    private Categoria idCategoria;
+
 
 }
