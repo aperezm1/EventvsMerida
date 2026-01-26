@@ -7,7 +7,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class CorsConfig {
-    private static final String[] ALLOWED_ORIGINS = { "" };
+    private static final String[] ALLOWED_ORIGINS = { "*" };
     private static final String[] ALLOWED_METHODS = { "GET", "POST", "PUT", "DELETE", "OPTIONS" };
     private static final String[] ALLOWED_HEADERS = { "Content-Type", "Authorization", "X-Requested-With" };
     private static final String[] EXPOSED_HEADERS = { "Authorization" };
