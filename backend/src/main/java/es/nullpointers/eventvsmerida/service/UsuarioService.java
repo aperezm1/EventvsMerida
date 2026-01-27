@@ -1,0 +1,98 @@
+package es.nullpointers.eventvsmerida.service;
+
+import es.nullpointers.eventvsmerida.entity.Usuario;
+import es.nullpointers.eventvsmerida.repository.UsuarioRepository;
+import jakarta.persistence.NoResultException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.NoSuchElementException;
+
+/**
+ * Servicio para gestionar la logica de negocio relacionada con la
+ * entidad Usuario.
+ */
+@Slf4j
+@RequiredArgsConstructor
+@Service
+public class UsuarioService {
+    private final UsuarioRepository usuarioRepository;
+
+    /**
+     * Metodo para obtener todos los usuarios.
+     *
+     * @return Lista de usuarios.
+     */
+    public List<Usuario> obtenerUsuarios() {
+        List<Usuario> usuarios = usuarioRepository.findAll();
+
+        if (usuarios.isEmpty()) {
+            throw new NoResultException("Error en UsuarioService.obtenerUsuarios: No se encontraron usuarios en la base de datos");
+        }
+
+        return usuarios;
+    }
+
+    /**
+     * Metodo para obtener un usuario por su ID.
+     *
+     * @param id ID del usuario a obtener.
+     * @return Usuario encontrado.
+     */
+    public Usuario obtenerUsuarioPorId(Long id) {
+        return obtenerUsuarioPorIdOExcepcion(id, "Error en UsuarioService.obtenerUsuarioPorId: No se encontró el usuario con id " + id);
+    }
+
+    /**
+     * Metodo para crear un nuevo usuario.
+     *
+     * @param usuarioNuevo Datos del usuario a crear.
+     * @return Usuario creado.
+     */
+    public Usuario crearUsuario(Usuario usuarioNuevo) {
+        return usuarioRepository.save(usuarioNuevo);
+    }
+
+    /**
+     * Metodo para eliminar un usuario por su ID.
+     *
+     * @param id ID del usuario a eliminar.
+     */
+    public void eliminarUsuario(Long id) {
+        if (!usuarioRepository.existsById(id)) {
+            throw new NoSuchElementException("Error en UsuarioService.eliminarUsuario: No se encontró el usuario con id " + id);
+        }
+        usuarioRepository.deleteById(id);
+    }
+
+    /**
+     * Metodo para actualizar un usuario existente.
+     *
+     * @param id ID del usuario a actualizar.
+     * @param usuarioAActualizar Datos actualizados del usuario.
+     * @return Usuario actualizado.
+     */
+    public Usuario actualizarUsuario(Long id, Usuario usuarioAActualizar) {
+        Usuario usuarioExistente = obtenerUsuarioPorIdOExcepcion(id, "Error en UsuarioService.actualizarUsuario: No se encontró usuario rol con id: " + id);
+        usuarioExistente.setNombre(usuarioAActualizar.getNombre());
+        return usuarioRepository.save(usuarioExistente);
+    }
+
+    // ================
+    // Metodos Privados
+    // ================
+
+    /**
+     * Metodo privado para obtener un usuario por su ID o lanzar una excepcion
+     * personalizada si no se encuentra.
+     *
+     * @param id ID del usuario a obtener.
+     * @param mensajeError Mensaje de error para la excepcion.
+     * @return Usuario encontrado.
+     */
+    private Usuario obtenerUsuarioPorIdOExcepcion(Long id, String mensajeError) {
+        return usuarioRepository.findById(id).orElseThrow(() -> new NoSuchElementException(mensajeError));
+    }
+}

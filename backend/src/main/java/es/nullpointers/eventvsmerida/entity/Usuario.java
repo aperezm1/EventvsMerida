@@ -2,7 +2,9 @@ package es.nullpointers.eventvsmerida.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -11,6 +13,8 @@ import java.time.LocalDate;
 
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Table(name = "\"Usuario\"")
 public class Usuario {
@@ -48,6 +52,4 @@ public class Usuario {
     @OnDelete(action = OnDeleteAction.SET_DEFAULT)
     @JoinColumn(name = "id_rol", nullable = false)
     private Rol idRol;
-
-
 }
