@@ -56,11 +56,11 @@ public class UsuarioController {
      * @param usuarioRequest Datos del usuario a crear.
      * @return ResponseEntity con el usuario creado y el estado HTTP 201 (CREATED).
      */
-    @PostMapping("/add")
-    public ResponseEntity<Usuario> crearUsuario(@Valid @RequestBody UsuarioRequest usuarioRequest) {
-        Usuario usuarioNuevo = usuarioService.crearUsuario();
-        return ResponseEntity.status(HttpStatus.CREATED).body(usuarioNuevo);
-    }
+//    @PostMapping("/add")
+//    public ResponseEntity<Usuario> crearUsuario(@Valid @RequestBody UsuarioRequest usuarioRequest) {
+//        Usuario usuarioNuevo = usuarioService.crearUsuario();
+//        return ResponseEntity.status(HttpStatus.CREATED).body(usuarioNuevo);
+//    }
 
     /**
      * Metodo DELETE que llama al servicio para eliminar un usuario por su ID.
@@ -81,11 +81,11 @@ public class UsuarioController {
      * @param usuarioRequest Datos actualizados del usuario.
      * @return ResponseEntity con el usuario actualizado y el estado HTTP 200 (OK).
      */
-    @PutMapping("/update/{id}")
-    public ResponseEntity<Usuario> actualizarUsuario(@PathVariable Long id, @Valid @RequestBody UsuarioRequest usuarioRequest) {
-        Usuario usuarioActualizado = usuarioService.actualizarRol(id, );
-        return ResponseEntity.ok(usuarioActualizado);
-    }
+//    @PutMapping("/update/{id}")
+//    public ResponseEntity<Usuario> actualizarUsuario(@PathVariable Long id, @Valid @RequestBody UsuarioRequest usuarioRequest) {
+//        Usuario usuarioActualizado = usuarioService.actualizarRol(id, );
+//        return ResponseEntity.ok(usuarioActualizado);
+//    }
 
     // ================
     // Metodos Privados
