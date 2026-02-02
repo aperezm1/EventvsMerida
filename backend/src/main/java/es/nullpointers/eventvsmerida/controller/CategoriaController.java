@@ -2,6 +2,7 @@ package es.nullpointers.eventvsmerida.controller;
 
 import es.nullpointers.eventvsmerida.dto.CategoriaRequest;
 import es.nullpointers.eventvsmerida.entity.Categoria;
+import es.nullpointers.eventvsmerida.mapper.CategoriaMapper;
 import es.nullpointers.eventvsmerida.service.CategoriaService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -62,7 +63,7 @@ public class CategoriaController {
      */
     @PostMapping("/add")
     public ResponseEntity<Categoria> crearCategoria(@Valid @RequestBody CategoriaRequest categoriaRequest) {
-        Categoria categoriaNueva = categoriaService.crearCategoria(obtenerCategoriaConNombreCapitalizado(categoriaRequest));
+        Categoria categoriaNueva = categoriaService.crearCategoria(CategoriaMapper.convertirAEntidad(categoriaRequest));
         return ResponseEntity.status(HttpStatus.CREATED).body(categoriaNueva);
     }
 
@@ -87,18 +88,7 @@ public class CategoriaController {
      */
     @PutMapping("/update/{id}")
     public ResponseEntity<Categoria> actualizarCategoria(@PathVariable Long id, @Valid @RequestBody CategoriaRequest categoriaRequest) {
-        Categoria categoriaActualizado = categoriaService.actualizarCategoria(id, obtenerCategoriaConNombreCapitalizado(categoriaRequest));
+        Categoria categoriaActualizado = categoriaService.actualizarCategoria(id, CategoriaMapper.convertirAEntidad(categoriaRequest));
         return ResponseEntity.ok(categoriaActualizado);
     }
-
-    // ================
-    // Metodos Privados
-    // ================
-
-    private Categoria obtenerCategoriaConNombreCapitalizado(CategoriaRequest categoriaRequest) {
-        String nuevoNombre = categoriaRequest.getNombre().trim();
-        String nombreCapitalizado = nuevoNombre.substring(0, 1).toUpperCase() + nuevoNombre.substring(1).toLowerCase();
-        return new Categoria(null, nombreCapitalizado);
-    }
 }
-

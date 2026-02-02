@@ -86,7 +86,7 @@ public class UsuarioService {
 
         if (usuarioAActualizar.getNombre() != null)
             usuarioExistente.setNombre(usuarioAActualizar.getNombre());
-        if (usuarioAActualizar.getApellidos() != null && !usuarioAActualizar.getApellidos().isEmpty())
+        if (usuarioAActualizar.getApellidos() != null)
             usuarioExistente.setApellidos(usuarioAActualizar.getApellidos());
         if (usuarioAActualizar.getFechaNacimiento() != null)
             usuarioExistente.setFechaNacimiento(usuarioAActualizar.getFechaNacimiento());

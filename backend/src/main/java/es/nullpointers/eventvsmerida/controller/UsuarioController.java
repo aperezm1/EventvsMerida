@@ -89,7 +89,7 @@ public class UsuarioController {
      * @param usuarioRequest DTO con los datos del usuario a actualizar.
      * @return ResponseEntity con el usuario actualizado y el estado HTTP 200 (OK).
      */
-    @PutMapping("/update/{id}")
+    @PatchMapping("/update/{id}")
     public ResponseEntity<Usuario> actualizarUsuario(@PathVariable Long id, @Valid @RequestBody UsuarioActualizarRequest usuarioRequest) {
         Usuario usuarioActualizado = usuarioService.actualizarUsuario(id, UsuarioMapper.convertirAEntidad(usuarioRequest, rolService));
         return ResponseEntity.ok(usuarioActualizado);
