@@ -5,6 +5,7 @@ import es.nullpointers.eventvsmerida.repository.UsuarioRepository;
 import jakarta.persistence.NoResultException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,12 +14,17 @@ import java.util.NoSuchElementException;
 /**
  * Servicio para gestionar la logica de negocio relacionada con la
  * entidad Usuario.
+ *
+ * @author Eva Retamar
+ * @author David Muñoz
+ * @author Adrián Pérez
  */
 @Slf4j
 @RequiredArgsConstructor
 @Service
 public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
+    private final PasswordEncoder passwordEncoder;
 
     /**
      * Metodo para obtener todos los usuarios.
@@ -52,6 +58,7 @@ public class UsuarioService {
      * @return Usuario creado.
      */
     public Usuario crearUsuario(Usuario usuarioNuevo) {
+        usuarioNuevo.setPassword(passwordEncoder.encode(usuarioNuevo.getPassword()));
         return usuarioRepository.save(usuarioNuevo);
     }
 
@@ -75,8 +82,23 @@ public class UsuarioService {
      * @return Usuario actualizado.
      */
     public Usuario actualizarUsuario(Long id, Usuario usuarioAActualizar) {
-        Usuario usuarioExistente = obtenerUsuarioPorIdOExcepcion(id, "Error en UsuarioService.actualizarUsuario: No se encontró usuario rol con id: " + id);
-        usuarioExistente.setNombre(usuarioAActualizar.getNombre());
+        Usuario usuarioExistente = obtenerUsuarioPorIdOExcepcion(id, "No se encontró el usuario con id " + id);
+
+        if (usuarioAActualizar.getNombre() != null)
+            usuarioExistente.setNombre(usuarioAActualizar.getNombre());
+        if (usuarioAActualizar.getApellidos() != null && !usuarioAActualizar.getApellidos().isEmpty())
+            usuarioExistente.setApellidos(usuarioAActualizar.getApellidos());
+        if (usuarioAActualizar.getFechaNacimiento() != null)
+            usuarioExistente.setFechaNacimiento(usuarioAActualizar.getFechaNacimiento());
+        if (usuarioAActualizar.getEmail() != null)
+            usuarioExistente.setEmail(usuarioAActualizar.getEmail());
+        if (usuarioAActualizar.getTelefono() != null)
+            usuarioExistente.setTelefono(usuarioAActualizar.getTelefono());
+        if (usuarioAActualizar.getPassword() != null)
+            usuarioExistente.setPassword(usuarioAActualizar.getPassword());
+        if (usuarioAActualizar.getIdRol() != null)
+            usuarioExistente.setIdRol(usuarioAActualizar.getIdRol());
+
         return usuarioRepository.save(usuarioExistente);
     }
 

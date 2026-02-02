@@ -2,6 +2,7 @@ package es.nullpointers.eventvsmerida.controller;
 
 import es.nullpointers.eventvsmerida.dto.RolRequest;
 import es.nullpointers.eventvsmerida.entity.Rol;
+import es.nullpointers.eventvsmerida.mapper.RolMapper;
 import es.nullpointers.eventvsmerida.service.RolService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,10 @@ import java.util.List;
 /**
  * Controlador REST que recibe las peticiones HTTP relacionadas con la
  * entidad Rol y las delega al servicio correspondiente.
+ *
+ * @author Eva Retamar
+ * @author David Muñoz
+ * @author Adrián Pérez
  */
 @Slf4j
 @RestController
@@ -58,7 +63,7 @@ public class RolController {
      */
     @PostMapping("/add")
     public ResponseEntity<Rol> crearRol(@Valid @RequestBody RolRequest rolRequest) {
-        Rol rolNuevo = rolService.crearRol(obtenerRolConNombreCapitalizado(rolRequest));
+        Rol rolNuevo = rolService.crearRol(RolMapper.convertirAEntidad(rolRequest));
         return ResponseEntity.status(HttpStatus.CREATED).body(rolNuevo);
     }
 
@@ -71,7 +76,7 @@ public class RolController {
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> eliminarRol(@PathVariable Long id) {
         rolService.eliminarRol(id);
-        return ResponseEntity.noContent().build(); // 204
+        return ResponseEntity.noContent().build();
     }
 
     /**
@@ -83,23 +88,7 @@ public class RolController {
      */
     @PutMapping("/update/{id}")
     public ResponseEntity<Rol> actualizarRol(@PathVariable Long id, @Valid @RequestBody RolRequest rolRequest) {
-        Rol rolActualizado = rolService.actualizarRol(id, obtenerRolConNombreCapitalizado(rolRequest));
+        Rol rolActualizado = rolService.actualizarRol(id, RolMapper.convertirAEntidad(rolRequest));
         return ResponseEntity.ok(rolActualizado);
-    }
-
-    // ================
-    // Metodos Privados
-    // ================
-
-    /**
-     * Metodo privado para obtener un objeto Rol con el nombre capitalizado.
-     *
-     * @param rolRequest Datos del rol.
-     * @return Objeto Rol con el nombre capitalizado.
-     */
-    private Rol obtenerRolConNombreCapitalizado(RolRequest rolRequest) {
-        String nuevoNombre = rolRequest.getNombre().trim();
-        String nombreCapitalizado = nuevoNombre.substring(0, 1).toUpperCase() + nuevoNombre.substring(1).toLowerCase();
-        return new Rol(null, nombreCapitalizado);
     }
 }

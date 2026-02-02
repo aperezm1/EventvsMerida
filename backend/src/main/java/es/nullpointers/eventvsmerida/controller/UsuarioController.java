@@ -1,7 +1,10 @@
 package es.nullpointers.eventvsmerida.controller;
 
-import es.nullpointers.eventvsmerida.dto.UsuarioRequest;
+import es.nullpointers.eventvsmerida.dto.UsuarioActualizarRequest;
+import es.nullpointers.eventvsmerida.dto.UsuarioCrearRequest;
 import es.nullpointers.eventvsmerida.entity.Usuario;
+import es.nullpointers.eventvsmerida.mapper.UsuarioMapper;
+import es.nullpointers.eventvsmerida.service.RolService;
 import es.nullpointers.eventvsmerida.service.UsuarioService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +18,10 @@ import java.util.List;
 /**
  * Controlador REST que recibe las peticiones HTTP relacionadas con la
  * entidad Usuario y las delega al servicio correspondiente.
+ *
+ * @author Eva Retamar
+ * @author David Muñoz
+ * @author Adrián Pérez
  */
 @Slf4j
 @RestController
@@ -22,6 +29,7 @@ import java.util.List;
 @RequestMapping("/api/usuarios")
 public class UsuarioController {
     private final UsuarioService usuarioService;
+    private final RolService rolService;
 
     // ============
     // Metodos CRUD
@@ -57,8 +65,8 @@ public class UsuarioController {
      * @return ResponseEntity con el usuario creado y el estado HTTP 201 (CREATED).
      */
     @PostMapping("/add")
-    public ResponseEntity<Usuario> crearUsuario(@Valid @RequestBody UsuarioRequest usuarioRequest) {
-        Usuario usuarioNuevo = usuarioService.crearUsuario();
+    public ResponseEntity<Usuario> crearUsuario(@Valid @RequestBody UsuarioCrearRequest usuarioRequest) {
+        Usuario usuarioNuevo = usuarioService.crearUsuario(UsuarioMapper.convertirAEntidad(usuarioRequest, rolService));
         return ResponseEntity.status(HttpStatus.CREATED).body(usuarioNuevo);
     }
 
@@ -82,19 +90,8 @@ public class UsuarioController {
      * @return ResponseEntity con el usuario actualizado y el estado HTTP 200 (OK).
      */
     @PutMapping("/update/{id}")
-    public ResponseEntity<Usuario> actualizarUsuario(@PathVariable Long id, @Valid @RequestBody UsuarioRequest usuarioRequest) {
-        Usuario usuarioActualizado = usuarioService.actualizarRol(id, );
+    public ResponseEntity<Usuario> actualizarUsuario(@PathVariable Long id, @Valid @RequestBody UsuarioActualizarRequest usuarioRequest) {
+        Usuario usuarioActualizado = usuarioService.actualizarUsuario(id, UsuarioMapper.convertirAEntidad(usuarioRequest, rolService));
         return ResponseEntity.ok(usuarioActualizado);
-    }
-
-    // ================
-    // Metodos Privados
-    // ================
-
-    private Usuario obtenerUsuarioConTextosValidos(UsuarioRequest usuarioRequest) {
-        Usuario usuario = new Usuario();
-        usuario.setNombre(usuarioRequest.getNombre().trim());
-        usuario.setEmail(usuarioRequest.getEmail().trim().toLowerCase());
-        return usuario;
     }
 }

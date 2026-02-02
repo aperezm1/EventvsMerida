@@ -25,6 +25,4 @@ public class UsuarioEvento {
     @OnDelete(action = OnDeleteAction.SET_DEFAULT)
     @JoinColumn(name = "id_evento", nullable = false)
     private Evento idEvento;
-
-
 }

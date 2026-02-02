@@ -13,6 +13,10 @@ import java.util.NoSuchElementException;
 /**
  * Servicio para gestionar la logica de negocio relacionada con la
  * entidad Rol.
+ *
+ * @author Eva Retamar
+ * @author David Muñoz
+ * @author Adrián Pérez
  */
 @Slf4j
 @RequiredArgsConstructor

@@ -22,6 +22,4 @@ public class UsuarioEventoId implements Serializable {
     @NotNull
     @Column(name = "id_evento", nullable = false)
     private Long idEvento;
-
-
 }

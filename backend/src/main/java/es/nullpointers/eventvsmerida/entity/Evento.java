@@ -50,6 +50,4 @@ public class Evento {
     @OnDelete(action = OnDeleteAction.SET_DEFAULT)
     @JoinColumn(name = "id_categoria", nullable = false)
     private Categoria idCategoria;
-
-
 }

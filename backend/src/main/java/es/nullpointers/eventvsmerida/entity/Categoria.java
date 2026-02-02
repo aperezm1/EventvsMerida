@@ -18,6 +18,4 @@ public class Categoria {
     @NotNull
     @Column(name = "nombre", nullable = false, length = Integer.MAX_VALUE)
     private String nombre;
-
-
 }

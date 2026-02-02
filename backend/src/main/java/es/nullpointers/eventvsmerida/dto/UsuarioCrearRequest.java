@@ -1,5 +1,6 @@
 package es.nullpointers.eventvsmerida.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -10,9 +11,16 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 
+/**
+ * DTO para la creación de un nuevo usuario.
+ *
+ * @author Eva Retamar
+ * @author David Muñoz
+ * @author Adrián Pérez
+ */
 @Getter
 @Setter
-public class UsuarioRequest {
+public class UsuarioCrearRequest implements UsuarioBaseRequest {
     @NotBlank
     private String nombre;
 
@@ -20,6 +28,7 @@ public class UsuarioRequest {
     private String apellidos;
 
     @NotNull
+    @JsonFormat(pattern = "dd/MM/yyyy")
     private LocalDate fechaNacimiento;
 
     @NotBlank
@@ -27,6 +36,7 @@ public class UsuarioRequest {
     private String email;
 
     @NotBlank
+    @Pattern(regexp = "^$|^[679]\\d{8}$", message = "El teléfono debe estar vacío o tener 9 dígitos y empezar por 6, 7 o 9")
     private String telefono;
 
     @NotBlank
