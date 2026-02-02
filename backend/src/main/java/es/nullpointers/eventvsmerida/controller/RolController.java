@@ -58,7 +58,7 @@ public class RolController {
     /**
      * Metodo POST que llama al servicio para crear un nuevo rol.
      *
-     * @param rolRequest Datos del rol a crear.
+     * @param rolRequest DTO con los datos del rol a crear.
      * @return ResponseEntity con el rol creado y el estado HTTP 201 (CREATED).
      */
     @PostMapping("/add")
@@ -83,7 +83,7 @@ public class RolController {
      * Metodo PUT que llama al servicio para actualizar un rol existente.
      *
      * @param id ID del rol a actualizar.
-     * @param rolRequest Datos actualizados del rol.
+     * @param rolRequest DTO con los datos del rol a actualizar.
      * @return ResponseEntity con el rol actualizado y el estado HTTP 200 (OK).
      */
     @PutMapping("/update/{id}")

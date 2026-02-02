@@ -61,7 +61,7 @@ public class UsuarioController {
     /**
      * Metodo POST que llama al servicio para crear un nuevo usuario.
      *
-     * @param usuarioRequest Datos del usuario a crear.
+     * @param usuarioRequest DTO con los datos del usuario a crear.
      * @return ResponseEntity con el usuario creado y el estado HTTP 201 (CREATED).
      */
     @PostMapping("/add")
@@ -86,7 +86,7 @@ public class UsuarioController {
      * Metodo PUT que llama al servicio para actualizar un usuario existente.
      *
      * @param id ID del usuario a actualizar.
-     * @param usuarioRequest Datos actualizados del usuario.
+     * @param usuarioRequest DTO con los datos del usuario a actualizar.
      * @return ResponseEntity con el usuario actualizado y el estado HTTP 200 (OK).
      */
     @PutMapping("/update/{id}")

@@ -93,8 +93,7 @@ public class RolService {
     // ================
 
     /**
-     * Metodo privado para obtener un rol por su ID o lanzar una excepcion
-     * personalizada si no se encuentra.
+     * Metodo privado para obtener un rol por su ID o lanzar una excepcion personalizada si no se encuentra.
      *
      * @param id ID del rol a obtener.
      * @param mensajeError Mensaje de error para la excepcion.

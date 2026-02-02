@@ -3,12 +3,8 @@ package es.nullpointers.eventvsmerida.controller;
 import es.nullpointers.eventvsmerida.dto.EventoRequest;
 import es.nullpointers.eventvsmerida.dto.EventoResponse;
 import es.nullpointers.eventvsmerida.dto.EventoUpdateRequest;
-import es.nullpointers.eventvsmerida.dto.UsuarioRequest;
-import es.nullpointers.eventvsmerida.entity.Categoria;
 import es.nullpointers.eventvsmerida.entity.Evento;
-import es.nullpointers.eventvsmerida.entity.Rol;
 import es.nullpointers.eventvsmerida.service.EventoService;
-import es.nullpointers.eventvsmerida.service.UsuarioService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,13 +12,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Controlador REST que recibe las peticiones HTTP relacionadas con la
  * entidad Evento y las delega al servicio correspondiente.
+ *
+ * @author Eva Retamar
+ * @author David Muñoz
+ * @author Adrián Pérez
  */
 @Slf4j
 @RestController

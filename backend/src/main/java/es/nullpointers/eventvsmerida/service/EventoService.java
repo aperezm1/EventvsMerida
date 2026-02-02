@@ -12,6 +12,14 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
+/**
+ * Servicio para gestionar la lógica de negocio relacionada con la
+ * entidad Evento.
+ *
+ * @author Eva Retamar
+ * @author David Muñoz
+ * @author Adrián Pérez
+ */
 @Slf4j
 @RequiredArgsConstructor
 @Service
