@@ -8,7 +8,6 @@ import java.time.Instant;
 @Getter
 @Setter
 public class EventoUpdateRequest {
-    private Long id;
     private String evento;
     private String descripcion;
     private Instant fechaHora;

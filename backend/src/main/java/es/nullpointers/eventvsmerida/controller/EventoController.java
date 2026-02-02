@@ -64,11 +64,12 @@ public class EventoController {
     /**
      * Método PATCH que llama a EventoService para actulizar un evento pasado por ID.
      * @param eventoUpdateRequest DTO con los campos de la petición.
+     * @param id .
      * @return Devuelve el código de estado de la petición.
      */
     @PatchMapping("update/{id}")
-    public ResponseEntity<Evento> actualizarEvento (@Valid @RequestBody EventoUpdateRequest eventoUpdateRequest) {
-        Evento evento = eventoService.actualizarEvento(eventoUpdateRequest);
+    public ResponseEntity<Evento> actualizarEvento (@Valid @RequestBody EventoUpdateRequest eventoUpdateRequest, @PathVariable Long id) {
+        Evento evento = eventoService.actualizarEvento(eventoUpdateRequest, id);
         return ResponseEntity.ok(evento);
     }
 

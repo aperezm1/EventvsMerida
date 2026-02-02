@@ -84,8 +84,8 @@ public class EventoService {
      * @param eventoUpdateRequest DTO con los campos que se pueden modificar en la petición.
      * @return Devuelve el código de estado sobre la modificación.
      */
-    public Evento actualizarEvento(EventoUpdateRequest eventoUpdateRequest) {
-        Evento evento = obtenerEventoSinDto(eventoUpdateRequest.getId());
+    public Evento actualizarEvento(EventoUpdateRequest eventoUpdateRequest, Long id) {
+        Evento evento = obtenerEventoSinDto(id);
         if (eventoUpdateRequest.getEvento() != null) {
             evento.setEvento(eventoUpdateRequest.getEvento());
         }
