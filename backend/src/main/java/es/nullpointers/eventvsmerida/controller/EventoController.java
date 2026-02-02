@@ -1,0 +1,87 @@
+package es.nullpointers.eventvsmerida.controller;
+
+import es.nullpointers.eventvsmerida.dto.EventoRequest;
+import es.nullpointers.eventvsmerida.dto.EventoResponse;
+import es.nullpointers.eventvsmerida.dto.EventoUpdateRequest;
+import es.nullpointers.eventvsmerida.dto.UsuarioRequest;
+import es.nullpointers.eventvsmerida.entity.Categoria;
+import es.nullpointers.eventvsmerida.entity.Evento;
+import es.nullpointers.eventvsmerida.entity.Rol;
+import es.nullpointers.eventvsmerida.service.EventoService;
+import es.nullpointers.eventvsmerida.service.UsuarioService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
+
+/**
+ * Controlador REST que recibe las peticiones HTTP relacionadas con la
+ * entidad Evento y las delega al servicio correspondiente.
+ */
+@Slf4j
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/api/eventos")
+public class EventoController {
+    private final EventoService eventoService;
+
+    /**
+     * Método GET que llama a EventoService para obtener todos los eventos.
+     * @return Listado de eventos.
+     */
+    @GetMapping("/all")
+    public ResponseEntity<List<EventoResponse>> obtenerEventos() {
+        List<EventoResponse> eventos = eventoService.obtenerEventos();
+        return ResponseEntity.ok(eventos);
+    }
+
+    /**
+     * Método GET que llama a EventoService para obtener un evento por su ID.
+     * @param id ID del evento.
+     * @return Evento cuya ID coincida.
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<EventoResponse> obtenerEventoPorId(@PathVariable Long id) {
+        EventoResponse eventoResponse = eventoService.obtenerEventoPorId(id);
+        return ResponseEntity.ok(eventoResponse);
+    }
+
+    /**
+     * Método POST que llama a EventoService para crear un evento.
+     * @param eventoRequest DTO con los campos de la petición.
+     * @return Devuelve el código de estado de la petición.
+     */
+    @PostMapping("/add")
+    public ResponseEntity<Evento> crearEvento(@Valid @RequestBody EventoRequest eventoRequest) {
+        Evento evento = eventoService.crearEvento(eventoRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body(evento);
+    }
+
+    /**
+     * Método PATCH que llama a EventoService para actulizar un evento pasado por ID.
+     * @param eventoUpdateRequest DTO con los campos de la petición.
+     * @return Devuelve el código de estado de la petición.
+     */
+    @PatchMapping("update/{id}")
+    public ResponseEntity<Evento> actualizarEvento (@Valid @RequestBody EventoUpdateRequest eventoUpdateRequest) {
+        Evento evento = eventoService.actualizarEvento(eventoUpdateRequest);
+        return ResponseEntity.ok(evento);
+    }
+
+    /**
+     * Método DELETE que llama a EventoService para eliminar un evento pasado por ID.
+     * @param id ID del evento.
+     * @return Devuelve el código de estado de la petición.
+     */
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Void> eliminarEvento(@PathVariable Long id) {
+        eventoService.eliminarEventoPorId(id);
+        return ResponseEntity.noContent().build();
+    }
+}
