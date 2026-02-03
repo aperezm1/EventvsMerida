@@ -1,6 +1,5 @@
 package es.nullpointers.eventvsmerida.exception;
 
-import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import jakarta.persistence.NoResultException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -11,6 +10,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import java.time.format.DateTimeParseException;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
@@ -113,21 +113,19 @@ public class ManejadorGlobalExcepciones {
     public ResponseEntity<Void> manejadorHttpMessageNotReadableException(HttpMessageNotReadableException e) {
         Throwable causa = e.getMostSpecificCause();
         String metodo = e.getStackTrace().length > 0 ? e.getStackTrace()[0].getMethodName() : "desconocido";
-        log.error("Causa: {}, Mensaje: {}", causa.getClass().getName(), causa.getMessage());
 
-        if (causa instanceof InvalidFormatException ife) {
-            if (!ife.getPath().isEmpty()) {
-                String campo = ife.getPath().getFirst().getFieldName();
-                String tipo = ife.getTargetType().getSimpleName();
-                log.error("Excepción en método '{}': Error de formato en el campo '{}', tipo esperado '{}'. Detalle: {}", metodo, campo, tipo, causa.getMessage());
-            } else {
-                log.error("Excepción en método '{}': InvalidFormatException sin path. Detalle: {}", metodo, causa.getMessage());
-            }
+        if (causa instanceof DateTimeParseException) {
+            String formatoEsperado = "dd-MM-yyyy";
+            log.error("Excepción en método '{}': Error de formato en la fecha de nacimiento de usuario. Formato esperado: '{}'. Detalle: {}", metodo, formatoEsperado, causa.getMessage());
         } else {
             log.error("Excepción en método '{}': Error de formato en los datos recibidos. Detalle: {}", metodo, causa.getMessage());
         }
+
         return ResponseEntity.badRequest().build();
     }
+
+
+
 
     /**
      * Maneja cualquier otra excepción no específica.
