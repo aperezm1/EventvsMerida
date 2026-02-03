@@ -95,7 +95,7 @@ public class UsuarioService {
         if (usuarioAActualizar.getTelefono() != null)
             usuarioExistente.setTelefono(usuarioAActualizar.getTelefono());
         if (usuarioAActualizar.getPassword() != null)
-            usuarioExistente.setPassword(usuarioAActualizar.getPassword());
+            usuarioExistente.setPassword(passwordEncoder.encode(usuarioAActualizar.getPassword()));
         if (usuarioAActualizar.getIdRol() != null)
             usuarioExistente.setIdRol(usuarioAActualizar.getIdRol());
 

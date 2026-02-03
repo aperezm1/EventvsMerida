@@ -1,10 +1,7 @@
 package es.nullpointers.eventvsmerida.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.*;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -28,6 +25,7 @@ public class UsuarioCrearRequest implements UsuarioBaseRequest {
     private String apellidos;
 
     @NotNull
+    @PastOrPresent(message = "La fecha de nacimiento no puede ser futura")
     @JsonFormat(pattern = "dd/MM/yyyy")
     private LocalDate fechaNacimiento;
 
@@ -36,7 +34,7 @@ public class UsuarioCrearRequest implements UsuarioBaseRequest {
     private String email;
 
     @NotBlank
-    @Pattern(regexp = "^$|^[679]\\d{8}$", message = "El teléfono debe estar vacío o tener 9 dígitos y empezar por 6, 7 o 9")
+    @Pattern(regexp = "^[679]\\d{8}$", message = "El teléfono debe tener 9 dígitos y empezar por 6, 7 o 9")
     private String telefono;
 
     @NotBlank

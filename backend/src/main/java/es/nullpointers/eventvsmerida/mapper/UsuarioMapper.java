@@ -31,10 +31,8 @@ public class UsuarioMapper {
         usuario.setFechaNacimiento(request.getFechaNacimiento());
         usuario.setEmail(TextoUtils.normalizarTexto(request.getEmail()));
         usuario.setTelefono(request.getTelefono());
-        usuario.setPassword(request.getPassword().trim());
-
-        if (request.getIdRol() != null)
-            usuario.setIdRol(rolService.obtenerRolPorId(request.getIdRol()));
+        usuario.setPassword(request.getPassword());
+        if (request.getIdRol() != null) usuario.setIdRol(rolService.obtenerRolPorId(request.getIdRol()));
 
         return usuario;
     }
