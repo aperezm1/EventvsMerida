@@ -11,7 +11,7 @@ import java.sql.Timestamp;
 @Setter
 public class EventoRequest {
     @NotBlank
-    private String evento;
+    private String titulo;
 
     @NotBlank
     private String descripcion;

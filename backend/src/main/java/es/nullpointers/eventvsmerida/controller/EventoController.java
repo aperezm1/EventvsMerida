@@ -64,7 +64,7 @@ public class EventoController {
     /**
      * Método PATCH que llama a EventoService para actulizar un evento pasado por ID.
      * @param eventoUpdateRequest DTO con los campos de la petición.
-     * @param id .
+     * @param id ID del evento.
      * @return Devuelve el código de estado de la petición.
      */
     @PatchMapping("update/{id}")

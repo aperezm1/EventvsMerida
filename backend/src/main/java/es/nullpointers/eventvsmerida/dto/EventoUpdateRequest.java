@@ -8,7 +8,7 @@ import java.time.Instant;
 @Getter
 @Setter
 public class EventoUpdateRequest {
-    private String evento;
+    private String titulo;
     private String descripcion;
     private Instant fechaHora;
     private String localizacion;

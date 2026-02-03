@@ -8,6 +8,7 @@ import es.nullpointers.eventvsmerida.repository.EventoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -68,7 +69,7 @@ public class EventoService {
      */
     public Evento crearEvento(EventoRequest eventoRequest) {
         Evento evento = new Evento();
-        evento.setEvento(eventoRequest.getEvento());
+        evento.setTitulo(eventoRequest.getTitulo());
         evento.setDescripcion(eventoRequest.getDescripcion());
         evento.setFechaHora(eventoRequest.getFecha().toInstant());
         evento.setLocalizacion(eventoRequest.getLocalizacion());
@@ -76,6 +77,9 @@ public class EventoService {
         evento.setIdUsuario(usuarioService.obtenerUsuarioPorId(eventoRequest.getIdUsuario()));
         evento.setIdCategoria(categoriaService.obtenerCategoriaPorId(eventoRequest.getIdCategoria()));
 
+        if (repository.existsByTituloAndFechaHora(evento.getTitulo(), evento.getFechaHora())) {
+            throw new DataIntegrityViolationException("Ya existe un evento con el título y fecha indicados");
+        }
         return repository.save(evento);
     }
 
@@ -86,8 +90,8 @@ public class EventoService {
      */
     public Evento actualizarEvento(EventoUpdateRequest eventoUpdateRequest, Long id) {
         Evento evento = obtenerEventoSinDto(id);
-        if (eventoUpdateRequest.getEvento() != null) {
-            evento.setEvento(eventoUpdateRequest.getEvento());
+        if (eventoUpdateRequest.getTitulo() != null) {
+            evento.setTitulo(eventoUpdateRequest.getTitulo());
         }
         if (eventoUpdateRequest.getDescripcion() != null) {
             evento.setDescripcion(eventoUpdateRequest.getDescripcion());
@@ -131,7 +135,7 @@ public class EventoService {
     private static @NonNull EventoResponse getEventoResponse(Evento evento) {
         EventoResponse eventoResponse = new EventoResponse();
         eventoResponse.setId(evento.getId());
-        eventoResponse.setEvento(evento.getEvento());
+        eventoResponse.setTitulo(evento.getTitulo());
         eventoResponse.setDescripcion(evento.getDescripcion());
         eventoResponse.setFechaHora(evento.getFechaHora());
         eventoResponse.setLocalizacion(evento.getLocalizacion());
