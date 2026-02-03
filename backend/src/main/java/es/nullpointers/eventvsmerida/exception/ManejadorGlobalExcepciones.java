@@ -115,17 +115,14 @@ public class ManejadorGlobalExcepciones {
         String metodo = e.getStackTrace().length > 0 ? e.getStackTrace()[0].getMethodName() : "desconocido";
 
         if (causa instanceof DateTimeParseException) {
-            String formatoEsperado = "dd-MM-yyyy";
-            log.error("Excepción en método '{}': Error de formato en la fecha de nacimiento de usuario. Formato esperado: '{}'. Detalle: {}", metodo, formatoEsperado, causa.getMessage());
+            String formatoEsperado = "dd/MM/yyyy";
+            log.error("Error de formato en la fecha de nacimiento de usuario. Formato esperado: '{}'. Detalle: {}", formatoEsperado, causa.getMessage());
         } else {
             log.error("Excepción en método '{}': Error de formato en los datos recibidos. Detalle: {}", metodo, causa.getMessage());
         }
 
         return ResponseEntity.badRequest().build();
     }
-
-
-
 
     /**
      * Maneja cualquier otra excepción no específica.
