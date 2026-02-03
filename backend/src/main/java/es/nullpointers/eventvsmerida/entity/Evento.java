@@ -20,8 +20,8 @@ public class Evento {
     private Long id;
 
     @NotNull
-    @Column(name = "evento", nullable = false, length = Integer.MAX_VALUE)
-    private String evento;
+    @Column(name = "titulo", nullable = false, length = Integer.MAX_VALUE)
+    private String titulo;
 
     @NotNull
     @Column(name = "descripcion", nullable = false, length = Integer.MAX_VALUE)

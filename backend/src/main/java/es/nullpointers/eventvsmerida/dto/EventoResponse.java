@@ -11,7 +11,7 @@ import java.time.Instant;
 @Setter
 @JsonPropertyOrder({
         "id",
-        "evento",
+        "titulo",
         "descripcion",
         "fechaHora",
         "localizacion",
@@ -21,7 +21,7 @@ import java.time.Instant;
 })
 public class EventoResponse {
     private Long id;
-    private String evento;
+    private String titulo;
     private String descripcion;
     private Instant fechaHora;
     private String localizacion;
