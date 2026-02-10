@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'screens/loading_screen.dart';
+import 'screens/splash.dart';
 import 'screens/login.dart';
 import 'screens/registro.dart';
 
@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
           primary: Color(0xFF0074E8),           // Azul
           onPrimary: Colors.black,
           secondary: Color(0xFFACD2F8),         // Celeste claro
-          onSecondary: Colors.white,
+          onSecondary: Colors.black,
           error: Colors.red,
           onError: Colors.white,
           surface: Colors.white,
@@ -35,9 +35,9 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme(
           brightness: Brightness.dark,
           primary: Color(0xFFEE8D24),           // Naranja
-          onPrimary: Colors.black,
+          onPrimary: Colors.white,
           secondary: Color(0xFFFFC483),         // Naranja claro
-          onSecondary: Colors.black,
+          onSecondary: Colors.white,
           error: Colors.red,
           onError: Colors.black,
           surface: Colors.black,
@@ -49,9 +49,9 @@ class MyApp extends StatelessWidget {
         ),
       ),
       themeMode: ThemeMode.system,
-      initialRoute: '/loading',
+      initialRoute: '/splash',
       routes: {
-        '/loading': (context) => const LoadingScreen(),
+        '/splash': (context) => const Splash(),
         '/registro': (context) => const Registro(),
         '/login': (context) => const Login(),
       },

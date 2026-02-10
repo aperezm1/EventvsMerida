@@ -9,20 +9,21 @@ class Login extends StatefulWidget {
 
 class _LoginState extends State<Login> {
   bool _autoLogin = false;
-  bool _obscurePassword = true;
+  bool _ocultarPassword = true;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final size = MediaQuery.of(context).size;
     final headerHeight = size.height * 0.18;
-    final logoWidth = size.width * 0.65;
+    final logoWidth = size.width * 0.70;
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
       body: SingleChildScrollView(
         child: Column(
           children: [
+            // CABECERA
             Container(
               color: colorScheme.primary,
               width: double.infinity,
@@ -31,13 +32,14 @@ class _LoginState extends State<Login> {
                 child: Text(
                   'Iniciar sesión',
                   style: TextStyle(
-                    color: colorScheme.onPrimary,
+                    color: colorScheme.surface,
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
             ),
+            // LOGO
             Container(
               margin: const EdgeInsets.only(top: 24, bottom: 24),
               child: Image.asset(
@@ -45,10 +47,12 @@ class _LoginState extends State<Login> {
                 width: logoWidth,
               ),
             ),
+            // CAMPOS DE LOGIN
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
                 children: [
+                  // CAMPO DE CORREO
                   TextField(
                     decoration: InputDecoration(
                       labelText: 'Correo',
@@ -61,8 +65,10 @@ class _LoginState extends State<Login> {
                     ),
                   ),
                   const SizedBox(height: 16),
+
+                  // CAMPO DE CONTRASEÑA
                   TextField(
-                    obscureText: _obscurePassword,
+                    obscureText: _ocultarPassword,
                     decoration: InputDecoration(
                       labelText: 'Contraseña',
                       border: OutlineInputBorder(
@@ -73,21 +79,25 @@ class _LoginState extends State<Login> {
                       ),
                       suffixIcon: IconButton(
                         icon: Icon(
-                          _obscurePassword
+                          _ocultarPassword
                               ? Icons.visibility_off
                               : Icons.visibility,
                           color: colorScheme.primary,
                         ),
                         onPressed: () {
                           setState(() {
-                            _obscurePassword = !_obscurePassword;
+                            _ocultarPassword = !_ocultarPassword;
                           });
                         },
                       ),
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 16),
+
+                  // CHECKBOX DE INICIO DE SESIÓN AUTOMÁTICO
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Checkbox(
                         value: _autoLogin,
@@ -98,15 +108,21 @@ class _LoginState extends State<Login> {
                           });
                         },
                       ),
-                      Text(
-                        'Inicio de sesión automático',
-                        style: TextStyle(
-                          color: colorScheme.onSurface,
+                      Flexible(
+                        child: Text(
+                          'Inicio de sesión automático',
+                          style: TextStyle(
+                            color: colorScheme.onSurface,
+                          ),
+                          textAlign: TextAlign.center,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 16),
+
+                  // BOTÓN DE INICIAR SESIÓN
                   SizedBox(
                     width: double.infinity,
                     height: 44,
@@ -121,12 +137,16 @@ class _LoginState extends State<Login> {
                       onPressed: () {},
                       child: Text(
                         'Iniciar sesión',
-                        style:
-                        TextStyle(fontSize: 16, color: colorScheme.onPrimary),
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: colorScheme.surface,
+                        ),
                       ),
                     ),
                   ),
                   const SizedBox(height: 16),
+
+                  // ENLACE PARA REGISTRARSE
                   GestureDetector(
                     onTap: () {
                       Navigator.pushNamed(context, '/registro');
@@ -134,7 +154,7 @@ class _LoginState extends State<Login> {
                     child: Text(
                       '¿Aún no tienes cuenta? Regístrate',
                       style: TextStyle(
-                        color: colorScheme.secondary,
+                        color: colorScheme.onPrimary,
                         fontSize: 14,
                         decoration: TextDecoration.underline,
                       ),
