@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -8,8 +10,52 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
   bool _autoLogin = false;
   bool _ocultarPassword = true;
+
+  void _Login() async{
+    final url = Uri.parse('http://192.168.101.239:8080/api/usuarios/login');
+    final email = emailController.text.trim();
+    final password = passwordController.text;
+
+    final respuesta = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: jsonEncode({
+        'email': email,
+        'password': password,
+      }),
+    );
+
+    if (respuesta.statusCode == 200) {
+      final datos = jsonDecode(respuesta.body);
+      final mensaje = datos.toString();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(mensaje)),
+      );
+    } else if ((respuesta.statusCode == 404) || (respuesta.statusCode == 400)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Credenciales inválidas')),
+      );
+    }
+    else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error en el servidor ' + respuesta.statusCode.toString())),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,6 +85,7 @@ class _LoginState extends State<Login> {
                 ),
               ),
             ),
+
             // LOGO
             Container(
               margin: const EdgeInsets.only(top: 24, bottom: 24),
@@ -47,6 +94,7 @@ class _LoginState extends State<Login> {
                 width: logoWidth,
               ),
             ),
+
             // CAMPOS DE LOGIN
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -54,6 +102,7 @@ class _LoginState extends State<Login> {
                 children: [
                   // CAMPO DE CORREO
                   TextField(
+                    controller: emailController,
                     decoration: InputDecoration(
                       labelText: 'Correo',
                       border: OutlineInputBorder(
@@ -68,6 +117,7 @@ class _LoginState extends State<Login> {
 
                   // CAMPO DE CONTRASEÑA
                   TextField(
+                    controller: passwordController,
                     obscureText: _ocultarPassword,
                     decoration: InputDecoration(
                       labelText: 'Contraseña',
@@ -134,7 +184,7 @@ class _LoginState extends State<Login> {
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
-                      onPressed: () {},
+                      onPressed: _Login,
                       child: Text(
                         'Iniciar sesión',
                         style: TextStyle(
@@ -156,7 +206,6 @@ class _LoginState extends State<Login> {
                       style: TextStyle(
                         color: colorScheme.onPrimary,
                         fontSize: 14,
-                        decoration: TextDecoration.underline,
                       ),
                     ),
                   ),
