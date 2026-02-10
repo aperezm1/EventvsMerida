@@ -1,5 +1,6 @@
 package es.nullpointers.eventvsmerida.controller;
 
+import es.nullpointers.eventvsmerida.dto.LoginRequest;
 import es.nullpointers.eventvsmerida.dto.UsuarioActualizarRequest;
 import es.nullpointers.eventvsmerida.dto.UsuarioCrearRequest;
 import es.nullpointers.eventvsmerida.entity.Usuario;
@@ -93,5 +94,21 @@ public class UsuarioController {
     public ResponseEntity<Usuario> actualizarUsuario(@PathVariable Long id, @Valid @RequestBody UsuarioActualizarRequest usuarioRequest) {
         Usuario usuarioActualizado = usuarioService.actualizarUsuario(id, UsuarioMapper.convertirAEntidad(usuarioRequest, rolService));
         return ResponseEntity.ok(usuarioActualizado);
+    }
+
+    // =================
+    // Metodos de Lógica
+    // =================
+
+    /**
+     * Metodo POST que llama al servicio para iniciar sesión a un usuario con su email y contraseña.
+     *
+     * @param loginRequest DTO con el email y la contraseña del usuario que intenta iniciar sesión.
+     * @return ResponseEntity con el usuario logeado y el estado HTTP 200 (OK).
+     */
+    @PostMapping("/login")
+    public ResponseEntity<Usuario> login(@Valid @RequestBody LoginRequest loginRequest) {
+        Usuario usuarioLogeado = usuarioService.login(loginRequest.getEmail(), loginRequest.getPassword());
+        return ResponseEntity.ok(usuarioLogeado);
     }
 }

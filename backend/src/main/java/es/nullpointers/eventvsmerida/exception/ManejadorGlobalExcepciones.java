@@ -27,17 +27,18 @@ import java.util.NoSuchElementException;
 @ControllerAdvice
 public class ManejadorGlobalExcepciones {
 
-    private static final Map<String, String> ERRORES = Map.of(
-            "crearRol", "Error en RolService.crearRol: ",
-            "actualizarRol", "Error en RolService.actualizarRol: ",
-            "crearUsuario", "Error en UsuarioService.crearUsuario: ",
-            "actualizarUsuario", "Error en UsuarioService.actualizarUsuario: ",
-            "crearCategoria", "Error en CategoriaService.crearCategoria: ",
-            "actualizarCategoria", "Error en CategoriaService.actualizarCategoria: ",
-            "Rol_nombre_key", "Nombre duplicado introducido",
-            "Usuario_email_key", "Email duplicado introducido",
-            "Usuario_telefono_key", "Teléfono duplicado introducido",
-            "Categoria_nombre_key", "Nombre duplicado introducido"
+    private static final Map<String, String> ERRORES = Map.ofEntries(
+            Map.entry("crearRol", "Error en RolService.crearRol: "),
+            Map.entry("actualizarRol", "Error en RolService.actualizarRol: "),
+            Map.entry("crearUsuario", "Error en UsuarioService.crearUsuario: "),
+            Map.entry("actualizarUsuario", "Error en UsuarioService.actualizarUsuario: "),
+            Map.entry("crearCategoria", "Error en CategoriaService.crearCategoria: "),
+            Map.entry("actualizarCategoria", "Error en CategoriaService.actualizarCategoria: "),
+            Map.entry("login", "Error en UsuarioService.login: "),
+            Map.entry("Rol_nombre_key", "Nombre duplicado introducido"),
+            Map.entry("Usuario_email_key", "Email duplicado introducido"),
+            Map.entry("Usuario_telefono_key", "Teléfono duplicado introducido"),
+            Map.entry("Categoria_nombre_key", "Nombre duplicado introducido")
     );
 
     // ========================

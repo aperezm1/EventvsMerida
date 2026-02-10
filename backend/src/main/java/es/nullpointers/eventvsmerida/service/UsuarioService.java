@@ -5,6 +5,7 @@ import es.nullpointers.eventvsmerida.repository.UsuarioRepository;
 import jakarta.persistence.NoResultException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -100,6 +101,29 @@ public class UsuarioService {
             usuarioExistente.setIdRol(usuarioAActualizar.getIdRol());
 
         return usuarioRepository.save(usuarioExistente);
+    }
+
+    // =================
+    // Metodos de Lógica
+    // =================
+
+    /**
+     * Metodo para iniciar sesión a un usuario con su email y contraseña.
+     *
+     * @param email Email del usuario a autenticar.
+     * @param password Contraseña del usuario a autenticar.
+     * @return Usuario logeado si las credenciales son correctas.
+     */
+    public Usuario login(String email, String password) {
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new NoSuchElementException("Error en UsuarioService.login: No se encontró el usuario con email " + email));
+
+        if (!passwordEncoder.matches(password, usuario.getPassword())) {
+            throw new DataIntegrityViolationException("Credenciales inválidas");
+        }
+
+        log.info("Login exitoso para el usuario con email: {}", email);
+        return usuario;
     }
 
     // ================
