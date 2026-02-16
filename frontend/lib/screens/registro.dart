@@ -77,11 +77,28 @@ class _RegistroState extends State<Registro> {
                       children: [
                         Expanded(child: _buildTextField(context, "Día")),
                         const SizedBox(width: 10),
-                        Expanded(child: _buildTextField(context, "Mes", controller: _mesController, readOnly: true, isDropdown: true,
-                          onTap: () {
-                            _mostrarSelectorMes(context);
-                          },
-                        ),
+                        Expanded(
+                          child: PopupMenuButton<String>(
+                            constraints: const BoxConstraints(
+                              maxHeight: 200,
+                              minWidth: 120,
+                            ),
+                            onSelected: (String valor) {
+                              setState(() {
+                                _mesSeleccionado = valor;
+                                _mesController.text = valor;
+                              });
+                            },
+                            itemBuilder: (BuildContext context) => _meses.map((String mes) {
+                              return PopupMenuItem<String>(
+                                  value: mes,
+                                  child: Text(mes, style: TextStyle(color: colorScheme.onSurface)),
+                              );
+                            }).toList(),
+                            child: AbsorbPointer(
+                              child: _buildTextField(context, "Mes", controller: _mesController, readOnly: true, isDropdown: true),
+                            ),
+                          ),
                         ),
                         const SizedBox(width: 10),
                         Expanded(child: _buildTextField(context, "Año")),
@@ -167,7 +184,17 @@ class _RegistroState extends State<Registro> {
       ),
     );
   }
-  Widget _buildTextField(BuildContext context, String label, {bool isPassword = false, bool? isObscured, VoidCallback? onToggle, VoidCallback? onTap, bool readOnly = false, TextEditingController? controller, bool isDropdown = false}) {
+Widget _buildTextField(
+BuildContext context,
+String label, {
+bool isPassword = false,
+bool readOnly = false,
+VoidCallback? onTap,
+TextEditingController? controller,
+bool? isObscured,
+VoidCallback? onToggle,
+bool isDropdown = false,
+}) {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Padding(
@@ -200,32 +227,6 @@ class _RegistroState extends State<Registro> {
         ),
         obscureText: isPassword ? (isObscured ?? true) : false,
       ),
-    );
-  }
-  void _mostrarSelectorMes(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    showBottomSheet(
-        context: context,
-        backgroundColor: colorScheme.surface,
-        shape: RoundedRectangleBorder(borderRadius: .circular(20)),
-        builder: (context) {
-          return ListView.builder(
-              itemCount: _meses.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(_meses[index], style: TextStyle(color: colorScheme.onSurface)),
-                  onTap: () {
-                    setState(() {
-                      _mesSeleccionado = _meses[index];
-                      _mesController.text = _meses[index];
-                    });
-                    Navigator.pop(context);
-                  },
-                );
-              },
-          );
-        },
     );
   }
 }
