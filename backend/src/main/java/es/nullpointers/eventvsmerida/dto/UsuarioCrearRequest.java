@@ -42,5 +42,9 @@ public class UsuarioCrearRequest implements UsuarioBaseRequest {
     private String password;
 
     @NotNull
+    @AssertTrue(message = "Debe aceptar las condiciones")
+    private Boolean leidoCondiciones;
+
+    @NotNull
     private Long idRol;
 }

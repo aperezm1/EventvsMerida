@@ -16,5 +16,6 @@ public interface UsuarioBaseRequest {
     String getEmail();
     String getTelefono();
     String getPassword();
+    Boolean getLeidoCondiciones();
     Long getIdRol();
 }

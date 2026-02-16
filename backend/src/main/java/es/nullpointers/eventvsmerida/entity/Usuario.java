@@ -1,7 +1,7 @@
 package es.nullpointers.eventvsmerida.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,11 +24,13 @@ public class Usuario {
     private Long id;
 
     @NotNull
-    @Column(name = "nombre", nullable = false, length = Integer.MAX_VALUE)
+    @Pattern(regexp = "^[A-Za-zÀ-ÿ]+$", message = "El nombre solo puede contener letras")
+    @Column(name = "nombre", nullable = false, length = 100)
     private String nombre;
 
     @NotNull
-    @Column(name = "apellidos", nullable = false, length = Integer.MAX_VALUE)
+    @Pattern(regexp = "^[A-Za-zÀ-ÿ]+$", message = "El apellido solo puede contener letras")
+    @Column(name = "apellidos", nullable = false, length = 100)
     private String apellidos;
 
     @NotNull
@@ -36,16 +38,26 @@ public class Usuario {
     private LocalDate fechaNacimiento;
 
     @NotNull
-    @Column(name = "email", nullable = false, length = Integer.MAX_VALUE)
+    @Email(message = "Correo no válido")
+    @Column(name = "email", nullable = false, length = 255)
     private String email;
 
     @NotNull
-    @Column(name = "telefono", nullable = false, length = Integer.MAX_VALUE)
+    @Pattern(regexp = "^\\d{9}$", message = "El teléfono debe tener 9 dígitos")
+    @Column(name = "telefono", nullable = false, length = 9)
     private String telefono;
 
     @NotNull
-    @Column(name = "password", nullable = false, length = Integer.MAX_VALUE)
+    @Pattern(
+            regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$",
+            message = "La contraseña debe tener al menos 8 caracteres, incluyendo mayúscula, minúscula, número y símbolo"
+    )
+    @Column(name = "password", nullable = false, length = 255)
     private String password;
+
+    @AssertTrue(message = "Debe aceptar las condiciones")
+    @Column(name = "leido_condiciones", nullable = false)
+    private Boolean leidoCondiciones;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../auth_service.dart';
 
 class Registro extends StatefulWidget {
   const Registro({super.key});
@@ -16,7 +17,34 @@ class _RegistroState extends State<Registro> {
     'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
     'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
   ];
-  final TextEditingController _mesController = TextEditingController();
+
+  String mesANumero(String mes) {
+    const meses = {
+      'Enero': '01',
+      'Febrero': '02',
+      'Marzo': '03',
+      'Abril': '04',
+      'Mayo': '05',
+      'Junio': '06',
+      'Julio': '07',
+      'Agosto': '08',
+      'Septiembre': '09',
+      'Octubre': '10',
+      'Noviembre': '11',
+      'Diciembre': '12'
+    };
+    return meses[mes] ?? '01';
+  }
+
+  final _mesController = TextEditingController();
+  final _nombreController = TextEditingController();
+  final _apellidoController = TextEditingController();
+  final _correoController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _telefonoController = TextEditingController();
+  final _diaController = TextEditingController();
+  final _anioController = TextEditingController();
+
 
   @override
   Widget build(BuildContext context) {
@@ -51,13 +79,13 @@ class _RegistroState extends State<Registro> {
                   children: [
                     Row(
                       children: [
-                        Expanded(child: _buildTextField(context, "Nombre")),
+                        Expanded(child: _buildTextField(context, "Nombre", controller: _nombreController)),
                         const SizedBox(width: 15), // Espacio horizontal entre los dos cuadros
-                        Expanded(child: _buildTextField(context, "Apellido")),
+                        Expanded(child: _buildTextField(context, "Apellido", controller: _apellidoController)),
                       ],
                     ),
-                    _buildTextField(context, "Correo"),
-                    _buildTextField(context, "Contraseña", isPassword: true, isObscured: _oscurecerPassword,
+                    _buildTextField(context, "Correo", controller: _correoController),
+                    _buildTextField(context, "Contraseña", controller: _passwordController, isPassword: true, isObscured: _oscurecerPassword,
                       onToggle: () {
                         setState(() {
                           _oscurecerPassword = !_oscurecerPassword;
@@ -71,11 +99,11 @@ class _RegistroState extends State<Registro> {
                         });
                       },
                     ),
-                    _buildTextField(context, "Número de teléfono"),
+                    _buildTextField(context, "Número de teléfono", controller: _telefonoController),
                     const SizedBox(height: 10),
                     Row(
                       children: [
-                        Expanded(child: _buildTextField(context, "Día")),
+                        Expanded(child: _buildTextField(context, "Día", controller: _diaController)),
                         const SizedBox(width: 10),
                         Expanded(
                           child: PopupMenuButton<String>(
@@ -101,7 +129,7 @@ class _RegistroState extends State<Registro> {
                           ),
                         ),
                         const SizedBox(width: 10),
-                        Expanded(child: _buildTextField(context, "Año")),
+                        Expanded(child: _buildTextField(context, "Año", controller: _anioController)),
                       ],
                     ),
                     const SizedBox(height: 10),
@@ -138,10 +166,21 @@ class _RegistroState extends State<Registro> {
                           backgroundColor: colorScheme.primary,
                           shape: RoundedRectangleBorder(borderRadius: .circular(5)),
                         ),
-                        onPressed: () {
-                          if(_aceptaTerminos) {
-                            print("Registrando...");
-                          }
+                        onPressed: () async {
+                          if(_aceptaTerminos) return;
+                          final fecha = "${_diaController.text}/${mesANumero(_mesSeleccionado!)}/${_anioController.text}";
+
+                          final userData = {
+                            "nombre": _nombreController.text,
+                            "apellidos": _apellidoController.text,
+                            "fechaNacimiento": fecha,
+                            "email": _correoController.text,
+                            "telefono": _telefonoController.text,
+                            "password": _passwordController.text,
+                            "leidoCondiciones": true,
+                            "idRol": 1
+                          };
+                          await AuthService.registrar(userData);
                         },
                         child: Text(
                           "Registrarse",
