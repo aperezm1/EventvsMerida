@@ -52,9 +52,12 @@ public class ManejadorGlobalExcepciones {
      * @return Una respuesta HTTP 204 No Content.
      */
     @ExceptionHandler(NoResultException.class)
-    public ResponseEntity<Void> manejadorNoResultException(NoResultException e) {
-        log.error(e.getMessage());
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<ErrorResponse> manejadorNoResultException(NoResultException e) {
+        String mensajeError = e.getMessage();
+        log.error(mensajeError);
+        return ResponseEntity
+                .status(204)
+                .body(new ErrorResponse(mensajeError));
     }
 
     /**
@@ -64,9 +67,12 @@ public class ManejadorGlobalExcepciones {
      * @return Una respuesta HTTP 404 Not Found.
      */
     @ExceptionHandler(NoSuchElementException.class)
-    public ResponseEntity<Void> manejadorNoSuchElementException(NoSuchElementException e) {
-        log.error(e.getMessage());
-        return ResponseEntity.notFound().build();
+    public ResponseEntity<ErrorResponse> manejadorNoSuchElementException(NoSuchElementException e) {
+        String mensajeError = e.getMessage();
+        log.error(mensajeError);
+        return ResponseEntity
+                .status(404)
+                .body(new ErrorResponse(mensajeError));
     }
 
     /**
@@ -78,11 +84,14 @@ public class ManejadorGlobalExcepciones {
      * @return Una respuesta HTTP 400 Bad Request.
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Void> manejadorMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+    public ResponseEntity<ErrorResponse> manejadorMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         String mensaje = e.getMessage();
         String errores = construirErroresValidacion(e);
-        log.error(obtenerMensajePersonalizado(mensaje, errores));
-        return ResponseEntity.badRequest().build();
+        String mensajeError = obtenerMensajePersonalizado(mensaje, errores);
+        log.error(mensajeError);
+        return ResponseEntity
+                .badRequest()
+                .body(new ErrorResponse(mensajeError));
     }
 
     /**
@@ -94,12 +103,15 @@ public class ManejadorGlobalExcepciones {
      * @return Una respuesta HTTP 400 Bad Request.
      */
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<Void> manejadorDataIntegrityViolationException(DataIntegrityViolationException e) {
+    public ResponseEntity<ErrorResponse> manejadorDataIntegrityViolationException(DataIntegrityViolationException e) {
         String mensaje = e.getMessage();
         String claseMetodo = obtenerClaseMetodoDesdeStackTrace(e.getStackTrace());
         String logMsg = obtenerMensajePersonalizado(mensaje, null);
-        log.error("Error en {}: {}", claseMetodo, logMsg);
-        return ResponseEntity.badRequest().build();
+        String mensajeError = "Error en " + claseMetodo + ": " + logMsg;
+        log.error(mensajeError);
+        return ResponseEntity
+                .badRequest()
+                .body(new ErrorResponse(mensajeError));
     }
 
     /**
@@ -111,18 +123,22 @@ public class ManejadorGlobalExcepciones {
      * @return Una respuesta HTTP 400 Bad Request.
      */
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<Void> manejadorHttpMessageNotReadableException(HttpMessageNotReadableException e) {
+    public ResponseEntity<ErrorResponse> manejadorHttpMessageNotReadableException(HttpMessageNotReadableException e) {
         Throwable causa = e.getMostSpecificCause();
         String metodo = e.getStackTrace().length > 0 ? e.getStackTrace()[0].getMethodName() : "desconocido";
+        String mensajeError;
 
         if (causa instanceof DateTimeParseException) {
             String formatoEsperado = "dd/MM/yyyy";
-            log.error("Error de formato en la fecha de nacimiento de usuario. Formato esperado: '{}'. Detalle: {}", formatoEsperado, causa.getMessage());
+            mensajeError = "Error de formato en la fecha. Formato esperado: '" + formatoEsperado + "'. Detalle: " + causa.getMessage();
         } else {
-            log.error("Excepción en método '{}': Error de formato en los datos recibidos. Detalle: {}", metodo, causa.getMessage());
+            mensajeError = "Excepción en método '" + metodo + "': Error de formato en los datos recibidos. Detalle: " + causa.getMessage();
         }
 
-        return ResponseEntity.badRequest().build();
+        log.error(mensajeError);
+        return ResponseEntity
+                .badRequest()
+                .body(new ErrorResponse(mensajeError));
     }
 
     /**
@@ -132,9 +148,12 @@ public class ManejadorGlobalExcepciones {
      * @return Una respuesta HTTP 500 Internal Server Error.
      */
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Void> manejadoreGeneralException(Exception e) {
-        log.error(e.getMessage());
-        return ResponseEntity.internalServerError().build();
+    public ResponseEntity<ErrorResponse> manejadoreGeneralException(Exception e) {
+        String mensajeError = e.getMessage();
+        log.error(mensajeError);
+        return ResponseEntity
+                .internalServerError()
+                .body(new ErrorResponse(mensajeError));
     }
 
     // ================
