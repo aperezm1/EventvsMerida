@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../services/api_service.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -14,41 +15,6 @@ class _LoginState extends State<Login> {
   final passwordController = TextEditingController();
   bool _autoLogin = false;
   bool _ocultarPassword = true;
-
-  void _Login() async{
-    final url = Uri.parse('http://192.168.101.239:8080/api/usuarios/login');
-    final email = emailController.text.trim();
-    final password = passwordController.text;
-
-    final respuesta = await http.post(
-      url,
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: jsonEncode({
-        'email': email,
-        'password': password,
-      }),
-    );
-
-    if (respuesta.statusCode == 200) {
-      final datos = jsonDecode(respuesta.body);
-      final mensaje = datos.toString();
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(mensaje)),
-      );
-    } else if ((respuesta.statusCode == 404) || (respuesta.statusCode == 400)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Credenciales inválidas')),
-      );
-    }
-    else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error en el servidor ' + respuesta.statusCode.toString())),
-      );
-    }
-  }
 
   @override
   void dispose() {
@@ -184,7 +150,12 @@ class _LoginState extends State<Login> {
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
-                      onPressed: _Login,
+                      onPressed: () async {
+                        final mensaje = await ApiService.login(emailController.text.trim(), passwordController.text);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(mensaje)),
+                        );
+                      },
                       child: Text(
                         'Iniciar sesión',
                         style: TextStyle(

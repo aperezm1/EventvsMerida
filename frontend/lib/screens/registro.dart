@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../auth_service.dart';
+import '../services/api_service.dart';
 
 class Registro extends StatefulWidget {
   const Registro({super.key});
@@ -14,8 +14,18 @@ class _RegistroState extends State<Registro> {
   bool _oscurecerRepetirPassword = true;
   String? _mesSeleccionado;
   final List<String> _meses = [
-    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+    'Enero',
+    'Febrero',
+    'Marzo',
+    'Abril',
+    'Mayo',
+    'Junio',
+    'Julio',
+    'Agosto',
+    'Septiembre',
+    'Octubre',
+    'Noviembre',
+    'Diciembre',
   ];
 
   String mesANumero(String mes) {
@@ -31,7 +41,7 @@ class _RegistroState extends State<Registro> {
       'Septiembre': '09',
       'Octubre': '10',
       'Noviembre': '11',
-      'Diciembre': '12'
+      'Diciembre': '12',
     };
     return meses[mes] ?? '01';
   }
@@ -44,7 +54,6 @@ class _RegistroState extends State<Registro> {
   final _telefonoController = TextEditingController();
   final _diaController = TextEditingController();
   final _anioController = TextEditingController();
-
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +72,9 @@ class _RegistroState extends State<Registro> {
               style: TextStyle(
                 fontSize: 28,
                 fontWeight: .bold,
-                color: colorScheme.brightness == Brightness.dark ? Colors.black : Colors.white,
+                color: colorScheme.brightness == Brightness.dark
+                    ? Colors.black
+                    : Colors.white,
               ),
             ),
           ),
@@ -79,31 +90,68 @@ class _RegistroState extends State<Registro> {
                   children: [
                     Row(
                       children: [
-                        Expanded(child: _buildTextField(context, "Nombre", controller: _nombreController)),
-                        const SizedBox(width: 15), // Espacio horizontal entre los dos cuadros
-                        Expanded(child: _buildTextField(context, "Apellido", controller: _apellidoController)),
+                        Expanded(
+                          child: _buildTextField(
+                            context,
+                            "Nombre",
+                            controller: _nombreController,
+                          ),
+                        ),
+                        const SizedBox(width: 15),
+                        // Espacio horizontal entre los dos cuadros
+                        Expanded(
+                          child: _buildTextField(
+                            context,
+                            "Apellido",
+                            controller: _apellidoController,
+                          ),
+                        ),
                       ],
                     ),
-                    _buildTextField(context, "Correo", controller: _correoController),
-                    _buildTextField(context, "Contraseña", controller: _passwordController, isPassword: true, isObscured: _oscurecerPassword,
+                    _buildTextField(
+                      context,
+                      "Correo",
+                      controller: _correoController,
+                    ),
+                    _buildTextField(
+                      context,
+                      "Contraseña",
+                      controller: _passwordController,
+                      isPassword: true,
+                      isObscured: _oscurecerPassword,
                       onToggle: () {
                         setState(() {
                           _oscurecerPassword = !_oscurecerPassword;
                         });
                       },
                     ),
-                    _buildTextField(context, "Repetir contraseña", isPassword: true, isObscured: _oscurecerRepetirPassword,
+                    _buildTextField(
+                      context,
+                      "Repetir contraseña",
+                      isPassword: true,
+                      isObscured: _oscurecerRepetirPassword,
                       onToggle: () {
                         setState(() {
-                          _oscurecerRepetirPassword = !_oscurecerRepetirPassword;
+                          _oscurecerRepetirPassword =
+                              !_oscurecerRepetirPassword;
                         });
                       },
                     ),
-                    _buildTextField(context, "Número de teléfono", controller: _telefonoController),
+                    _buildTextField(
+                      context,
+                      "Número de teléfono",
+                      controller: _telefonoController,
+                    ),
                     const SizedBox(height: 10),
                     Row(
                       children: [
-                        Expanded(child: _buildTextField(context, "Día", controller: _diaController)),
+                        Expanded(
+                          child: _buildTextField(
+                            context,
+                            "Día",
+                            controller: _diaController,
+                          ),
+                        ),
                         const SizedBox(width: 10),
                         Expanded(
                           child: PopupMenuButton<String>(
@@ -117,19 +165,37 @@ class _RegistroState extends State<Registro> {
                                 _mesController.text = valor;
                               });
                             },
-                            itemBuilder: (BuildContext context) => _meses.map((String mes) {
-                              return PopupMenuItem<String>(
-                                  value: mes,
-                                  child: Text(mes, style: TextStyle(color: colorScheme.onSurface)),
-                              );
-                            }).toList(),
+                            itemBuilder: (BuildContext context) =>
+                                _meses.map((String mes) {
+                                  return PopupMenuItem<String>(
+                                    value: mes,
+                                    child: Text(
+                                      mes,
+                                      style: TextStyle(
+                                        color: colorScheme.onSurface,
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
                             child: AbsorbPointer(
-                              child: _buildTextField(context, "Mes", controller: _mesController, readOnly: true, isDropdown: true),
+                              child: _buildTextField(
+                                context,
+                                "Mes",
+                                controller: _mesController,
+                                readOnly: true,
+                                isDropdown: true,
+                              ),
                             ),
                           ),
                         ),
                         const SizedBox(width: 10),
-                        Expanded(child: _buildTextField(context, "Año", controller: _anioController)),
+                        Expanded(
+                          child: _buildTextField(
+                            context,
+                            "Año",
+                            controller: _anioController,
+                          ),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 10),
@@ -137,20 +203,28 @@ class _RegistroState extends State<Registro> {
                     Row(
                       children: [
                         Checkbox(
-                          value: _aceptaTerminos, // Aquí deberías usar una variable de estado
+                          value: _aceptaTerminos,
+                          // Aquí deberías usar una variable de estado
                           onChanged: (bool? value) {
                             setState(() {
                               _aceptaTerminos = value ?? false;
                             });
                           },
                           activeColor: colorScheme.primary,
-                          checkColor: colorScheme.brightness == Brightness.dark ? Colors.black : Colors.white,
-                          side: BorderSide(color: colorScheme.onSurface.withValues(alpha: 0.5)),
+                          checkColor: colorScheme.brightness == Brightness.dark
+                              ? Colors.black
+                              : Colors.white,
+                          side: BorderSide(
+                            color: colorScheme.onSurface.withValues(alpha: 0.5),
+                          ),
                         ),
                         Expanded(
                           child: Text(
                             "He leído y acepto los Términos y condiciones y la Política de Privacidad",
-                            style: TextStyle(color: colorScheme.onSurface, fontSize: 12),
+                            style: TextStyle(
+                              color: colorScheme.onSurface,
+                              fontSize: 12,
+                            ),
                           ),
                         ),
                       ],
@@ -164,10 +238,12 @@ class _RegistroState extends State<Registro> {
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: colorScheme.primary,
-                          shape: RoundedRectangleBorder(borderRadius: .circular(5)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: .circular(5),
+                          ),
                         ),
                         onPressed: () async {
-                          if(_aceptaTerminos) return;
+                          if (_aceptaTerminos) return;
                           final fecha = "${_diaController.text}/${mesANumero(_mesSeleccionado!)}/${_anioController.text}";
 
                           final userData = {
@@ -177,15 +253,17 @@ class _RegistroState extends State<Registro> {
                             "email": _correoController.text,
                             "telefono": _telefonoController.text,
                             "password": _passwordController.text,
-                            "leidoCondiciones": true,
-                            "idRol": 1
+                            "idRol": 1,
                           };
-                          await AuthService.registrar(userData);
+
+                          await ApiService.registrar(userData);
                         },
                         child: Text(
                           "Registrarse",
                           style: TextStyle(
-                            color: colorScheme.brightness == Brightness.dark ? Colors.black : Colors.white,
+                            color: colorScheme.brightness == Brightness.dark
+                                ? Colors.black
+                                : Colors.white,
                             fontSize: 18,
                           ),
                         ),
@@ -223,17 +301,18 @@ class _RegistroState extends State<Registro> {
       ),
     );
   }
-Widget _buildTextField(
-BuildContext context,
-String label, {
-bool isPassword = false,
-bool readOnly = false,
-VoidCallback? onTap,
-TextEditingController? controller,
-bool? isObscured,
-VoidCallback? onToggle,
-bool isDropdown = false,
-}) {
+
+  Widget _buildTextField(
+    BuildContext context,
+    String label, {
+    bool isPassword = false,
+    bool readOnly = false,
+    VoidCallback? onTap,
+    TextEditingController? controller,
+    bool? isObscured,
+    VoidCallback? onToggle,
+    bool isDropdown = false,
+  }) {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Padding(
@@ -245,19 +324,23 @@ bool isDropdown = false,
         style: TextStyle(color: colorScheme.onSurface),
         decoration: InputDecoration(
           labelText: label,
-          labelStyle: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.7)),
+          labelStyle: TextStyle(
+            color: colorScheme.onSurface.withValues(alpha: 0.7),
+          ),
           suffixIcon: isPassword
-            ? IconButton(
-              icon: Icon(
-                isObscured! ? Icons.visibility_off : Icons.visibility,
-                color: colorScheme.primary.withValues(alpha: 0.6),
-              ),
-            onPressed: onToggle,
-          )
-          : (isDropdown ? const Icon(Icons.arrow_drop_down) : null),
+              ? IconButton(
+                  icon: Icon(
+                    isObscured! ? Icons.visibility_off : Icons.visibility,
+                    color: colorScheme.primary.withValues(alpha: 0.6),
+                  ),
+                  onPressed: onToggle,
+                )
+              : (isDropdown ? const Icon(Icons.arrow_drop_down) : null),
           enabledBorder: OutlineInputBorder(
             borderRadius: .circular(20),
-            borderSide: BorderSide(color: colorScheme.onSurface.withValues(alpha: 0.4)),
+            borderSide: BorderSide(
+              color: colorScheme.onSurface.withValues(alpha: 0.4),
+            ),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: .circular(20),
