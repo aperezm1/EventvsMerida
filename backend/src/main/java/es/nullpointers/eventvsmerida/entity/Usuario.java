@@ -55,10 +55,6 @@ public class Usuario {
     @Column(name = "password", nullable = false, length = 255)
     private String password;
 
-    @AssertTrue(message = "Debe aceptar las condiciones")
-    @Column(name = "leido_condiciones", nullable = false)
-    private Boolean leidoCondiciones;
-
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @OnDelete(action = OnDeleteAction.SET_DEFAULT)
