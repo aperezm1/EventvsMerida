@@ -1,6 +1,7 @@
 package es.nullpointers.eventvsmerida.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import es.nullpointers.eventvsmerida.validation.EdadValida;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,6 +21,7 @@ public class UsuarioActualizarRequest implements UsuarioBaseRequest {
 
     private String apellidos;
 
+    @EdadValida
     @PastOrPresent(message = "La fecha de nacimiento no puede ser futura")
     @JsonFormat(pattern = "dd/MM/yyyy")
     private LocalDate fechaNacimiento;
