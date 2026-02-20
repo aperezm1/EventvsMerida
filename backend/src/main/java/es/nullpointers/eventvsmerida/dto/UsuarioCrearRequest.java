@@ -1,6 +1,7 @@
 package es.nullpointers.eventvsmerida.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import es.nullpointers.eventvsmerida.validation.EdadValida;
 import jakarta.validation.constraints.*;
 
 import lombok.Getter;
@@ -25,6 +26,7 @@ public class UsuarioCrearRequest implements UsuarioBaseRequest {
     private String apellidos;
 
     @NotNull
+    @EdadValida
     @PastOrPresent(message = "La fecha de nacimiento no puede ser futura")
     @JsonFormat(pattern = "dd/MM/yyyy")
     private LocalDate fechaNacimiento;
@@ -40,10 +42,6 @@ public class UsuarioCrearRequest implements UsuarioBaseRequest {
     @NotBlank
     @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$", message = "La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número")
     private String password;
-
-    @NotNull
-    @AssertTrue(message = "Debe aceptar las condiciones")
-    private Boolean leidoCondiciones;
 
     @NotNull
     private Long idRol;

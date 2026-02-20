@@ -9,8 +9,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.time.Period;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -61,14 +59,6 @@ public class UsuarioService {
      * @return Usuario creado.
      */
     public Usuario crearUsuario(Usuario usuarioNuevo) {
-        if (!esFechaNacimientoValida(usuarioNuevo.getFechaNacimiento())) {
-            throw new IllegalArgumentException("La edad del usuario debe estar entre 14 y 100 años");
-        }
-
-        if (usuarioNuevo.getLeidoCondiciones() == null || !usuarioNuevo.getLeidoCondiciones()) {
-            throw new IllegalArgumentException("Debe aceptar las condiciones para registrarse");
-        }
-
         usuarioNuevo.setPassword(passwordEncoder.encode(usuarioNuevo.getPassword()));
         return usuarioRepository.save(usuarioNuevo);
     }
@@ -100,9 +90,6 @@ public class UsuarioService {
         if (usuarioAActualizar.getApellidos() != null)
             usuarioExistente.setApellidos(usuarioAActualizar.getApellidos());
         if (usuarioAActualizar.getFechaNacimiento() != null)
-            if (!esFechaNacimientoValida(usuarioAActualizar.getFechaNacimiento())) {
-                throw new IllegalArgumentException("La edad debe estar entre 14 y 100 años");
-            }
             usuarioExistente.setFechaNacimiento(usuarioAActualizar.getFechaNacimiento());
         if (usuarioAActualizar.getEmail() != null)
             usuarioExistente.setEmail(usuarioAActualizar.getEmail());
@@ -153,14 +140,5 @@ public class UsuarioService {
      */
     private Usuario obtenerUsuarioPorIdOExcepcion(Long id, String mensajeError) {
         return usuarioRepository.findById(id).orElseThrow(() -> new NoSuchElementException(mensajeError));
-    }
-
-    private boolean esFechaNacimientoValida(LocalDate fecha) {
-        if (fecha == null) return false;
-
-        LocalDate hoy = LocalDate.now();
-        int edad = Period.between(fecha, hoy).getYears();
-
-        return edad >= 14 && edad <= 100;
     }
 }
