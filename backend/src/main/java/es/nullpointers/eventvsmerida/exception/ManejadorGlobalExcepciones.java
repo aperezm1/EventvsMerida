@@ -9,6 +9,8 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.client.RestClientResponseException;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.format.DateTimeParseException;
 import java.util.Map;
@@ -154,6 +156,18 @@ public class ManejadorGlobalExcepciones {
         return ResponseEntity
                 .internalServerError()
                 .body(new ErrorResponse(mensajeError));
+    }
+
+    /**
+     * Maneja la excepción en caso de que se quiera insertar una imagen que ya está almacenada.
+     * @param e Excepción capturada.
+     * @return Respuesta HTTP con el código 409.
+     */
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ErrorResponse> manejadorResponseStatus(ResponseStatusException e) {
+        String mensaje = e.getReason() != null ? e.getReason() : e.getMessage();
+        log.error("Error en " + obtenerClaseMetodoDesdeStackTrace(e.getStackTrace()) + ": " + mensaje);
+        return ResponseEntity.status(e.getStatusCode()).body(new ErrorResponse(mensaje));
     }
 
     // ================

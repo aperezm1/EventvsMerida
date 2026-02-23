@@ -5,6 +5,7 @@ import es.nullpointers.eventvsmerida.dto.EventoResponse;
 import es.nullpointers.eventvsmerida.dto.EventoUpdateRequest;
 import es.nullpointers.eventvsmerida.entity.Evento;
 import es.nullpointers.eventvsmerida.repository.EventoRepository;
+import es.nullpointers.eventvsmerida.supabase.SupabaseStorage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
@@ -28,6 +29,7 @@ public class EventoService {
     private final EventoRepository repository;
     private final UsuarioService usuarioService;
     private final CategoriaService categoriaService;
+    private final SupabaseStorage storageUploader;
 
     /**
      * Método para obtener un listado con todos los eventos.
@@ -73,7 +75,7 @@ public class EventoService {
         evento.setDescripcion(eventoRequest.getDescripcion());
         evento.setFechaHora(eventoRequest.getFecha().toInstant());
         evento.setLocalizacion(eventoRequest.getLocalizacion());
-        evento.setFoto(eventoRequest.getFoto());
+        evento.setFoto(storageUploader.subirImagen(eventoRequest.getFoto()));
         evento.setIdUsuario(usuarioService.obtenerUsuarioPorId(eventoRequest.getIdUsuario()));
         evento.setIdCategoria(categoriaService.obtenerCategoriaPorId(eventoRequest.getIdCategoria()));
 
