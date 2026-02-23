@@ -1,18 +1,43 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 
 class ApiService {
   static const String baseUrl = "https://eventvsmerida.onrender.com/api";
 
-  static Future<void> registrar(Map<String, dynamic> userData) async {
-    final response = await http.post(
-      Uri.parse("$baseUrl/usuarios/add"),
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode(userData),
-    );
+  static Future<String> registrar(Map<String, dynamic> userData) async {
+    try {
+      final url = Uri.parse("$baseUrl/usuarios/add");
 
-    print(response.statusCode);
-    print(response.body);
+      final response = await http
+        .post(
+          url,
+          headers: {"Content-Type": "application/json"},
+          body: jsonEncode(userData),
+      )
+      .timeout(const Duration(seconds: 10));
+
+      switch (response.statusCode) {
+        case 201:
+          return "Registro exitoso";
+        case 400:
+          return "Datos inválidos, revisa los campos";
+        case 409:
+          return "El correo ya está registrado";
+        case 500:
+          return "Error interno del servidor";
+        default:
+          return "Error inesperado: ${response.statusCode}";
+      }
+
+    } on TimeoutException {
+      return "El servidor tarda demasiado en responder";
+    } on SocketException {
+      return "No hay conexión a internet";
+    } catch (e) {
+      return "Error desconocido";
+    }
   }
 
   static Future<String> login(String email, String password) async {

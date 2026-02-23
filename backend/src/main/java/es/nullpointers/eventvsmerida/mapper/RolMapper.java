@@ -1,6 +1,6 @@
 package es.nullpointers.eventvsmerida.mapper;
 
-import es.nullpointers.eventvsmerida.dto.RolRequest;
+import es.nullpointers.eventvsmerida.dto.request.RolRequest;
 import es.nullpointers.eventvsmerida.entity.Rol;
 import es.nullpointers.eventvsmerida.utils.TextoUtils;
 

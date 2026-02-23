@@ -1,8 +1,8 @@
 package es.nullpointers.eventvsmerida.controller;
 
-import es.nullpointers.eventvsmerida.dto.LoginRequest;
-import es.nullpointers.eventvsmerida.dto.UsuarioActualizarRequest;
-import es.nullpointers.eventvsmerida.dto.UsuarioCrearRequest;
+import es.nullpointers.eventvsmerida.dto.request.LoginRequest;
+import es.nullpointers.eventvsmerida.dto.request.UsuarioActualizarRequest;
+import es.nullpointers.eventvsmerida.dto.request.UsuarioCrearRequest;
 import es.nullpointers.eventvsmerida.entity.Usuario;
 import es.nullpointers.eventvsmerida.mapper.UsuarioMapper;
 import es.nullpointers.eventvsmerida.service.RolService;

@@ -1,4 +1,4 @@
-package es.nullpointers.eventvsmerida.dto;
+package es.nullpointers.eventvsmerida.dto.request;
 
 import lombok.Getter;
 import lombok.Setter;

@@ -1,4 +1,4 @@
-package es.nullpointers.eventvsmerida.dto;
+package es.nullpointers.eventvsmerida.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

@@ -1,6 +1,6 @@
 package es.nullpointers.eventvsmerida.mapper;
 
-import es.nullpointers.eventvsmerida.dto.CategoriaRequest;
+import es.nullpointers.eventvsmerida.dto.request.CategoriaRequest;
 import es.nullpointers.eventvsmerida.entity.Categoria;
 import es.nullpointers.eventvsmerida.utils.TextoUtils;
 

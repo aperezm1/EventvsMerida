@@ -1,4 +1,4 @@
-package es.nullpointers.eventvsmerida.dto;
+package es.nullpointers.eventvsmerida.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.Getter;

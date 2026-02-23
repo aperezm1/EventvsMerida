@@ -1,8 +1,8 @@
 package es.nullpointers.eventvsmerida.controller;
 
-import es.nullpointers.eventvsmerida.dto.EventoRequest;
-import es.nullpointers.eventvsmerida.dto.EventoResponse;
-import es.nullpointers.eventvsmerida.dto.EventoUpdateRequest;
+import es.nullpointers.eventvsmerida.dto.request.EventoRequest;
+import es.nullpointers.eventvsmerida.dto.response.EventoResponse;
+import es.nullpointers.eventvsmerida.dto.request.EventoUpdateRequest;
 import es.nullpointers.eventvsmerida.entity.Evento;
 import es.nullpointers.eventvsmerida.service.EventoService;
 import jakarta.validation.Valid;
