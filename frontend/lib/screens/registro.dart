@@ -1,6 +1,5 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
+// Servicio para manejar el registro vía API
 import '../services/api_service.dart';
 
 class Registro extends StatefulWidget {
@@ -11,6 +10,7 @@ class Registro extends StatefulWidget {
 }
 
 class _RegistroState extends State<Registro> {
+  // Clave global para el formulario (permite validar campos)
   final _formKey = GlobalKey<FormState>();
 
   bool _aceptaTerminos = false;
@@ -18,6 +18,7 @@ class _RegistroState extends State<Registro> {
   bool _oscurecerRepetirPassword = true;
   String? _mesSeleccionado;
 
+  // Lista de meses para el selector
   final List<String> _meses = [
     'Enero',
     'Febrero',
@@ -33,6 +34,7 @@ class _RegistroState extends State<Registro> {
     'Diciembre',
   ];
 
+  // Función que convierte el nombre del mes a número (para fechas)
   String mesANumero(String mes) {
     const meses = {
       'Enero': '01',
@@ -51,6 +53,7 @@ class _RegistroState extends State<Registro> {
     return meses[mes] ?? '01';
   }
 
+  // Controladores para manejar el texto de los campos
   final _mesController = TextEditingController();
   final _nombreController = TextEditingController();
   final _apellidoController = TextEditingController();
@@ -86,13 +89,17 @@ class _RegistroState extends State<Registro> {
           ),
           Expanded(
             child: Container(
+              //controla el espacio interno dentro de un contenedor
               padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
               decoration: BoxDecoration(
                 color: colorScheme.surface,
                 borderRadius: const .vertical(top: Radius.circular(30)),
               ),
               child: SingleChildScrollView(
+                //agrupa varios campos de entrada TextFormField
+                //Permite validar los campos de manera conjunta y manejar su estado.
                 child: Form(
+                  //Acceder al estado del formulario desde cualquier parte del código
                   key: _formKey,
                   child: Column(
                     children: [
@@ -270,7 +277,7 @@ class _RegistroState extends State<Registro> {
                               );
                               return;
                             }
-
+                            //Convertir fecha a número
                             int? dia = int.tryParse(_diaController.text);
                             int mes = int.parse(mesANumero(_mesSeleccionado!));
                             int? anio = int.tryParse(_anioController.text);
@@ -303,6 +310,7 @@ class _RegistroState extends State<Registro> {
 
                             final fechaString = "${dia.toString().padLeft(2,'0')}/${mes.toString().padLeft(2,'0')}/$anio";
 
+                            //Crear objeto de usuario
                             final userData = {
                               "nombre": _nombreController.text,
                               "apellidos": _apellidoController.text,
@@ -313,12 +321,15 @@ class _RegistroState extends State<Registro> {
                               "idRol": 1,
                             };
 
+                            //Llamada al API para registrar
                             final mensaje = await ApiService.registrar(userData);
 
+                            //Mostrar feedback al usuario
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(content: Text(mensaje)),
                             );
 
+                            //Si es exitoso se navega a la proxima pantalla
                             if (mensaje.toLowerCase().contains("correcto") ||
                                 mensaje.toLowerCase().contains("exitoso")) {
                               //Navigator.pushNamed(context, '/login');
@@ -374,12 +385,12 @@ class _RegistroState extends State<Registro> {
     String label, {
     bool isPassword = false,
     bool readOnly = false,
-    VoidCallback? onTap,
+    VoidCallback? onTap, //Acción al tocar
     TextEditingController? controller,
     bool? isObscured,
-    VoidCallback? onToggle,
+    VoidCallback? onToggle, //Cambiar visibilidad contraseña
     bool isDropdown = false,
-    TextInputType? keyboardType,
+    TextInputType? keyboardType, //Tipo de teclado
   }) {
     final colorScheme = Theme.of(context).colorScheme;
 
