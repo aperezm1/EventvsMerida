@@ -1,9 +1,8 @@
 package es.nullpointers.eventvsmerida.controller;
 
-import es.nullpointers.eventvsmerida.dto.request.EventoRequest;
+import es.nullpointers.eventvsmerida.dto.request.EventoCrearRequest;
 import es.nullpointers.eventvsmerida.dto.response.EventoResponse;
-import es.nullpointers.eventvsmerida.dto.request.EventoUpdateRequest;
-import es.nullpointers.eventvsmerida.entity.Evento;
+import es.nullpointers.eventvsmerida.dto.request.EventoActualizarRequest;
 import es.nullpointers.eventvsmerida.service.EventoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -29,9 +28,14 @@ import java.util.List;
 public class EventoController {
     private final EventoService eventoService;
 
+    // ============
+    // Metodos CRUD
+    // ============
+
     /**
      * Método GET que llama a EventoService para obtener todos los eventos.
-     * @return Listado de eventos.
+     *
+     * @return ResponseEntity con la lista de eventos y el estado HTTP 200 (OK).
      */
     @GetMapping("/all")
     public ResponseEntity<List<EventoResponse>> obtenerEventos() {
@@ -40,47 +44,51 @@ public class EventoController {
     }
 
     /**
-     * Método GET que llama a EventoService para obtener un evento por su ID.
-     * @param id ID del evento.
-     * @return Evento cuya ID coincida.
+     * Método GET que llama al servicio para obtener un evento por su ID.
+     *
+     * @param id ID del evento a obtener.
+     * @return ResponseEntity con el evento encontrado y el estado HTTP 200 (OK).
      */
     @GetMapping("/{id}")
     public ResponseEntity<EventoResponse> obtenerEventoPorId(@PathVariable Long id) {
-        EventoResponse eventoResponse = eventoService.obtenerEventoPorId(id);
-        return ResponseEntity.ok(eventoResponse);
+        EventoResponse eventoObtenido = eventoService.obtenerEventoPorId(id);
+        return ResponseEntity.ok(eventoObtenido);
     }
 
     /**
-     * Método POST que llama a EventoService para crear un evento.
-     * @param eventoRequest DTO con los campos de la petición.
-     * @return Devuelve el código de estado de la petición.
+     * Método POST que llama al servicio para crear un nuevo evento.
+     *
+     * @param eventoCrearRequest DTO con los datos del evento a crear.
+     * @return ResponseEntity con el evento creado y el estado HTTP 201 (Created).
      */
     @PostMapping("/add")
-    public ResponseEntity<Evento> crearEvento(@Valid @RequestBody EventoRequest eventoRequest) {
-        Evento evento = eventoService.crearEvento(eventoRequest);
-        return ResponseEntity.status(HttpStatus.CREATED).body(evento);
+    public ResponseEntity<EventoResponse> crearEvento(@Valid @RequestBody EventoCrearRequest eventoCrearRequest) {
+        EventoResponse eventoNuevo = eventoService.crearEvento(eventoCrearRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body(eventoNuevo);
     }
 
     /**
-     * Método PATCH que llama a EventoService para actulizar un evento pasado por ID.
-     * @param eventoUpdateRequest DTO con los campos de la petición.
-     * @param id ID del evento.
-     * @return Devuelve el código de estado de la petición.
-     */
-    @PatchMapping("update/{id}")
-    public ResponseEntity<Evento> actualizarEvento (@Valid @RequestBody EventoUpdateRequest eventoUpdateRequest, @PathVariable Long id) {
-        Evento evento = eventoService.actualizarEvento(eventoUpdateRequest, id);
-        return ResponseEntity.ok(evento);
-    }
-
-    /**
-     * Método DELETE que llama a EventoService para eliminar un evento pasado por ID.
-     * @param id ID del evento.
-     * @return Devuelve el código de estado de la petición.
+     * Método DELETE que llama al servicio para eliminar un evento por su ID.
+     *
+     * @param id ID del evento a eliminar.
+     * @return ResponseEntity con el estado HTTP 204 (No Content).
      */
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> eliminarEvento(@PathVariable Long id) {
-        eventoService.eliminarEventoPorId(id);
+        eventoService.eliminarEvento(id);
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Método PUT que llama al servicio para actualizar un evento existente.
+     *
+     * @param id ID del evento a actualizar.
+     * @param eventoActualizarRequest DTO con los datos del evento a actualizar.
+     * @return ResponseEntity con el evento actualizado y el estado HTTP 200 (OK).
+     */
+    @PutMapping("update/{id}")
+    public ResponseEntity<EventoResponse> actualizarEvento (@PathVariable Long id, @Valid @RequestBody EventoActualizarRequest eventoActualizarRequest) {
+        EventoResponse eventoActualizado = eventoService.actualizarEvento(id, eventoActualizarRequest);
+        return ResponseEntity.ok(eventoActualizado);
     }
 }

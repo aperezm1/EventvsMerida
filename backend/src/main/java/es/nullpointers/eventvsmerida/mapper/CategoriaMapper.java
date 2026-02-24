@@ -1,6 +1,7 @@
 package es.nullpointers.eventvsmerida.mapper;
 
 import es.nullpointers.eventvsmerida.dto.request.CategoriaRequest;
+import es.nullpointers.eventvsmerida.dto.response.CategoriaResponse;
 import es.nullpointers.eventvsmerida.entity.Categoria;
 import es.nullpointers.eventvsmerida.utils.TextoUtils;
 
@@ -23,7 +24,19 @@ public class CategoriaMapper {
      */
     public static Categoria convertirAEntidad(CategoriaRequest request) {
         Categoria categoria = new Categoria();
-        categoria.setNombre(TextoUtils.capitalizarTexto(request.getNombre()));
+        categoria.setNombre(TextoUtils.capitalizarTexto(request.nombre()));
         return categoria;
+    }
+
+    /**
+     * Metodo que convierte una entidad Categoria a un objeto CategoriaResponse.
+     *
+     * @param categoria Entidad Categoria a convertir.
+     * @return Objeto DTO con los datos de la categoría.
+     */
+    public static CategoriaResponse convertirAResponse(Categoria categoria) {
+        String nombre = categoria.getNombre();
+
+        return new CategoriaResponse(nombre);
     }
 }

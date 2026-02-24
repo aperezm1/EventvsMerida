@@ -1,20 +1,20 @@
-package es.nullpointers.eventvsmerida.dto.response;
+package es.nullpointers.eventvsmerida.dto.request;
 
 import java.time.Instant;
 
 /**
- * DTO para devolver los datos de un evento.
+ * DTO para la actualización de un evento.
  *
  * @author Eva Retamar
  * @author David Muñoz
  * @author Adrián Pérez
  */
-public record EventoResponse(
+public record EventoActualizarRequest(
         String titulo,
         String descripcion,
         Instant fechaHora,
         String localizacion,
         String foto,
-        String emailUsuario,
-        String nombreCategoria
+        Long idUsuario,
+        Long idCategoria
 ) {}

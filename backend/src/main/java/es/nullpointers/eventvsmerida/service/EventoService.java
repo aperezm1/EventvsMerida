@@ -1,14 +1,16 @@
 package es.nullpointers.eventvsmerida.service;
 
-import es.nullpointers.eventvsmerida.dto.request.EventoRequest;
+import es.nullpointers.eventvsmerida.dto.request.EventoCrearRequest;
 import es.nullpointers.eventvsmerida.dto.response.EventoResponse;
-import es.nullpointers.eventvsmerida.dto.request.EventoUpdateRequest;
+import es.nullpointers.eventvsmerida.dto.request.EventoActualizarRequest;
+import es.nullpointers.eventvsmerida.entity.Categoria;
 import es.nullpointers.eventvsmerida.entity.Evento;
+import es.nullpointers.eventvsmerida.entity.Usuario;
+import es.nullpointers.eventvsmerida.mapper.EventoMapper;
 import es.nullpointers.eventvsmerida.repository.EventoRepository;
 import es.nullpointers.eventvsmerida.supabase.SupabaseStorage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.NonNull;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
@@ -26,134 +28,142 @@ import java.util.*;
 @RequiredArgsConstructor
 @Service
 public class EventoService {
-    private final EventoRepository repository;
+    private final EventoRepository eventoRepository;
     private final UsuarioService usuarioService;
     private final CategoriaService categoriaService;
     private final SupabaseStorage storageUploader;
 
+    // ============
+    // Metodos CRUD
+    // ============
+
     /**
-     * Método para obtener un listado con todos los eventos.
-     * @return Listado de eventos.
+     * Método para obtener todos los eventos.
+     *
+     * @return Lista de eventos.
      */
     public List<EventoResponse> obtenerEventos() {
-        List<Evento> eventos = repository.findAll();
+        List<Evento> eventos = eventoRepository.findAll();
+        List<EventoResponse> eventosResponse = new ArrayList<>();
+
         if (eventos.isEmpty()) {
-            // Devuelve lista vacía en vez de lanzar excepción
-            return Collections.emptyList();
+            throw new NoSuchElementException("Error en EventoService.obtenerEventos: No se encontraron eventos en la base de datos");
         }
 
-        List<EventoResponse> resultado = new ArrayList<>(eventos.size());
         for (Evento evento : eventos) {
-            EventoResponse eventoResponse = getEventoResponse(evento);
-
-            resultado.add(eventoResponse);
+            eventosResponse.add(EventoMapper.convertirAResponse(evento));
         }
-        return resultado;
+
+        return eventosResponse;
     }
 
     /**
-     * Método para obtener un evento en función de su ID.
-     * @param id ID del evento.
-     * @return Evento cuya ID coincide.
+     * Método para obtener un evento por su ID.
+     *
+     * @param id ID del evento a obtener.
+     * @return Evento encontrado.
      */
     public EventoResponse obtenerEventoPorId(Long id) {
-        Evento evento = repository.findById(id).orElseThrow(() -> new NoSuchElementException("Error en UsuarioService.obtenerUsuarioPorId: No se encontró el usuario con id" + id));
-
-        EventoResponse eventoResponse = getEventoResponse(evento);
-
-        return eventoResponse;
+        Evento eventoObtenido = obtenerEventoPorIdOExcepcion(id, "Error en EventoService.obtenerEventoPorId: No se encontró el evento con id " + id);
+        return EventoMapper.convertirAResponse(eventoObtenido);
     }
 
     /**
-     * Métooo para crear un evento.
-     * @param eventoRequest DTO con los campos que se envían en la petición para crear un evento.
-     * @return Devuelve el código de estado sobre la creación.
+     * Métooo para crear un nuevo evento.
+     *
+     * @param eventoRequest Datos del evento a crear.
+     * @return Evento creado.
      */
-    public Evento crearEvento(EventoRequest eventoRequest) {
-        Evento evento = new Evento();
-        evento.setTitulo(eventoRequest.getTitulo());
-        evento.setDescripcion(eventoRequest.getDescripcion());
-        evento.setFechaHora(eventoRequest.getFecha().toInstant());
-        evento.setLocalizacion(eventoRequest.getLocalizacion());
-        evento.setFoto(storageUploader.subirImagen(eventoRequest.getFoto()));
-        evento.setIdUsuario(usuarioService.obtenerUsuarioPorId(eventoRequest.getIdUsuario()));
-        evento.setIdCategoria(categoriaService.obtenerCategoriaPorId(eventoRequest.getIdCategoria()));
-
-        if (repository.existsByTituloAndFechaHora(evento.getTitulo(), evento.getFechaHora())) {
+    public EventoResponse crearEvento(EventoCrearRequest eventoRequest) {
+        // Se hacen las comprobaciones necesarias para evitar errores de integridad de datos
+        if (eventoRepository.existsByTituloAndFechaHora(eventoRequest.titulo(), eventoRequest.fecha().toInstant())) {
             throw new DataIntegrityViolationException("Ya existe un evento con el título y fecha indicados");
         }
-        return repository.save(evento);
+
+        Usuario usuario = usuarioService.obtenerUsuarioPorIdOExcepcion(eventoRequest.idUsuario(), "Error en EventoService.crearEvento: No se encontró el usuario con id " + eventoRequest.idUsuario());
+        Categoria categoria = categoriaService.obtenerCategoriaPorIdOExcepcion(eventoRequest.idCategoria(), "Error en EventoService.crearEvento: No se encontró la categoría con id " + eventoRequest.idCategoria());
+
+        // Se convierte el DTO a entidad
+        Evento eventoNuevo = EventoMapper.convertirAEntidad(eventoRequest, usuario, categoria, storageUploader);
+
+        // Se guarda el nuevo evento en la base de datos
+        Evento eventoCreado = eventoRepository.save(eventoNuevo);
+
+        // Se devuelve el evento creado convertido a response
+        return EventoMapper.convertirAResponse(eventoCreado);
     }
 
     /**
-     * Método que actualiza un evento en función.
-     * @param eventoUpdateRequest DTO con los campos que se pueden modificar en la petición.
-     * @return Devuelve el código de estado sobre la modificación.
+     * Método para eliminar un evento por su ID.
+     *
+     * @param id ID del evento a eliminar.
      */
-    public Evento actualizarEvento(EventoUpdateRequest eventoUpdateRequest, Long id) {
-        Evento evento = obtenerEventoSinDto(id);
-        if (eventoUpdateRequest.getTitulo() != null) {
-            evento.setTitulo(eventoUpdateRequest.getTitulo());
-        }
-        if (eventoUpdateRequest.getDescripcion() != null) {
-            evento.setDescripcion(eventoUpdateRequest.getDescripcion());
-        }
-        if (eventoUpdateRequest.getFechaHora() != null) {
-            evento.setFechaHora(eventoUpdateRequest.getFechaHora());
-        }
-        if (eventoUpdateRequest.getLocalizacion() != null) {
-            evento.setLocalizacion(eventoUpdateRequest.getLocalizacion());
-        }
-        if (eventoUpdateRequest.getFoto() != null) {
-            evento.setFoto(eventoUpdateRequest.getFoto());
-        }
-        if (eventoUpdateRequest.getUsuarioId() != null) {
-            evento.setIdUsuario(usuarioService.obtenerUsuarioPorId(eventoUpdateRequest.getUsuarioId()));
-        }
-        if (eventoUpdateRequest.getCategoriaId() != null) {
-            evento.setIdCategoria(categoriaService.obtenerCategoriaPorId(eventoUpdateRequest.getCategoriaId()));
-        }
-
-        return repository.save(evento);
+    public void eliminarEvento(Long id) {
+        Evento evento = obtenerEventoPorIdOExcepcion(id, "Error en EventoService.eliminarEvento: No se encontró el evento con id " + id);
+        eventoRepository.delete(evento);
     }
 
     /**
-     * Método que elimina un evento en función de un ID dado.
-     * @param id ID del evento que se desea eliminar.
+     * Método para actualizar un evento existente.
+     *
+     * @param id ID del evento a actualizar.
+     * @param eventoRequest Datos actualizados del evento.
+     * @return Evento actualizado.
      */
-    public void eliminarEventoPorId(Long id) {
-        if (!repository.existsById(id)) {
-            throw new NoSuchElementException("Error en EventoService.eliminarEvento: No se encontró el evento con id " + id);
+    public EventoResponse actualizarEvento(Long id, EventoActualizarRequest eventoRequest) {
+        Evento eventoExistente = obtenerEventoPorIdOExcepcion(id, "Error en EventoService.actualizarEvento: No se encontró el evento con id " + id);
+
+        // Se actualizan solo los campos que no sean nulos en el request, permitiendo actualizaciones parciales
+        if (eventoRequest.titulo() != null) {
+            eventoExistente.setTitulo(eventoRequest.titulo());
         }
 
-        repository.deleteById(id);
+        if (eventoRequest.descripcion() != null) {
+            eventoExistente.setDescripcion(eventoRequest.descripcion());
+        }
+
+        if (eventoRequest.fechaHora() != null) {
+            eventoExistente.setFechaHora(eventoRequest.fechaHora());
+        }
+
+        if (eventoRequest.localizacion() != null) {
+            eventoExistente.setLocalizacion(eventoRequest.localizacion());
+        }
+
+        if (eventoRequest.foto() != null) {
+            eventoExistente.setFoto(eventoRequest.foto());
+        }
+
+        if (eventoRequest.idUsuario() != null) {
+            Usuario usuario = usuarioService.obtenerUsuarioPorIdOExcepcion(eventoRequest.idUsuario(), "Error en EventoService.actualizarEvento: No se encontró el usuario con id " + eventoRequest.idUsuario());
+            eventoExistente.setUsuario(usuario);
+        }
+
+        if (eventoRequest.idCategoria() != null) {
+            Categoria categoria = categoriaService.obtenerCategoriaPorIdOExcepcion(eventoRequest.idCategoria(), "Error en EventoService.actualizarEvento: No se encontró la categoría con id " + eventoRequest.idCategoria());
+            eventoExistente.setCategoria(categoria);
+        }
+
+        // Se guarda el evento actualizado en la base de datos
+        Evento eventoActualizado = eventoRepository.save(eventoExistente);
+
+        // Se devuelve el evento actualizado convertido a response
+        return EventoMapper.convertirAResponse(eventoActualizado);
     }
 
-    /**
-     * Método privado de la clase que recibe un evento y lo convierte al DTO EventoResponse.
-     * @param evento Evento recibido por parámetro.
-     * @return Devuelve un DTO de EventoResponse.
-     */
-    private static @NonNull EventoResponse getEventoResponse(Evento evento) {
-        EventoResponse eventoResponse = new EventoResponse();
-        eventoResponse.setId(evento.getId());
-        eventoResponse.setTitulo(evento.getTitulo());
-        eventoResponse.setDescripcion(evento.getDescripcion());
-        eventoResponse.setFechaHora(evento.getFechaHora());
-        eventoResponse.setLocalizacion(evento.getLocalizacion());
-        eventoResponse.setFoto(evento.getFoto());
-        // Solo IDs para evitar problemas de lazy en la serialización
-        eventoResponse.setUsuarioId(evento.getIdUsuario() != null ? evento.getIdUsuario().getId() : null);
-        eventoResponse.setCategoriaId(evento.getIdCategoria() != null ? evento.getIdCategoria().getId() : null);
-        return eventoResponse;
-    }
+    // ==================
+    // Metodos Auxiliares
+    // ==================
 
     /**
-     * Método privado que se encarga de devolver un Evento con un ID pasado.
-     * @param id ID del evento.
-     * @return Devuelve el evento buscado si existe, si no lanza una excepción .
+     * Método auxiliar para obtener un evento por su ID o lanzar una excepción
+     * personalizada si no se encuentra.
+     *
+     * @param id ID del evento a obtener.
+     * @param mensajeError Mensaje de error para la excepción.
+     * @return Evento encontrado.
      */
-    private Evento obtenerEventoSinDto(Long id) {
-        return repository.findById(id).orElseThrow(() -> new NoSuchElementException("Error en EventooService.obtenerUsuarioPorId: No se encontró el evento con id" + id));
+    public Evento obtenerEventoPorIdOExcepcion(Long id, String mensajeError) {
+        return eventoRepository.findById(id).orElseThrow(() -> new NoSuchElementException(mensajeError));
     }
 }

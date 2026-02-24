@@ -3,9 +3,8 @@ package es.nullpointers.eventvsmerida.controller;
 import es.nullpointers.eventvsmerida.dto.request.LoginRequest;
 import es.nullpointers.eventvsmerida.dto.request.UsuarioActualizarRequest;
 import es.nullpointers.eventvsmerida.dto.request.UsuarioCrearRequest;
+import es.nullpointers.eventvsmerida.dto.response.UsuarioResponse;
 import es.nullpointers.eventvsmerida.entity.Usuario;
-import es.nullpointers.eventvsmerida.mapper.UsuarioMapper;
-import es.nullpointers.eventvsmerida.service.RolService;
 import es.nullpointers.eventvsmerida.service.UsuarioService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +29,6 @@ import java.util.List;
 @RequestMapping("/api/usuarios")
 public class UsuarioController {
     private final UsuarioService usuarioService;
-    private final RolService rolService;
 
     // ============
     // Metodos CRUD
@@ -42,8 +40,8 @@ public class UsuarioController {
      * @return ResponseEntity con la lista de usuarios y el estado HTTP 200 (OK).
      */
     @GetMapping("/all")
-    public ResponseEntity<List<Usuario>> obtenerUsuarios() {
-        List<Usuario> usuarios = usuarioService.obtenerUsuarios();
+    public ResponseEntity<List<UsuarioResponse>> obtenerUsuarios() {
+        List<UsuarioResponse> usuarios = usuarioService.obtenerUsuarios();
         return ResponseEntity.ok(usuarios);
     }
 
@@ -54,20 +52,20 @@ public class UsuarioController {
      * @return ResponseEntity con el usuario encontrado y el estado HTTP 200 (OK).
      */
     @GetMapping("/{id}")
-    public ResponseEntity<Usuario> obtenerUsuarioPorId(@PathVariable Long id) {
-        Usuario usuario = usuarioService.obtenerUsuarioPorId(id);
-        return ResponseEntity.ok(usuario);
+    public ResponseEntity<UsuarioResponse> obtenerUsuarioPorId(@PathVariable Long id) {
+        UsuarioResponse usuarioObtenido = usuarioService.obtenerUsuarioPorId(id);
+        return ResponseEntity.ok(usuarioObtenido);
     }
 
     /**
      * Metodo POST que llama al servicio para crear un nuevo usuario.
      *
-     * @param usuarioRequest DTO con los datos del usuario a crear.
+     * @param usuarioCrearRequest DTO con los datos del usuario a crear.
      * @return ResponseEntity con el usuario creado y el estado HTTP 201 (CREATED).
      */
     @PostMapping("/add")
-    public ResponseEntity<Usuario> crearUsuario(@Valid @RequestBody UsuarioCrearRequest usuarioRequest) {
-        Usuario usuarioNuevo = usuarioService.crearUsuario(UsuarioMapper.convertirAEntidad(usuarioRequest, rolService));
+    public ResponseEntity<UsuarioResponse> crearUsuario(@Valid @RequestBody UsuarioCrearRequest usuarioCrearRequest) {
+        UsuarioResponse usuarioNuevo = usuarioService.crearUsuario(usuarioCrearRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(usuarioNuevo);
     }
 
@@ -87,12 +85,12 @@ public class UsuarioController {
      * Metodo PUT que llama al servicio para actualizar un usuario existente.
      *
      * @param id ID del usuario a actualizar.
-     * @param usuarioRequest DTO con los datos del usuario a actualizar.
+     * @param usuarioActualizarRequest DTO con los datos del usuario a actualizar.
      * @return ResponseEntity con el usuario actualizado y el estado HTTP 200 (OK).
      */
     @PatchMapping("/update/{id}")
-    public ResponseEntity<Usuario> actualizarUsuario(@PathVariable Long id, @Valid @RequestBody UsuarioActualizarRequest usuarioRequest) {
-        Usuario usuarioActualizado = usuarioService.actualizarUsuario(id, UsuarioMapper.convertirAEntidad(usuarioRequest, rolService));
+    public ResponseEntity<UsuarioResponse> actualizarUsuario(@PathVariable Long id, @Valid @RequestBody UsuarioActualizarRequest usuarioActualizarRequest) {
+        UsuarioResponse usuarioActualizado = usuarioService.actualizarUsuario(id, usuarioActualizarRequest);
         return ResponseEntity.ok(usuarioActualizado);
     }
 
@@ -107,8 +105,8 @@ public class UsuarioController {
      * @return ResponseEntity con el usuario logeado y el estado HTTP 200 (OK).
      */
     @PostMapping("/login")
-    public ResponseEntity<Usuario> login(@Valid @RequestBody LoginRequest loginRequest) {
-        Usuario usuarioLogeado = usuarioService.login(loginRequest.getEmail(), loginRequest.getPassword());
+    public ResponseEntity<UsuarioResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
+        UsuarioResponse usuarioLogeado = usuarioService.login(loginRequest.email(), loginRequest.password());
         return ResponseEntity.ok(usuarioLogeado);
     }
 }

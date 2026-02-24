@@ -1,12 +1,16 @@
 package es.nullpointers.eventvsmerida.service;
 
+import es.nullpointers.eventvsmerida.dto.request.RolRequest;
+import es.nullpointers.eventvsmerida.dto.response.RolResponse;
 import es.nullpointers.eventvsmerida.entity.Rol;
+import es.nullpointers.eventvsmerida.mapper.RolMapper;
 import es.nullpointers.eventvsmerida.repository.RolRepository;
 import jakarta.persistence.NoResultException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -33,14 +37,19 @@ public class RolService {
      *
      * @return Lista de roles.
      */
-    public List<Rol> obtenerRoles() {
+    public List<RolResponse> obtenerRoles() {
         List<Rol> roles = rolRepository.findAll();
+        List<RolResponse> rolesResponse = new ArrayList<>();
 
         if (roles.isEmpty()) {
             throw new NoResultException("Error en RolService.obtenerRoles: No se encontraron roles en la base de datos");
         }
 
-        return roles;
+        for (Rol rol : roles) {
+            rolesResponse.add(RolMapper.convertirAResponse(rol));
+        }
+
+        return rolesResponse;
     }
 
     /**
@@ -49,18 +58,21 @@ public class RolService {
      * @param id ID del rol a obtener.
      * @return Rol encontrado.
      */
-    public Rol obtenerRolPorId(Long id) {
-        return obtenerRolPorIdOExcepcion(id, "Error en RolService.obtenerRolPorId: No se encontró el rol con id " + id);
+    public RolResponse obtenerRolPorId(Long id) {
+        Rol rolObtenido = obtenerRolPorIdOExcepcion(id, "Error en RolService.obtenerRolPorId: No se encontró el rol con id " + id);
+        return RolMapper.convertirAResponse(rolObtenido);
     }
 
     /**
      * Metodo para crear un nuevo rol.
      *
-     * @param rolNuevo Datos del rol a crear.
+     * @param rolRequest Datos del rol a crear.
      * @return Rol creado.
      */
-    public Rol crearRol(Rol rolNuevo) {
-        return rolRepository.save(rolNuevo);
+    public RolResponse crearRol(RolRequest rolRequest) {
+        Rol rolNuevo = RolMapper.convertirAEntidad(rolRequest);
+        Rol rolCreado = rolRepository.save(rolNuevo);
+        return RolMapper.convertirAResponse(rolCreado);
     }
 
     /**
@@ -69,28 +81,29 @@ public class RolService {
      * @param id ID del rol a eliminar.
      */
     public void eliminarRol(Long id) {
-        if (!rolRepository.existsById(id)) {
-            throw new NoSuchElementException("Error en RolService.eliminarRol: No se encontró el rol con id " + id);
-        }
-        rolRepository.deleteById(id);
+        Rol rol = obtenerRolPorIdOExcepcion(id, "Error en RolService.eliminarRol: No se encontró el rol con id " + id);
+        rolRepository.delete(rol);
     }
 
     /**
      * Metodo para actualizar un rol existente.
      *
      * @param id ID del rol a actualizar.
-     * @param rolAActualizar Datos actualizados del rol.
+     * @param rolRequest Datos actualizados del rol.
      * @return Rol actualizado.
      */
-    public Rol actualizarRol(Long id, Rol rolAActualizar) {
-        Rol rolExistente = obtenerRolPorIdOExcepcion(id, "Error en RolService.actualizarRol: No se encontró el rol con id: " + id);
-        rolExistente.setNombre(rolAActualizar.getNombre());
-        return rolRepository.save(rolExistente);
+    public RolResponse actualizarRol(Long id, RolRequest rolRequest) {
+        Rol rolExistente = obtenerRolPorIdOExcepcion(id, "Error en RolService.actualizarRol: No se encontró el rol con id " + id);
+
+        rolExistente.setNombre(rolRequest.nombre());
+        Rol rolActualizado = rolRepository.save(rolExistente);
+
+        return RolMapper.convertirAResponse(rolActualizado);
     }
 
-    // ================
-    // Metodos Privados
-    // ================
+    // ==================
+    // Metodos Auxiliares
+    // ==================
 
     /**
      * Metodo privado para obtener un rol por su ID o lanzar una excepcion personalizada si no se encuentra.
@@ -99,7 +112,7 @@ public class RolService {
      * @param mensajeError Mensaje de error para la excepcion.
      * @return Rol encontrado.
      */
-    private Rol obtenerRolPorIdOExcepcion(Long id, String mensajeError) {
+    public Rol obtenerRolPorIdOExcepcion(Long id, String mensajeError) {
         return rolRepository.findById(id).orElseThrow(() -> new NoSuchElementException(mensajeError));
     }
 }

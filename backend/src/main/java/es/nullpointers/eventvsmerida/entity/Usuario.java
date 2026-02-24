@@ -59,5 +59,5 @@ public class Usuario {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @OnDelete(action = OnDeleteAction.SET_DEFAULT)
     @JoinColumn(name = "id_rol", nullable = false)
-    private Rol idRol;
+    private Rol rol;
 }

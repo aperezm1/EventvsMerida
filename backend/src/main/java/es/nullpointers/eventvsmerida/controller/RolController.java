@@ -1,8 +1,7 @@
 package es.nullpointers.eventvsmerida.controller;
 
 import es.nullpointers.eventvsmerida.dto.request.RolRequest;
-import es.nullpointers.eventvsmerida.entity.Rol;
-import es.nullpointers.eventvsmerida.mapper.RolMapper;
+import es.nullpointers.eventvsmerida.dto.response.RolResponse;
 import es.nullpointers.eventvsmerida.service.RolService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -38,8 +37,8 @@ public class RolController {
      * @return ResponseEntity con la lista de roles y el estado HTTP 200 (OK).
      */
     @GetMapping("/all")
-    public ResponseEntity<List<Rol>> obtenerRoles() {
-        List<Rol> roles = rolService.obtenerRoles();
+    public ResponseEntity<List<RolResponse>> obtenerRoles() {
+        List<RolResponse> roles = rolService.obtenerRoles();
         return ResponseEntity.ok(roles);
     }
 
@@ -50,20 +49,20 @@ public class RolController {
      * @return ResponseEntity con el rol encontrado y el estado HTTP 200 (OK).
      */
     @GetMapping("/{id}")
-    public ResponseEntity<Rol> obtenerRolPorId(@PathVariable Long id) {
-        Rol rol = rolService.obtenerRolPorId(id);
-        return ResponseEntity.ok(rol);
+    public ResponseEntity<RolResponse> obtenerRolPorId(@PathVariable Long id) {
+        RolResponse rolObtenido = rolService.obtenerRolPorId(id);
+        return ResponseEntity.ok(rolObtenido);
     }
 
     /**
      * Metodo POST que llama al servicio para crear un nuevo rol.
      *
-     * @param rolRequest DTO con los datos del rol a crear.
+     * @param rolCrearRequest DTO con los datos del rol a crear.
      * @return ResponseEntity con el rol creado y el estado HTTP 201 (CREATED).
      */
     @PostMapping("/add")
-    public ResponseEntity<Rol> crearRol(@Valid @RequestBody RolRequest rolRequest) {
-        Rol rolNuevo = rolService.crearRol(RolMapper.convertirAEntidad(rolRequest));
+    public ResponseEntity<RolResponse> crearRol(@Valid @RequestBody RolRequest rolCrearRequest) {
+        RolResponse rolNuevo = rolService.crearRol(rolCrearRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(rolNuevo);
     }
 
@@ -83,12 +82,12 @@ public class RolController {
      * Metodo PUT que llama al servicio para actualizar un rol existente.
      *
      * @param id ID del rol a actualizar.
-     * @param rolRequest DTO con los datos del rol a actualizar.
+     * @param rolActualizarRequest DTO con los datos del rol a actualizar.
      * @return ResponseEntity con el rol actualizado y el estado HTTP 200 (OK).
      */
     @PutMapping("/update/{id}")
-    public ResponseEntity<Rol> actualizarRol(@PathVariable Long id, @Valid @RequestBody RolRequest rolRequest) {
-        Rol rolActualizado = rolService.actualizarRol(id, RolMapper.convertirAEntidad(rolRequest));
+    public ResponseEntity<RolResponse> actualizarRol(@PathVariable Long id, @Valid @RequestBody RolRequest rolActualizarRequest) {
+        RolResponse rolActualizado = rolService.actualizarRol(id, rolActualizarRequest);
         return ResponseEntity.ok(rolActualizado);
     }
 }
