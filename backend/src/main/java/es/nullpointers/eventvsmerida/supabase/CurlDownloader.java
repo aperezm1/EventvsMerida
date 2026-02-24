@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
  * URL recibidd devolviendo la imagen en un array de bytes.
  */
 public final class CurlDownloader {
-    // COnstructor vacío
+    // Constructor vacío
     private CurlDownloader() {}
 
     /**

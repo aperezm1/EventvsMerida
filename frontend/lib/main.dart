@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'screens/splash.dart';
-import 'screens/login.dart';
-import 'screens/registro.dart';
+import 'router.dart';
 
 void main() {
   runApp(const MyApp());
@@ -12,7 +10,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'Eventvs Mérida',
       theme: ThemeData(
         colorScheme: ColorScheme(
@@ -49,12 +47,7 @@ class MyApp extends StatelessWidget {
         ),
       ),
       themeMode: ThemeMode.system,
-      initialRoute: '/splash',
-      routes: {
-        '/splash': (context) => const Splash(),
-        '/registro': (context) => const Registro(),
-        '/login': (context) => const Login(),
-      },
+      routerConfig: router,
     );
   }
 }
