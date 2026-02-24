@@ -1,6 +1,9 @@
+import 'package:eventvsmerida/screens/principal.dart';
 import 'package:flutter/material.dart';
+import 'inicio.dart';
 import 'registro.dart';
 import 'login.dart';
+import 'package:go_router/go_router.dart';
 
 class Splash extends StatefulWidget {
   const Splash({super.key});
@@ -14,11 +17,13 @@ class _LoadingScreenState extends State<Splash> {
   void initState() {
     super.initState();
     Future.delayed(const Duration(seconds: 2), () {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const Login()),
-        //MaterialPageRoute(builder: (context) => const Registro()),
-      );
+      context.go('/inicio');
+      // Navigator.pushReplacement(
+      //   context,
+      //   //MaterialPageRoute(builder: (context) => const Login()),
+      //   //MaterialPageRoute(builder: (context) => const Registro()),
+      //   //MaterialPageRoute(builder: (context) => const Inicio());
+      // );
     });
   }
 
