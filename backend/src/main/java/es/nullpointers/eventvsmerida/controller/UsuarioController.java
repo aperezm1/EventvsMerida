@@ -4,7 +4,6 @@ import es.nullpointers.eventvsmerida.dto.request.LoginRequest;
 import es.nullpointers.eventvsmerida.dto.request.UsuarioActualizarRequest;
 import es.nullpointers.eventvsmerida.dto.request.UsuarioCrearRequest;
 import es.nullpointers.eventvsmerida.dto.response.UsuarioResponse;
-import es.nullpointers.eventvsmerida.entity.Usuario;
 import es.nullpointers.eventvsmerida.service.UsuarioService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
