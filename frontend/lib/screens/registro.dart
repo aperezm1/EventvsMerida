@@ -381,17 +381,17 @@ class _RegistroState extends State<Registro> {
   }
 
   Widget _buildTextField(
-    BuildContext context,
-    String label, {
-    bool isPassword = false,
-    bool readOnly = false,
-    VoidCallback? onTap, //Acción al tocar
-    TextEditingController? controller,
-    bool? isObscured,
-    VoidCallback? onToggle, //Cambiar visibilidad contraseña
-    bool isDropdown = false,
-    TextInputType? keyboardType, //Tipo de teclado
-  }) {
+      BuildContext context,
+      String label, {
+        bool isPassword = false,
+        bool readOnly = false,
+        VoidCallback? onTap, //Acción al tocar
+        TextEditingController? controller,
+        bool? isObscured,
+        VoidCallback? onToggle, //Cambiar visibilidad contraseña
+        bool isDropdown = false,
+        TextInputType? keyboardType, //Tipo de teclado
+      }) {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Padding(
@@ -441,12 +441,12 @@ class _RegistroState extends State<Registro> {
           ),
           suffixIcon: isPassword
               ? IconButton(
-                  icon: Icon(
-                    isObscured! ? Icons.visibility_off : Icons.visibility,
-                    color: colorScheme.primary.withValues(alpha: 0.6),
-                  ),
-                  onPressed: onToggle,
-                )
+            icon: Icon(
+              isObscured! ? Icons.visibility_off : Icons.visibility,
+              color: colorScheme.primary.withValues(alpha: 0.6),
+            ),
+            onPressed: onToggle,
+          )
               : (isDropdown ? const Icon(Icons.arrow_drop_down) : null),
           enabledBorder: OutlineInputBorder(
             borderRadius: .circular(20),
