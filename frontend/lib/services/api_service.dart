@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
+import 'package:eventvsmerida/models/evento.dart';
 import 'package:http/http.dart' as http;
 
 class ApiService {
@@ -56,7 +58,7 @@ class ApiService {
     }
   }
 
-  static Future<List<dynamic>> obtenerEventos() async {
+  static Future<List<dynamic>> obtenerEventos() async { //¿POrque no Evento en lugar de dynamic?
     final respuesta = await http.get(Uri.parse("$baseUrl/eventos/all"));
 
     if (respuesta.statusCode == 200) {
@@ -65,4 +67,23 @@ class ApiService {
       throw Exception('Error al cargar los usuarios');
     }
   }
-}
+
+  static Future<Map<DateTime, List<Evento>>> obtenerEventosParaCalendario() async {
+    List<dynamic> datos = await obtenerEventos();
+    Map<DateTime, List<Evento>> mapa = {};
+    
+    for(var item in datos) {
+      Evento evento = Evento.fromJson(item);
+      DateTime fecha = DateTime(
+          evento.fechaHora.year,
+          evento.fechaHora.month,
+          evento.fechaHora.day
+      );
+
+      if(mapa[fecha] == null) {
+        mapa[fecha] = [];
+      }
+      mapa[fecha]!.add(evento);
+    }
+    return mapa;
+  }

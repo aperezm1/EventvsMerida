@@ -24,7 +24,7 @@ class Evento {
       id: json['id'] as int,
       nombre: json['nombre'] ?? '',
       descripcion: json['descripcion'] ?? '',
-      fechaHora: json['fechaHora'] ?? '',
+      fechaHora: json['fechaHora'] ?? '', //fechaHora: DateTime.parse(json['fechaHora'].toString),
       localizacion: json['localizacion'] ?? '',
       urlImagen: json['urlImagen'] ?? '',
       usuarioId: json['usuarioId'] as int,
