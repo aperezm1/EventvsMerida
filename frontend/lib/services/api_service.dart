@@ -14,10 +14,10 @@ class ApiService {
 
       final response = await http
           .post(
-            url,
-            headers: {"Content-Type": "application/json"},
-            body: jsonEncode(userData),
-          )
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(userData),
+      )
           .timeout(const Duration(seconds: 10));
 
       switch (response.statusCode) {
@@ -58,7 +58,8 @@ class ApiService {
     }
   }
 
-  static Future<List<dynamic>> obtenerEventos() async { //¿POrque no Evento en lugar de dynamic?
+  static Future<List<dynamic>> obtenerEventos() async {
+    //¿POrque no Evento en lugar de dynamic?
     final respuesta = await http.get(Uri.parse("$baseUrl/eventos/all"));
 
     if (respuesta.statusCode == 200) {
@@ -68,11 +69,12 @@ class ApiService {
     }
   }
 
-  static Future<Map<DateTime, List<Evento>>> obtenerEventosParaCalendario() async {
+  static Future<
+      Map<DateTime, List<Evento>>> obtenerEventosParaCalendario() async {
     List<dynamic> datos = await obtenerEventos();
     Map<DateTime, List<Evento>> mapa = {};
-    
-    for(var item in datos) {
+
+    for (var item in datos) {
       Evento evento = Evento.fromJson(item);
       DateTime fecha = DateTime(
           evento.fechaHora.year,
@@ -80,10 +82,11 @@ class ApiService {
           evento.fechaHora.day
       );
 
-      if(mapa[fecha] == null) {
+      if (mapa[fecha] == null) {
         mapa[fecha] = [];
       }
       mapa[fecha]!.add(evento);
     }
     return mapa;
   }
+}
