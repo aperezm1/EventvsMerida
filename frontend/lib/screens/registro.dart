@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-// Servicio para manejar el registro vía API
 import '../services/api_service.dart';
+import 'package:go_router/go_router.dart';
 
 class Registro extends StatefulWidget {
   const Registro({super.key});
@@ -332,7 +332,7 @@ class _RegistroState extends State<Registro> {
                             //Si es exitoso se navega a la proxima pantalla
                             if (mensaje.toLowerCase().contains("correcto") ||
                                 mensaje.toLowerCase().contains("exitoso")) {
-                              //Navigator.pushNamed(context, '/login');
+                                context.go('/eventos');
                             }
                           },
                           child: Text(
@@ -356,7 +356,7 @@ class _RegistroState extends State<Registro> {
                           ),
                           GestureDetector(
                             onTap: () {
-                              Navigator.pushNamed(context, '/login');
+                              context.push('/login');
                             },
                             child: Text(
                               "Inicia sesión",

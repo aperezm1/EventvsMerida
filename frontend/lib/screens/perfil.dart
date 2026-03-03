@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import '../controlador_tema.dart';
 
-// Puedes ajustar según tu modelo real
 class Usuario {
   final String nombre;
   final String? fotoUrl;
@@ -16,17 +17,15 @@ class Perfil extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    // Top pattern image could go as BoxDecoration, a placeholder color for now
     return Column(
       children: [
-        // CABECERA NARANJA (usa primary)
+        // Encabezado con información del usuario o invitación a registrarse
         Container(
           width: double.infinity,
           padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
           color: colorScheme.primary,
-          // Aquí podrías usar DecorationImage/BoxDecoration si tienes el patrón
-          child: usuario == null
-              ? Column(
+          child: usuario == null ? Column(
+            // En caso de no estar iniciado sesión
             children: [
               Text(
                 'Regístrate o inicia sesión',
@@ -37,33 +36,36 @@ class Perfil extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
+
+              // Fila de botones para registrarse o iniciar sesión
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  // Botón de registro
                   OutlinedButton(
                     style: OutlinedButton.styleFrom(
                       side: BorderSide(color: colorScheme.onPrimary),
                       foregroundColor: colorScheme.onPrimary,
                     ),
-                    onPressed: () =>
-                        Navigator.pushNamed(context, "/registro"),
+                    onPressed: () => context.push("/registro"),
                     child: const Text('Registrarse'),
                   ),
                   const SizedBox(width: 12),
+
+                  // Botón de inicio de sesión
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: colorScheme.onPrimary,
                       foregroundColor: colorScheme.primary,
                     ),
-                    onPressed: () =>
-                        Navigator.pushNamed(context, "/login"),
+                    onPressed: () => context.push("/login"),
                     child: const Text('Iniciar sesión'),
                   ),
                 ],
               )
             ],
-          )
-              : Column(
+          ) : Column(
+            // En caso de estar iniciado sesión, mostrar información del usuario
             children: [
               CircleAvatar(
                 backgroundColor: colorScheme.onPrimary.withOpacity(0.9),
@@ -88,11 +90,14 @@ class Perfil extends StatelessWidget {
             ],
           ),
         ),
-        // Sección preferencias y legal (scroll si hay mucho)
+
+        // Contenido principal
         Expanded(
           child: ListView(
             children: [
               const SizedBox(height: 24),
+
+              // Sección de preferencias
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24.0),
                 child: Text(
@@ -104,14 +109,17 @@ class Perfil extends StatelessWidget {
                 ),
               ),
               _buildPreferencias(context, colorScheme, usuario),
+
+              // Separador
               Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 24.0, vertical: 16.0),
+                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
                 child: Divider(
                   color: colorScheme.primary,
                   thickness: 2,
                 ),
               ),
+
+              // Sección de información legal
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24.0),
                 child: Text(
@@ -130,12 +138,11 @@ class Perfil extends StatelessWidget {
     );
   }
 
-  static Widget _buildPreferencias(
-      BuildContext context, ColorScheme colorScheme, Usuario? usuario) {
+  static Widget _buildPreferencias(BuildContext context, ColorScheme colorScheme, Usuario? usuario) {
     final isRegistrado = usuario != null;
+
     return Column(
-      children: isRegistrado
-          ? [
+      children: isRegistrado ? [
         _buildItem(Icons.account_circle, "Cuenta"),
         _buildItem(
           Icons.dark_mode,
@@ -143,20 +150,23 @@ class Perfil extends StatelessWidget {
           trailing: Switch(
             value: Theme.of(context).brightness == Brightness.dark,
             activeColor: colorScheme.secondary,
-            onChanged: (v) {}, // Aquí cambia el modo
+            onChanged: (v) {
+              themeController.value = v ? ThemeMode.dark : ThemeMode.light;
+            },
           ),
         ),
         _buildItem(Icons.bookmark_border, "Eventos guardados"),
         _buildItem(Icons.notifications, "Preferencias de notificaciones"),
-      ]
-          : [
+      ] : [
         _buildItem(
           Icons.dark_mode,
           "Modo Oscuro",
           trailing: Switch(
             value: Theme.of(context).brightness == Brightness.dark,
             activeColor: colorScheme.secondary,
-            onChanged: (v) {}, // Aquí cambia el modo
+            onChanged: (v) {
+              themeController.value = v ? ThemeMode.dark : ThemeMode.light;
+            },
           ),
         ),
       ],

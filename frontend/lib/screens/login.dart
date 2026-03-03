@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:go_router/go_router.dart';
 import '../services/api_service.dart';
 
 class Login extends StatefulWidget {
@@ -155,6 +154,7 @@ class _LoginState extends State<Login> {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text(mensaje)),
                         );
+                        context.go('/eventos');
                       },
                       child: Text(
                         'Iniciar sesión',
@@ -170,7 +170,7 @@ class _LoginState extends State<Login> {
                   // ENLACE PARA REGISTRARSE
                   GestureDetector(
                     onTap: () {
-                      Navigator.pushNamed(context, '/registro');
+                      context.push('/registro');
                     },
                     child: Text(
                       '¿Aún no tienes cuenta? Regístrate',
