@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class ControladorTema extends ValueNotifier<ThemeMode> {
-  ControladorTema() : super(ThemeMode.light);
+  ControladorTema() : super(ThemeMode.system);
 }
 
 final themeController = ControladorTema();
