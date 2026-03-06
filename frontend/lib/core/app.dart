@@ -12,6 +12,7 @@ class App extends StatelessWidget {
       valueListenable: themeController,
       builder: (context, mode, _) {
         return MaterialApp.router(
+          debugShowCheckedModeBanner: false,
           title: 'Eventvs Mérida',
           theme: lightTheme,
           darkTheme: darkTheme,

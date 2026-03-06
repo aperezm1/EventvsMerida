@@ -7,6 +7,8 @@ import '../screens/registro.dart';
 import '../screens/navegador.dart';
 import '../screens/eventos.dart';
 import '../screens/perfil.dart';
+import '../screens/terminos.dart';
+import '../screens/privacidad.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -40,6 +42,14 @@ final GoRouter router = GoRouter(
         GoRoute(
           path: '/perfil',
           builder: (context, state) => const Perfil(),
+        ),
+        GoRoute(
+          path: '/terminos',
+          builder: (context, state) => const TerminosScreen(),
+        ),
+        GoRoute(
+          path: '/privacidad',
+          builder: (context, state) => const PrivacidadScreen(),
         ),
       ],
     ),

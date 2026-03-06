@@ -1,6 +1,7 @@
 import 'package:eventvsmerida/models/evento.dart';
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
+import 'dart:ui';
 
 class Eventos extends StatefulWidget {
   const Eventos({super.key});
@@ -129,6 +130,7 @@ class _EventosState extends State<Eventos> {
 
                 return Card(
                   elevation: 6,
+                  shadowColor: colorScheme.onSurface,
                   margin: const EdgeInsets.all(16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
@@ -161,7 +163,7 @@ class _EventosState extends State<Eventos> {
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16,
-                                  color: colorScheme.surface,
+                                  color: Colors.black,
                                 ),
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
@@ -172,7 +174,7 @@ class _EventosState extends State<Eventos> {
                               Text(
                                 evento['nombreCategoria'],
                                 style: TextStyle(
-                                  color: colorScheme.surface,
+                                  color: Colors.black,
                                   fontSize: 14,
                                 ),
                                 maxLines: 1,
@@ -184,7 +186,7 @@ class _EventosState extends State<Eventos> {
                               Text(
                                 ubicacionFinal,
                                 style: TextStyle(
-                                  color: colorScheme.surface,
+                                  color: Colors.black,
                                   fontSize: 14,
                                 ),
                                 maxLines: 2,
@@ -200,7 +202,7 @@ class _EventosState extends State<Eventos> {
                                     child: Text(
                                       'Fecha: $fechaFormateada',
                                       style: TextStyle(
-                                        color: colorScheme.surface,
+                                        color: Colors.black,
                                         fontWeight: FontWeight.w500,
                                         fontSize: 14,
                                       ),
@@ -214,7 +216,7 @@ class _EventosState extends State<Eventos> {
                                     child: Text(
                                       'Hora: $horaFormateada',
                                       style: TextStyle(
-                                        color: colorScheme.surface,
+                                        color: Colors.black,
                                         fontWeight: FontWeight.w500,
                                         fontSize: 14,
                                       ),
@@ -245,58 +247,71 @@ class _EventosState extends State<Eventos> {
     );
   }
 
-  void _abrirModal(BuildContext context, dynamic evento, String fechaFormateada, String localizacionFormateada,) {
+  void _abrirModal(BuildContext context, dynamic evento, String fechaFormateada, String localizacionFormateada) {
     final colorScheme = Theme.of(context).colorScheme;
 
     showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: Color(0xFF292727),
-        // Márgenes respecto a los bordes de la pantalla
-        insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-        // Padding interno del contenido
-        contentPadding: const EdgeInsets.all(16),
-
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Icon(Icons.close),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Sí'),
-          ),
-        ],
-        actionsAlignment: MainAxisAlignment.start,
-
-        // AQUÍ controlas el tamaño del contenido
-        content: SizedBox(
-          width: 500, // ancho deseado de la modal
-          // height: 400, // si también quieres fijar alto
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Image.network(evento['foto'], width: 500, fit: BoxFit.cover),
-                const SizedBox(height: 16),
-                Text(
-                  evento['titulo'],
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  evento['descripcion'],
-                  maxLines: 6,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 8),
-                Text(localizacionFormateada),
-                Text(fechaFormateada),
-              ],
+      builder: (ctx) => Stack(
+        children: [
+          BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+            child: Container(
+              color: Colors.black.withOpacity(0.2),
             ),
           ),
-        ),
+          Center(
+            child: AlertDialog(
+              backgroundColor: colorScheme.surface,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+                side: BorderSide(
+                  color: colorScheme.onPrimary,
+                  width: 2,
+                ),
+              ),
+              insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+              contentPadding: const EdgeInsets.all(16),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx, false),
+                  child: const Icon(Icons.close),
+                ),
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(ctx, true),
+                  child: const Text('Sí'),
+                ),
+              ],
+              actionsAlignment: MainAxisAlignment.start,
+              content: SizedBox(
+                width: 500,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Image.network(evento['foto'], width: 500, fit: BoxFit.cover),
+                      const SizedBox(height: 16),
+                      Text(
+                        evento['titulo'],
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        evento['descripcion'],
+                        maxLines: 6,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(localizacionFormateada),
+                      Text(fechaFormateada),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

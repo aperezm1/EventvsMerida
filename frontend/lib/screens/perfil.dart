@@ -27,10 +27,11 @@ class Perfil extends StatelessWidget {
           child: usuario == null ? Column(
             // En caso de no estar iniciado sesión
             children: [
+              const SizedBox(height: 20),
               Text(
                 'Regístrate o inicia sesión',
                 style: TextStyle(
-                  color: colorScheme.onPrimary,
+                  color: colorScheme.surface,
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                 ),
@@ -44,8 +45,8 @@ class Perfil extends StatelessWidget {
                   // Botón de registro
                   OutlinedButton(
                     style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: colorScheme.onPrimary),
-                      foregroundColor: colorScheme.onPrimary,
+                      side: BorderSide(color: colorScheme.surface),
+                      foregroundColor: colorScheme.surface,
                     ),
                     onPressed: () => context.push("/registro"),
                     child: const Text('Registrarse'),
@@ -55,8 +56,8 @@ class Perfil extends StatelessWidget {
                   // Botón de inicio de sesión
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: colorScheme.onPrimary,
-                      foregroundColor: colorScheme.primary,
+                      backgroundColor: colorScheme.surface,
+                      foregroundColor: colorScheme.onSurface,
                     ),
                     onPressed: () => context.push("/login"),
                     child: const Text('Iniciar sesión'),
@@ -95,8 +96,6 @@ class Perfil extends StatelessWidget {
         Expanded(
           child: ListView(
             children: [
-              const SizedBox(height: 24),
-
               // Sección de preferencias
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -176,14 +175,25 @@ class Perfil extends StatelessWidget {
   static Widget _buildLegal(BuildContext context, ColorScheme colorScheme) {
     return Column(
       children: [
-        _buildItem(Icons.file_copy, "Términos y servicios"),
-        _buildItem(Icons.privacy_tip, "Política de privacidad"),
+        _buildItem(
+          Icons.file_copy,
+          "Términos y servicios",
+          onTap: () {
+            context.push('/terminos');
+          },
+        ),
+        _buildItem(
+          Icons.privacy_tip,
+          "Política de privacidad",
+          onTap: () {
+            context.push('/privacidad');
+          },
+        ),
       ],
     );
   }
 
-  static Widget _buildItem(IconData icono, String titulo,
-      {Widget? trailing}) {
+  static Widget _buildItem(IconData icono, String titulo, {Widget? trailing, VoidCallback? onTap}) {
     return ListTile(
       leading: Icon(icono),
       title: Text(
@@ -192,7 +202,7 @@ class Perfil extends StatelessWidget {
       ),
       trailing: trailing ?? Icon(Icons.arrow_forward_ios),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
-      onTap: () {},
+      onTap: onTap,
     );
   }
 }
