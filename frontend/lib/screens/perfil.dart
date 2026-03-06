@@ -1,17 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../core/theme/controlador_tema.dart';
+import '../services/shared_preferences_service.dart';
+import '../models/usuario.dart';
 
-class Usuario {
-  final String nombre;
-  final String? fotoUrl;
-  Usuario({required this.nombre, this.fotoUrl});
+class Perfil extends StatefulWidget {
+  const Perfil({Key? key}) : super(key: key);
+
+  @override
+  State<Perfil> createState() => _PerfilState();
 }
 
-class Perfil extends StatelessWidget {
-  final Usuario? usuario;
+class _PerfilState extends State<Perfil> {
+  Usuario? _usuario;
 
-  const Perfil({Key? key, this.usuario}) : super(key: key);
+  @override
+  void initState() {
+    super.initState();
+    _cargarUsuario();
+  }
+
+  Future<void> _cargarUsuario() async {
+    final usuario = await SharedPreferencesService.cargarUsuario();
+    setState(() {
+      _usuario = usuario;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,13 +33,14 @@ class Perfil extends StatelessWidget {
 
     return Column(
       children: [
-        // Encabezado con información del usuario o invitación a registrarse
+        // Encabezado
         Container(
           width: double.infinity,
           padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
           color: colorScheme.primary,
-          child: usuario == null ? Column(
-            // En caso de no estar iniciado sesión
+          child: _usuario == null
+              ? Column(
+            // No logueado
             children: [
               const SizedBox(height: 20),
               Text(
@@ -37,12 +52,9 @@ class Perfil extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
-
-              // Fila de botones para registrarse o iniciar sesión
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Botón de registro
                   OutlinedButton(
                     style: OutlinedButton.styleFrom(
                       side: BorderSide(color: colorScheme.surface),
@@ -52,8 +64,6 @@ class Perfil extends StatelessWidget {
                     child: const Text('Registrarse'),
                   ),
                   const SizedBox(width: 12),
-
-                  // Botón de inicio de sesión
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: colorScheme.surface,
@@ -65,23 +75,22 @@ class Perfil extends StatelessWidget {
                 ],
               )
             ],
-          ) : Column(
-            // En caso de estar iniciado sesión, mostrar información del usuario
+          )
+              : Column(
+            // Logueado
             children: [
               CircleAvatar(
                 backgroundColor: colorScheme.onPrimary.withOpacity(0.9),
-                backgroundImage: usuario!.fotoUrl != null
-                    ? NetworkImage(usuario!.fotoUrl!)
-                    : null,
                 radius: 32,
-                child: usuario!.fotoUrl == null
-                    ? Icon(Icons.person,
-                    color: colorScheme.primary, size: 34)
-                    : null,
+                child: Icon(
+                  Icons.person,
+                  color: colorScheme.primary,
+                  size: 34,
+                ),
               ),
               const SizedBox(height: 8),
               Text(
-                usuario!.nombre,
+                _usuario!.nombre,
                 style: TextStyle(
                   color: colorScheme.onPrimary,
                   fontWeight: FontWeight.bold,
@@ -96,7 +105,6 @@ class Perfil extends StatelessWidget {
         Expanded(
           child: ListView(
             children: [
-              // Sección de preferencias
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24.0),
                 child: Text(
@@ -107,7 +115,7 @@ class Perfil extends StatelessWidget {
                   ),
                 ),
               ),
-              _buildPreferencias(context, colorScheme, usuario),
+              _buildPreferencias(context, colorScheme, _usuario),
 
               // Separador
               Padding(
@@ -118,7 +126,6 @@ class Perfil extends StatelessWidget {
                 ),
               ),
 
-              // Sección de información legal
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24.0),
                 child: Text(
@@ -137,11 +144,12 @@ class Perfil extends StatelessWidget {
     );
   }
 
-  static Widget _buildPreferencias(BuildContext context, ColorScheme colorScheme, Usuario? usuario) {
+  static Widget _buildPreferencias(
+      BuildContext context, ColorScheme colorScheme, Usuario? usuario) {
     final isRegistrado = usuario != null;
-
     return Column(
-      children: isRegistrado ? [
+      children: isRegistrado
+          ? [
         _buildItem(Icons.account_circle, "Cuenta"),
         _buildItem(
           Icons.dark_mode,
@@ -150,13 +158,15 @@ class Perfil extends StatelessWidget {
             value: Theme.of(context).brightness == Brightness.dark,
             activeColor: colorScheme.secondary,
             onChanged: (v) {
-              themeController.value = v ? ThemeMode.dark : ThemeMode.light;
+              themeController.value =
+              v ? ThemeMode.dark : ThemeMode.light;
             },
           ),
         ),
         _buildItem(Icons.bookmark_border, "Eventos guardados"),
         _buildItem(Icons.notifications, "Preferencias de notificaciones"),
-      ] : [
+      ]
+          : [
         _buildItem(
           Icons.dark_mode,
           "Modo Oscuro",
@@ -164,7 +174,8 @@ class Perfil extends StatelessWidget {
             value: Theme.of(context).brightness == Brightness.dark,
             activeColor: colorScheme.secondary,
             onChanged: (v) {
-              themeController.value = v ? ThemeMode.dark : ThemeMode.light;
+              themeController.value =
+              v ? ThemeMode.dark : ThemeMode.light;
             },
           ),
         ),
@@ -193,7 +204,8 @@ class Perfil extends StatelessWidget {
     );
   }
 
-  static Widget _buildItem(IconData icono, String titulo, {Widget? trailing, VoidCallback? onTap}) {
+  static Widget _buildItem(IconData icono, String titulo,
+      {Widget? trailing, VoidCallback? onTap}) {
     return ListTile(
       leading: Icon(icono),
       title: Text(

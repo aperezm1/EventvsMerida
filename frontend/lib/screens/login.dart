@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../services/api_service.dart';
+import '../services/shared_preferences_service.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -149,11 +150,21 @@ class _LoginState extends State<Login> {
                               ),
                             ),
                             onPressed: () async {
-                              final mensaje = await ApiService.login(emailController.text.trim(), passwordController.text);
+                              final result = await ApiService.login(
+                                emailController.text.trim(),
+                                passwordController.text,
+                              );
+                              final mensaje = result['mensaje'];
+                              final usuario = result['usuario'];
+
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(content: Text(mensaje)),
                               );
-                              context.go('/eventos');
+
+                              if (usuario != null) {
+                                await SharedPreferencesService.guardarUsuario(usuario);
+                                context.go('/eventos');
+                              }
                             },
                             child: Text(
                               'Iniciar sesión',

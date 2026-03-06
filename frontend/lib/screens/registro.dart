@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
+import '../services/shared_preferences_service.dart';
 import 'package:go_router/go_router.dart';
 
 class Registro extends StatefulWidget {
@@ -261,9 +262,12 @@ class _RegistroState extends State<Registro> {
                             ),
                           ),
                           onPressed: () async {
+                            // Validar formulario (si hay errores, no continúa)
                             if (!_formKey.currentState!.validate()) {
-                              return; // Si hay errores, no continúa
+                              return;
                             }
+
+                            // ¿Acepta términos?
                             if (!_aceptaTerminos) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(content: Text("Debes aceptar los términos")),
@@ -271,13 +275,15 @@ class _RegistroState extends State<Registro> {
                               return;
                             }
 
+                            // ¿Ha elegido mes?
                             if (_mesSeleccionado == null) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(content: Text("Selecciona un mes")),
                               );
                               return;
                             }
-                            //Convertir fecha a número
+
+                            // Convertir fecha a número
                             int? dia = int.tryParse(_diaController.text);
                             int mes = int.parse(mesANumero(_mesSeleccionado!));
                             int? anio = int.tryParse(_anioController.text);
@@ -289,9 +295,9 @@ class _RegistroState extends State<Registro> {
                               return;
                             }
 
+                            // Validar que la fecha es válida y no es futura
                             try {
                               DateTime fechaValida = DateTime(anio, mes, dia);
-
                               if (fechaValida.day != dia || fechaValida.month != mes || fechaValida.year != anio) {
                                 throw Exception();
                               }
@@ -308,9 +314,10 @@ class _RegistroState extends State<Registro> {
                               return;
                             }
 
+                            // Formatear fecha dd/MM/yyyy
                             final fechaString = "${dia.toString().padLeft(2,'0')}/${mes.toString().padLeft(2,'0')}/$anio";
 
-                            //Crear objeto de usuario
+                            // Crear objeto de usuario
                             final userData = {
                               "nombre": _nombreController.text,
                               "apellidos": _apellidoController.text,
@@ -321,18 +328,21 @@ class _RegistroState extends State<Registro> {
                               "idRol": 1,
                             };
 
-                            //Llamada al API para registrar
-                            final mensaje = await ApiService.registrar(userData);
+                            // Llamada al API para registrar: espera un mapa con 'mensaje' y 'usuario'
+                            final result = await ApiService.registrar(userData);
 
-                            //Mostrar feedback al usuario
+                            final mensaje = result['mensaje'];
+                            final usuario = result['usuario']; // Este será null si falla el registro
+
+                            // Mostrar feedback al usuario SIEMPRE
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(content: Text(mensaje)),
                             );
 
-                            //Si es exitoso se navega a la proxima pantalla
-                            if (mensaje.toLowerCase().contains("correcto") ||
-                                mensaje.toLowerCase().contains("exitoso")) {
-                                context.go('/eventos');
+                            // Si el registro es correcto, guarda el usuario y navega
+                            if (usuario != null) {
+                              await SharedPreferencesService.guardarUsuario(usuario);
+                              context.go('/eventos');
                             }
                           },
                           child: Text(

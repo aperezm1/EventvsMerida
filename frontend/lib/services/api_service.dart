@@ -1,65 +1,66 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
-import 'package:eventvsmerida/models/evento.dart';
+import '../models/evento.dart';
+import '../models/usuario.dart';
 import 'package:http/http.dart' as http;
 
 class ApiService {
   static const String baseUrl = "https://eventvsmerida.onrender.com/api";
 
-  static Future<String> registrar(Map<String, dynamic> userData) async {
+  static Future<Map<String, dynamic>> registrar(Map userData) async {
     try {
       final url = Uri.parse("$baseUrl/usuarios/add");
-
-      final response = await http
-          .post(
+      final response = await http.post(
         url,
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(userData),
-      )
-          .timeout(const Duration(seconds: 10));
+      ).timeout(const Duration(seconds: 10));
 
-      switch (response.statusCode) {
-        case 201:
-          return "Registro exitoso";
-        case 400:
-          return "Datos inválidos, revisa los campos";
-        case 409:
-          return "El correo ya está registrado";
-        case 500:
-          return "Error interno del servidor";
-        default:
-          return "Error inesperado: ${response.statusCode}";
+      if (response.statusCode == 201) {
+        final data = jsonDecode(response.body);
+        final usuario = Usuario.fromJson(data);
+        return {'mensaje': "Registro exitoso", 'usuario': usuario};
+      } else {
+        String msg = "Error inesperado: ${response.statusCode}";
+        if (response.statusCode == 400) msg = "Datos inválidos, revisa los campos";
+        if (response.statusCode == 409) msg = "El correo ya está registrado";
+        if (response.statusCode == 500) msg = "Error interno del servidor";
+        return {'mensaje': msg, 'usuario': null};
       }
     } on TimeoutException {
-      return "El servidor tarda demasiado en responder";
+      return {'mensaje': "El servidor tarda demasiado en responder", 'usuario': null};
     } on SocketException {
-      return "No hay conexión a internet";
+      return {'mensaje': "No hay conexión a internet", 'usuario': null};
     } catch (e) {
-      return "Error desconocido";
+      return {'mensaje': "Error desconocido", 'usuario': null};
     }
   }
 
-  static Future<String> login(String email, String password) async {
+  static Future<Map<String, dynamic>> login(String email, String password) async {
     final url = Uri.parse("$baseUrl/usuarios/login");
-    final respuesta = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'email': email, 'password': password}),
-    );
+    try {
+      final respuesta = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email, 'password': password}),
+      );
 
-    if (respuesta.statusCode == 200) {
-      return "Login exitoso";
-    } else if (respuesta.statusCode == 404 || respuesta.statusCode == 400) {
-      return "Credenciales inválidas";
-    } else {
-      return "Error en el servidor: ${respuesta.statusCode}";
+      if (respuesta.statusCode == 200) {
+        final data = jsonDecode(respuesta.body);
+        final usuario = Usuario.fromJson(data);
+        return {'mensaje': "Login exitoso", 'usuario': usuario};
+      } else {
+        String msg = "Error en el servidor: ${respuesta.statusCode}";
+        if (respuesta.statusCode == 404 || respuesta.statusCode == 400) msg = "Credenciales inválidas";
+        return {'mensaje': msg, 'usuario': null};
+      }
+    } catch (e) {
+      return {'mensaje': "Error desconocido", 'usuario': null};
     }
   }
 
   static Future<List<dynamic>> obtenerEventos() async {
-    //¿POrque no Evento en lugar de dynamic?
     final respuesta = await http.get(Uri.parse("$baseUrl/eventos/all"));
 
     if (respuesta.statusCode == 200) {
@@ -69,8 +70,7 @@ class ApiService {
     }
   }
 
-  static Future<
-      Map<DateTime, List<Evento>>> obtenerEventosParaCalendario() async {
+  static Future<Map<DateTime, List<Evento>>> obtenerEventosParaCalendario() async {
     List<dynamic> datos = await obtenerEventos();
     Map<DateTime, List<Evento>> mapa = {};
 
