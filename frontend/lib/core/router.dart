@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import 'screens/splash.dart';
-import 'screens/login.dart';
-import 'screens/registro.dart';
-import 'screens/navegador.dart';
-import 'screens/eventos.dart';
-import 'screens/perfil.dart';
+import '../screens/splash.dart';
+import '../screens/login.dart';
+import '../screens/registro.dart';
+import '../screens/navegador.dart';
+import '../screens/eventos.dart';
+import '../screens/perfil.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();

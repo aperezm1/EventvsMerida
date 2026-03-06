@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../controlador_tema.dart';
+import '../core/theme/controlador_tema.dart';
 
 class Usuario {
   final String nombre;
