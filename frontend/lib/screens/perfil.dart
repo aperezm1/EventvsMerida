@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../core/theme/controlador_tema.dart';
 import '../services/shared_preferences_service.dart';
 import '../models/usuario.dart';
+import '../models/sesion_usuario.dart';
 
 class Perfil extends StatefulWidget {
   const Perfil({Key? key}) : super(key: key);
@@ -21,10 +22,23 @@ class _PerfilState extends State<Perfil> {
   }
 
   Future<void> _cargarUsuario() async {
-    final usuario = await SharedPreferencesService.cargarUsuario();
-    setState(() {
-      _usuario = usuario;
-    });
+    if (usuarioSesionActual != null) {
+      setState(() {
+        _usuario = usuarioSesionActual;
+      });
+      return;
+    }
+    final autoLogin = await SharedPreferencesService.cargarAutoLogin();
+    if (autoLogin) {
+      final usuario = await SharedPreferencesService.cargarUsuario();
+      setState(() {
+        _usuario = usuario;
+      });
+    } else {
+      setState(() {
+        _usuario = null;
+      });
+    }
   }
 
   @override
@@ -38,8 +52,7 @@ class _PerfilState extends State<Perfil> {
           width: double.infinity,
           padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
           color: colorScheme.primary,
-          child: _usuario == null
-              ? Column(
+          child: _usuario == null ? Column(
             // No logueado
             children: [
               const SizedBox(height: 20),
@@ -75,12 +88,12 @@ class _PerfilState extends State<Perfil> {
                 ],
               )
             ],
-          )
-              : Column(
+          ) : Column(
             // Logueado
             children: [
+              const SizedBox(height: 20),
               CircleAvatar(
-                backgroundColor: colorScheme.onPrimary.withOpacity(0.9),
+                backgroundColor: colorScheme.surface.withOpacity(0.9),
                 radius: 32,
                 child: Icon(
                   Icons.person,
@@ -90,9 +103,9 @@ class _PerfilState extends State<Perfil> {
               ),
               const SizedBox(height: 8),
               Text(
-                _usuario!.nombre,
+                "${_usuario!.nombre} ${_usuario!.apellidos}",
                 style: TextStyle(
-                  color: colorScheme.onPrimary,
+                  color: colorScheme.surface,
                   fontWeight: FontWeight.bold,
                   fontSize: 20,
                 ),
@@ -105,6 +118,7 @@ class _PerfilState extends State<Perfil> {
         Expanded(
           child: ListView(
             children: [
+              // Sección de preferencias
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24.0),
                 child: Text(
@@ -126,6 +140,7 @@ class _PerfilState extends State<Perfil> {
                 ),
               ),
 
+              // Sección de información legal
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24.0),
                 child: Text(

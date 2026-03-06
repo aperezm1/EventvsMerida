@@ -68,23 +68,24 @@ class _RegistroState extends State<Registro> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final size = MediaQuery.of(context).size;
+    final headerHeight = size.height * 0.18;
 
     return Scaffold(
       body: Column(
         children: [
           Container(
-            height: 200,
-            width: double.infinity,
             color: colorScheme.primary,
-            alignment: Alignment.center,
-            child: Text(
-              'Crear cuenta',
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: .bold,
-                color: colorScheme.brightness == Brightness.dark
-                    ? Colors.black
-                    : Colors.white,
+            width: double.infinity,
+            height: headerHeight,
+            child: Center(
+              child: Text(
+                'Crear cuenta',
+                style: TextStyle(
+                  color: colorScheme.surface,
+                  fontSize: 25,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),
