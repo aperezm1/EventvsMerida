@@ -342,7 +342,7 @@ class _RegistroState extends State<Registro> {
 
                             // Si el registro es correcto, guarda el usuario y navega
                             if (usuario != null) {
-                              await SharedPreferencesService.guardarUsuario(usuario);
+                              SharedPreferencesService.usuarioSesionActual = usuario;
                               context.go('/eventos');
                             }
                           },

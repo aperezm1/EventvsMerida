@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class PrivacidadScreen extends StatelessWidget {
-  const PrivacidadScreen({super.key});
+class Privacidad extends StatelessWidget {
+  const Privacidad({super.key});
 
   @override
   Widget build(BuildContext context) {

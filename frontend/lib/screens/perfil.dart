@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import '../core/theme/controlador_tema.dart';
 import '../services/shared_preferences_service.dart';
 import '../models/usuario.dart';
-import '../models/sesion_usuario.dart';
 
 class Perfil extends StatefulWidget {
   const Perfil({Key? key}) : super(key: key);
@@ -21,24 +20,11 @@ class _PerfilState extends State<Perfil> {
     _cargarUsuario();
   }
 
-  Future<void> _cargarUsuario() async {
-    if (usuarioSesionActual != null) {
-      setState(() {
-        _usuario = usuarioSesionActual;
-      });
-      return;
-    }
-    final autoLogin = await SharedPreferencesService.cargarAutoLogin();
-    if (autoLogin) {
-      final usuario = await SharedPreferencesService.cargarUsuario();
-      setState(() {
-        _usuario = usuario;
-      });
-    } else {
-      setState(() {
-        _usuario = null;
-      });
-    }
+  void _cargarUsuario() async {
+    final usuario = await SharedPreferencesService.cargarUsuario();
+    setState(() {
+      _usuario = usuario;
+    });
   }
 
   @override
@@ -165,7 +151,13 @@ class _PerfilState extends State<Perfil> {
     return Column(
       children: isRegistrado
           ? [
-        _buildItem(Icons.account_circle, "Cuenta"),
+        _buildItem(
+            Icons.account_circle,
+            "Cuenta",
+            onTap: () {
+              context.push('/cuenta');
+            },
+        ),
         _buildItem(
           Icons.dark_mode,
           "Modo Oscuro",

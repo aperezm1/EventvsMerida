@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../services/api_service.dart';
 import '../services/shared_preferences_service.dart';
-import '../models/sesion_usuario.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -171,12 +170,12 @@ class _LoginState extends State<Login> {
                                 );
 
                                 if (usuario != null) {
-                                  usuarioSesionActual = usuario;
+                                  SharedPreferencesService.usuarioSesionActual = usuario;
 
-                                  await SharedPreferencesService.guardarAutoLogin(_autoLogin);
+                                  await SharedPreferencesService.guardarAutoLoginKey(_autoLogin);
 
                                   if (_autoLogin) {
-                                    await SharedPreferencesService.guardarUsuario(usuario);
+                                    await SharedPreferencesService.guardarUsuarioKey(usuario);
                                   }
 
                                   context.go('/eventos');

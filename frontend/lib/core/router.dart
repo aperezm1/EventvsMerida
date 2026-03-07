@@ -9,6 +9,7 @@ import '../screens/eventos.dart';
 import '../screens/perfil.dart';
 import '../screens/terminos.dart';
 import '../screens/privacidad.dart';
+import '../screens/cuenta.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -45,11 +46,15 @@ final GoRouter router = GoRouter(
         ),
         GoRoute(
           path: '/terminos',
-          builder: (context, state) => const TerminosScreen(),
+          builder: (context, state) => const Terminos(),
         ),
         GoRoute(
           path: '/privacidad',
-          builder: (context, state) => const PrivacidadScreen(),
+          builder: (context, state) => const Privacidad(),
+        ),
+        GoRoute(
+          path: '/cuenta',
+          builder: (context, state) => const Cuenta(),
         ),
       ],
     ),
