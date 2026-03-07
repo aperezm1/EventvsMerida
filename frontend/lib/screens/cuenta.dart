@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../services/shared_preferences_service.dart';
 import '../models/usuario.dart';
 
@@ -38,90 +39,102 @@ class _CuentaState extends State<Cuenta> {
         title: const Text('Cuenta'),
         elevation: 2,
       ),
-      body: _usuario == null
-          ? Center(
-        child: Text(
-          'No hay información disponible',
-          style: TextStyle(
-            color: colorScheme.onSurface,
-            fontSize: 18,
-          ),
-        ),
-      )
-          : Column(
-        children: [
-          // CABECERA (idéntica a perfil)
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
-            color: colorScheme.primary,
-            child: Column(
-              children: [
-                CircleAvatar(
-                  backgroundColor: colorScheme.surface.withOpacity(0.9),
-                  radius: 32,
-                  child: Icon(
-                    Icons.person,
-                    color: colorScheme.primary,
-                    size: 34,
+      body: SingleChildScrollView(
+        padding: EdgeInsets.zero,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // CABECERA
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
+              color: colorScheme.primary,
+              child: Column(
+                children: [
+                  CircleAvatar(
+                    backgroundColor: colorScheme.surface.withOpacity(0.9),
+                    radius: 45,
+                    child: Icon(
+                      Icons.person,
+                      color: colorScheme.primary,
+                      size: 45,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  "${_usuario!.nombre}",
-                  style: TextStyle(
-                    color: colorScheme.surface,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                  ),
-                ),
-              ],
+                  const SizedBox(height: 8),
+                ],
+              ),
             ),
-          ),
-          // DATOS DE USUARIO
-          Expanded(
-            child: ListView(
+
+            // DATOS DE USUARIO
+            Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-              children: [
-                // Apellidos
-                _infoTile(
-                  context,
-                  label: "Apellidos",
-                  value: _usuario!.apellidos,
-                  icon: Icons.badge,
-                ),
-                // Fecha de nacimiento
-                _infoTile(
-                  context,
-                  label: "Fecha de nacimiento",
-                  value: _usuario!.fechaNacimiento != null
-                      ? "${_usuario!.fechaNacimiento.day.toString().padLeft(2,'0')}/${_usuario!.fechaNacimiento.month.toString().padLeft(2,'0')}/${_usuario!.fechaNacimiento.year}"
-                      : "No disponible",
-                  icon: Icons.cake,
-                ),
-                // Email
-                _infoTile(
-                  context,
-                  label: "Correo electrónico",
-                  value: _usuario!.email,
-                  icon: Icons.email,
-                ),
-                // Teléfono
-                _infoTile(
-                  context,
-                  label: "Teléfono",
-                  value: _usuario!.telefono,
-                  icon: Icons.phone,
-                ),
-              ],
+              child: Column(
+                children: [
+                  _infoTile(
+                    context,
+                    label: "Nombre",
+                    value: _usuario!.nombre,
+                    icon: Icons.badge,
+                  ),
+                  _infoTile(
+                    context,
+                    label: "Apellidos",
+                    value: _usuario!.apellidos,
+                    icon: Icons.badge,
+                  ),
+                  _infoTile(
+                    context,
+                    label: "Fecha de nacimiento",
+                    value: "${_usuario!.fechaNacimiento.day.toString().padLeft(2, '0')}/${_usuario!.fechaNacimiento.month.toString().padLeft(2, '0')}/${_usuario!.fechaNacimiento.year}",
+                    icon: Icons.cake,
+                  ),
+                  _infoTile(
+                    context,
+                    label: "Correo electrónico",
+                    value: _usuario!.email,
+                    icon: Icons.email,
+                  ),
+                  _infoTile(
+                    context,
+                    label: "Teléfono",
+                    value: _usuario!.telefono,
+                    icon: Icons.phone,
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+
+            // BOTÓN DE CERRAR SESIÓN
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.logout),
+                label: const Text('Cerrar sesión'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: colorScheme.error,
+                  foregroundColor: colorScheme.onError,
+                  minimumSize: const Size.fromHeight(48),
+                ),
+                onPressed: () async {
+                  SharedPreferencesService.usuarioSesionActual = null;
+                  await SharedPreferencesService.borrarAutoLoginKey();
+                  await SharedPreferencesService.borrarUsuarioKey();
+                  context.go('/eventos');
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _infoTile(BuildContext context, {required String label, required String value, required IconData icon}) {
+  Widget _infoTile(
+    BuildContext context, {
+    required String label,
+    required String value,
+    required IconData icon,
+  }) {
     final colorScheme = Theme.of(context).colorScheme;
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -140,10 +153,7 @@ class _CuentaState extends State<Cuenta> {
         ),
         subtitle: Text(
           value,
-          style: TextStyle(
-            color: colorScheme.onSurface,
-            fontSize: 15,
-          ),
+          style: TextStyle(color: colorScheme.onSurface, fontSize: 15),
         ),
       ),
     );
