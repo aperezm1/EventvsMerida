@@ -1,34 +1,31 @@
 class Evento {
-  final int id;
-  final String nombre;
+  final String titulo;
   final String descripcion;
   final DateTime fechaHora;
   final String localizacion;
-  final String urlImagen;
-  final int usuarioId;
-  final int categoriaId;
+  final String foto;
+  final String emailUsuario;
+  final String nombreCategoria;
 
   Evento({
-    required this.id,
-    required this.nombre,
+    required this.titulo,
     required this.descripcion,
     required this.fechaHora,
     required this.localizacion,
-    required this.urlImagen,
-    required this.usuarioId,
-    required this.categoriaId
+    required this.foto,
+    required this.emailUsuario,
+    required this.nombreCategoria,
   });
 
   factory Evento.fromJson(Map<String, dynamic> json) {
     return Evento(
-      id: json['id'] as int,
-      nombre: json['nombre'] ?? '',
+      titulo: json['titulo'] ?? '',
       descripcion: json['descripcion'] ?? '',
-      fechaHora: json['fechaHora'] ?? '', //fechaHora: DateTime.parse(json['fechaHora'].toString),
+      fechaHora: DateTime.parse(json['fechaHora'].toString()),
       localizacion: json['localizacion'] ?? '',
-      urlImagen: json['urlImagen'] ?? '',
-      usuarioId: json['usuarioId'] as int,
-      categoriaId: json['categoriaId'] as int
+      foto: json['foto'] ?? '',
+      emailUsuario: json['emailUsuario'] ?? '',
+      nombreCategoria: json['nombreCategoria'] ?? '',
     );
   }
 }

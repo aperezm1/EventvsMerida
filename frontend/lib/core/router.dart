@@ -1,6 +1,8 @@
+import 'package:eventvsmerida/screens/calendario.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../screens/mapa.dart';
 import '../screens/splash.dart';
 import '../screens/login.dart';
 import '../screens/registro.dart';
@@ -31,6 +33,14 @@ final GoRouter router = GoRouter(
         GoRoute(
           path: '/eventos',
           builder: (context, state) => const Eventos(),
+        ),
+        GoRoute(
+          path: '/calendario',
+          builder: (context, state) => const Calendario(),
+        ),
+        GoRoute(
+          path: '/mapa',
+          builder: (context, state) => const Mapa(),
         ),
         GoRoute(
           path: '/login',

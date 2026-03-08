@@ -33,10 +33,10 @@ class _NavegadorState extends State<Navegador> {
         context.go('/eventos');
         break;
       case 1:
-        //context.go('/mapa');
+        context.go('/mapa');
         break;
       case 2:
-        //context.go('/calendario');
+        context.go('/calendario');
         break;
       case 3:
         context.go('/perfil');
