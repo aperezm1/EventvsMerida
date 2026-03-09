@@ -41,11 +41,11 @@ class _CalendarioState extends State<Calendario> {
     super.initState();
     final ahora = DateTime.now();
 
-    _primerMesPermitido = DateTime(ahora.year, ahora.month, ahora.day);
+    _primerMesPermitido = DateTime(ahora.year, ahora.month, 1);
     _ultimoMesPermitido = DateTime(2030, 12, 1);
 
-    _focusedDay = _primerMesPermitido;
-    _selectedDay = _primerMesPermitido;
+    _focusedDay = DateTime(ahora.year, ahora.month, ahora.day);
+    _selectedDay = DateTime(ahora.year, ahora.month, ahora.day);
 
     _years = List.generate(
         _ultimoMesPermitido.year - _primerMesPermitido.year + 1,
@@ -167,7 +167,7 @@ class _CalendarioState extends State<Calendario> {
         const SizedBox(height: 12),
         TableCalendar(
           firstDay: _primerMesPermitido,
-          lastDay: DateTime.utc(2030, 12, 31),
+          lastDay: _ultimoMesPermitido,
           focusedDay: _focusedDay,
           headerVisible: false, // Desactivamos el header nativo
           availableGestures: AvailableGestures.none,
