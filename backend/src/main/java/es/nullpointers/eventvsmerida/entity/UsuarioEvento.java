@@ -18,11 +18,11 @@ public class UsuarioEvento {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @OnDelete(action = OnDeleteAction.SET_DEFAULT)
     @JoinColumn(name = "id_usuario", nullable = false)
-    private Usuario idUsuario;
+    private Usuario usuario;
 
     @MapsId("idEvento")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @OnDelete(action = OnDeleteAction.SET_DEFAULT)
     @JoinColumn(name = "id_evento", nullable = false)
-    private Evento idEvento;
+    private Evento evento;
 }
