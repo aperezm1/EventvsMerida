@@ -76,15 +76,17 @@ public class EventoService {
      */
     public EventoResponse crearEvento(EventoCrearRequest eventoRequest) {
         // Se hacen las comprobaciones necesarias para evitar errores de integridad de datos
-        if (eventoRepository.existsByTituloAndFechaHora(eventoRequest.titulo(), eventoRequest.fecha().toInstant())) {
+        if (eventoRepository.existsByTituloAndFechaHora(eventoRequest.titulo(), eventoRequest.fecha())) {
             throw new DataIntegrityViolationException("Ya existe un evento con el título y fecha indicados");
         }
 
         Usuario usuario = usuarioService.obtenerUsuarioPorIdOExcepcion(eventoRequest.idUsuario(), "Error en EventoService.crearEvento: No se encontró el usuario con id " + eventoRequest.idUsuario());
         Categoria categoria = categoriaService.obtenerCategoriaPorIdOExcepcion(eventoRequest.idCategoria(), "Error en EventoService.crearEvento: No se encontró la categoría con id " + eventoRequest.idCategoria());
 
+        log.info("antes de convertir a entidad");
         // Se convierte el DTO a entidad
         Evento eventoNuevo = EventoMapper.convertirAEntidad(eventoRequest, usuario, categoria, storageUploader);
+        log.info("despues de convertir a entidad");
 
         // Se guarda el nuevo evento en la base de datos
         Evento eventoCreado = eventoRepository.save(eventoNuevo);

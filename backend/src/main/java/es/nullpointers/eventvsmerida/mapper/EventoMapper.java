@@ -8,6 +8,7 @@ import es.nullpointers.eventvsmerida.entity.Usuario;
 import es.nullpointers.eventvsmerida.supabase.SupabaseStorage;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 
 /**
  * Clase mapper que convierte entre objetos DTO y entidades
@@ -33,7 +34,7 @@ public class EventoMapper {
 
         evento.setTitulo(request.titulo());
         evento.setDescripcion(request.descripcion());
-        evento.setFechaHora(request.fecha().toInstant());
+        evento.setFechaHora(request.fecha());
         evento.setLocalizacion(request.localizacion());
         evento.setFoto(storageUploader.subirImagen(request.foto()));
         evento.setUsuario(usuario);
@@ -51,7 +52,7 @@ public class EventoMapper {
     public static EventoResponse convertirAResponse(Evento evento) {
         String titulo = evento.getTitulo();
         String descripcion = evento.getDescripcion();
-        Instant fechaHora = evento.getFechaHora();
+        LocalDateTime fechaHora = evento.getFechaHora();
         String localizacion = evento.getLocalizacion();
         String urlFoto = evento.getFoto();
         String emailOrganizador = evento.getUsuario().getEmail();

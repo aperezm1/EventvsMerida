@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 /**
@@ -17,6 +18,6 @@ import java.util.Optional;
  */
 @Repository
 public interface EventoRepository extends JpaRepository<Evento, Long> {
-    boolean existsByTituloAndFechaHora(String titulo, Instant fechaHora);
-    Optional<Evento> findByTituloAndFechaHora(String titulo, Instant fechaHora);
+    boolean existsByTituloAndFechaHora(String titulo, LocalDateTime fechaHora);
+    Optional<Evento> findByTituloAndFechaHora(String titulo, LocalDateTime fechaHora);
 }

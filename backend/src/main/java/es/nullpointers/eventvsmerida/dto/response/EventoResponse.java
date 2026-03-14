@@ -1,6 +1,7 @@
 package es.nullpointers.eventvsmerida.dto.response;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 
 /**
  * DTO para devolver los datos de un evento.
@@ -12,7 +13,7 @@ import java.time.Instant;
 public record EventoResponse(
         String titulo,
         String descripcion,
-        Instant fechaHora,
+        LocalDateTime fechaHora,
         String localizacion,
         String foto,
         String emailUsuario,

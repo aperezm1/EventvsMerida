@@ -17,5 +17,5 @@ import java.util.List;
  */
 @Repository
 public interface UsuarioEventoRepository extends JpaRepository<UsuarioEvento, UsuarioEventoId> {
-    List<UsuarioEvento> findByIdUsuarioId(Long idUsuario);
+    List<UsuarioEvento> findByIdIdUsuario(Long idUsuario);
 }

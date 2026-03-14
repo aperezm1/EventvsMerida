@@ -36,6 +36,7 @@ public class ManejadorGlobalExcepciones {
             Map.entry("crearCategoria", "Error en CategoriaService.crearCategoria: "),
             Map.entry("actualizarCategoria", "Error en CategoriaService.actualizarCategoria: "),
             Map.entry("login", "Error en UsuarioService.login: "),
+            Map.entry("guardarUsuarioEvento",  "Error en UsuarioService.guardarUsuarioEvento: "),
             Map.entry("Rol_nombre_key", "Nombre duplicado introducido"),
             Map.entry("Usuario_email_key", "Email duplicado introducido"),
             Map.entry("Usuario_telefono_key", "Teléfono duplicado introducido"),

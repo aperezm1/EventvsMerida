@@ -8,6 +8,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -29,7 +30,7 @@ public class Evento {
 
     @NotNull
     @Column(name = "fecha_hora", nullable = false)
-    private Instant fechaHora;
+    private LocalDateTime fechaHora;
 
     @NotNull
     @Column(name = "localizacion", nullable = false, length = Integer.MAX_VALUE)

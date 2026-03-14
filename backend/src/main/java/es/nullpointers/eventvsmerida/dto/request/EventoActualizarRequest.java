@@ -1,6 +1,6 @@
 package es.nullpointers.eventvsmerida.dto.request;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 /**
  * DTO para la actualización de un evento.
@@ -12,7 +12,7 @@ import java.time.Instant;
 public record EventoActualizarRequest(
         String titulo,
         String descripcion,
-        Instant fechaHora,
+        LocalDateTime fechaHora,
         String localizacion,
         String foto,
         Long idUsuario,

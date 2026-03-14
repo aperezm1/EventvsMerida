@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.ZoneId;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -88,7 +89,7 @@ public class UsuarioEventoService {
                 .orElseThrow(() -> new NoSuchElementException("Error en UsuarioEventoService.obtenerEventosGuardadosPorUsuario: No se encontró el usuario con email " + emailUsuario));
 
         // Buscar las relaciones entre el usuario y los eventos guardados, lanzando una excepción si no se encuentran
-        List<UsuarioEvento> relaciones = usuarioEventoRepository.findByIdUsuarioId(usuario.getId());
+        List<UsuarioEvento> relaciones = usuarioEventoRepository.findByIdIdUsuario(usuario.getId());
         if (relaciones.isEmpty()) {
             throw new NoSuchElementException("Error en UsuarioEventoService.obtenerEventosGuardadosPorUsuario: El usuario con email " + emailUsuario + " no tiene eventos guardados");
         }

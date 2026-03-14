@@ -3,6 +3,7 @@ package es.nullpointers.eventvsmerida.dto.request;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 /**
  * DTO para la creación o actualización de un evento.
@@ -19,7 +20,7 @@ public record EventoCrearRequest(
         String descripcion,
 
         @NotNull
-        Timestamp fecha,
+        LocalDateTime fecha,
 
         @NotBlank
         String localizacion,
