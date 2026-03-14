@@ -170,7 +170,7 @@ class _PerfilState extends State<Perfil> {
             },
           ),
         ),
-        _buildItem(Icons.bookmark_border, "Eventos guardados"),
+        _buildItem(Icons.bookmark_border, "Eventos guardados", onTap: () {context.push('/eventos_guardados');}),
         _buildItem(Icons.notifications, "Preferencias de notificaciones"),
       ]
           : [

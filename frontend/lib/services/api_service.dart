@@ -39,6 +39,7 @@ class ApiService {
 
   static Future<Map<String, dynamic>> login(String email, String password) async {
     final url = Uri.parse("$baseUrl/usuarios/login");
+
     try {
       final respuesta = await http.post(
         url,
@@ -66,7 +67,7 @@ class ApiService {
     if (respuesta.statusCode == 200) {
       return jsonDecode(respuesta.body);
     } else {
-      throw Exception('Error al cargar los usuarios');
+      throw Exception('Error al cargar los eventos');
     }
   }
 
@@ -88,5 +89,64 @@ class ApiService {
       mapa[fecha]!.add(evento);
     }
     return mapa;
+  }
+
+  static Future<String> guardarEventoUsuario(String emailUsuario, String tituloEvento, DateTime fechaHora) async {
+    final url = Uri.parse("$baseUrl/usuario-eventos/guardar");
+
+    try {
+      final respuesta = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'emailUsuario': emailUsuario, 'tituloEvento': tituloEvento, 'fechaHoraEvento': fechaHora.toIso8601String()}),
+      );
+
+      if (respuesta.statusCode == 200) {
+        return "Evento guardado correctamente";
+      } else {
+        return "Error en el servidor: ${respuesta.statusCode}";
+      }
+    } catch (e) {
+      return "Error desconocido";
+    }
+  }
+
+  static Future<String> eliminarEventoUsuario(String emailUsuario, String tituloEvento, DateTime fechaHora) async {
+    final url = Uri.parse("$baseUrl/usuario-eventos/eliminar");
+
+    try {
+      final respuesta = await http.delete(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'emailUsuario': emailUsuario, 'tituloEvento': tituloEvento, 'fechaHoraEvento': fechaHora.toIso8601String()}),
+      );
+
+      if (respuesta.statusCode == 204) {
+        return "Evento eliminado correctamente";
+      } else {
+        return "Error en el servidor: ${respuesta.statusCode}";
+      }
+    } catch (e) {
+      return "Error desconocido" + e.toString();
+    }
+  }
+
+  static Future<List<Evento>> obtenerEventosGuardados(String emailUsuario) async {
+    final url = Uri.parse("$baseUrl/usuario-eventos/guardados?emailUsuario=$emailUsuario");
+
+    try {
+      final respuesta = await http.get(url);
+
+      if (respuesta.statusCode == 200) {
+        List<dynamic> datos = jsonDecode(respuesta.body);
+        return datos.map((item) => Evento.fromJson(item)).toList();
+      } else if (respuesta.statusCode == 404) {
+        return [];
+      } else {
+        throw Exception("Error en el servidor: ${respuesta.statusCode}");
+      }
+    } catch (e) {
+      throw Exception("Error desconocido");
+    }
   }
 }
