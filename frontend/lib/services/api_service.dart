@@ -61,11 +61,12 @@ class ApiService {
     }
   }
 
-  static Future<List<dynamic>> obtenerEventos() async {
+  static Future<List<Evento>> obtenerEventos() async {
     final respuesta = await http.get(Uri.parse("$baseUrl/eventos/all"));
 
     if (respuesta.statusCode == 200) {
-      return jsonDecode(respuesta.body);
+      final List<dynamic> eventos = jsonDecode(respuesta.body);
+      return eventos.map((json) => Evento.fromJson(json)).toList();
     } else {
       throw Exception('Error al cargar los eventos');
     }
