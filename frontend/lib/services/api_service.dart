@@ -73,11 +73,10 @@ class ApiService {
   }
 
   static Future<Map<DateTime, List<Evento>>> obtenerEventosParaCalendario() async {
-    List<dynamic> datos = await obtenerEventos();
+    List<Evento> datos = await obtenerEventos();
     Map<DateTime, List<Evento>> mapa = {};
 
-    for (var item in datos) {
-      Evento evento = Evento.fromJson(item);
+    for (var evento in datos) {
       DateTime fecha = DateTime(
           evento.fechaHora.year,
           evento.fechaHora.month,

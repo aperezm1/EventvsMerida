@@ -709,7 +709,7 @@ class _EventosState extends State<Eventos> {
                       Expanded(
                         child: FilledButton(
                           style: FilledButton.styleFrom(
-                            backgroundColor: const Color(0xFFDD7A00), // naranja
+                            backgroundColor: colorScheme.primary, // naranja
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20),
                             ),
@@ -725,7 +725,7 @@ class _EventosState extends State<Eventos> {
                       Expanded(
                         child: FilledButton(
                           style: FilledButton.styleFrom(
-                            backgroundColor: const Color(0xFFDD7A00),
+                            backgroundColor: colorScheme.primary,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20),
                             ),

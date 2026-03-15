@@ -203,6 +203,7 @@ class _CalendarioState extends State<Calendario> {
                 shape: BoxShape.circle
             ),
             markersAlignment: Alignment.bottomCenter,
+            markersMaxCount: 1,
             selectedTextStyle: TextStyle(color: colorScheme.onPrimary),
             todayTextStyle: TextStyle(color: colorScheme.onSecondary),
           ),
