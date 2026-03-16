@@ -21,13 +21,6 @@ class _EventosState extends State<Eventos> {
   Usuario? _usuario;
   List<Evento> _eventosGuardados = [];
 
-  void _cargarUsuario() async {
-    final usuario = await SharedPreferencesService.cargarUsuario();
-    setState(() {
-      _usuario = usuario;
-    });
-  }
-
   Future<void> _cargarEventosGuardados(Usuario usuario) async {
     final eventos = await ApiService.obtenerEventosGuardados(usuario.email);
     _eventosGuardados = eventos;
@@ -110,55 +103,6 @@ class _EventosState extends State<Eventos> {
               itemCount: eventos.length,
               itemBuilder: (context, indice) {
                 final evento = eventos[indice];
-                final String tituloStr = evento.titulo;
-                if (tituloStr.contains("\\")) {
-                  tituloStr.replaceAll("\\", "");
-                }
-
-                final String fechaHoraStr = evento.fechaHora.toString() ?? '';
-                String fechaFormateada = '';
-                String horaFormateada = '';
-                String ubicacionFinal = '';
-
-                if (fechaHoraStr.contains(' ')) {
-                  final partes = fechaHoraStr.split(
-                    ' ',
-                  ); // ["2026-02-25", "18:30:00"]
-                  final fecha = partes[0]; // "2026-02-25"
-                  final horaCompleta = partes[1]; // "18:30:00"
-
-                  // Fecha a dd/MM/yyyy
-                  final fechaPartes = fecha.split('-'); // ["2026", "02", "25"]
-                  if (fechaPartes.length == 3) {
-                    final anio = fechaPartes[0];
-                    final mes = fechaPartes[1];
-                    final dia = fechaPartes[2];
-                    fechaFormateada = '$dia/$mes/$anio'; // "25/02/2026"
-                  }
-
-                  // Solo hora y minutos
-                  final horaPartes = horaCompleta.split(
-                    ':',
-                  ); // ["18", "30", "00"]
-                  if (horaPartes.length >= 2) {
-                    final hh = horaPartes[0];
-                    final mm = horaPartes[1];
-                    horaFormateada = '$hh:$mm'; // "18:30"
-                  }
-
-                  final String ubicacion = evento.localizacion;
-                  List<String> ubicacionParseada = ubicacion.split("");
-                  for (int i = 0; i < ubicacionParseada.length; i++) {
-                    if (ubicacionParseada[i] == '\\' &&
-                        ubicacionParseada[i + 1] != 'n') {
-                      ubicacionParseada[i] = ubicacionParseada[i].replaceAll(
-                        '\\',
-                        '',
-                      );
-                    }
-                    ubicacionFinal += ubicacionParseada[i];
-                  }
-                }
 
                 return Card(
                   elevation: 6,
@@ -179,12 +123,11 @@ class _EventosState extends State<Eventos> {
                           ),
                           child: AspectRatio(
                             aspectRatio: 16 / 9,
-                            // o 3/2, 4/3, etc. Elige la que mejor quede.
                             child: Image.network(
                               evento.foto,
                               fit: BoxFit.cover,
                               alignment:
-                                  .topCenter, // rellena todo el espacio, recortando un poco si hace falta
+                                  .topCenter,
                             ),
                           ),
                         ),
@@ -195,7 +138,7 @@ class _EventosState extends State<Eventos> {
                             children: [
                               // Título
                               Text(
-                                tituloStr,
+                                evento.titulo,
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16,
@@ -219,10 +162,10 @@ class _EventosState extends State<Eventos> {
 
                               // Localización
                               Text(
-                                ubicacionFinal,
+                                evento.localizacion,
                                 style: TextStyle(
                                   color: Colors.black,
-                                  fontSize: 14,
+                                  fontSize: 14
                                 ),
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
@@ -235,7 +178,7 @@ class _EventosState extends State<Eventos> {
                                   Expanded(
                                     flex: 2,
                                     child: Text(
-                                      'Fecha: $fechaFormateada',
+                                      'Fecha: ${evento.fechaHora.day.toString().padLeft(2, '0')}/${evento.fechaHora.month.toString().padLeft(2, '0')}/${evento.fechaHora.year}',
                                       style: TextStyle(
                                         color: Colors.black,
                                         fontWeight: FontWeight.w500,
@@ -249,7 +192,7 @@ class _EventosState extends State<Eventos> {
                                   Expanded(
                                     flex: 1,
                                     child: Text(
-                                      'Hora: $horaFormateada',
+                                      'Hora: ${evento.fechaHora.hour.toString().padLeft(2, '0')}:${evento.fechaHora.minute.toString().padLeft(2, '0')}',
                                       style: TextStyle(
                                         color: Colors.black,
                                         fontWeight: FontWeight.w500,
@@ -270,10 +213,6 @@ class _EventosState extends State<Eventos> {
                       context,
                       evento,
                       _usuario,
-                      tituloStr,
-                      fechaFormateada,
-                      ubicacionFinal,
-                      horaFormateada,
                     ),
                   ),
                 );
@@ -288,11 +227,7 @@ class _EventosState extends State<Eventos> {
   void _abrirModal(
     BuildContext context,
     Evento evento,
-    Usuario? usuario,
-    String tituloFormateado,
-    String fechaFormateada,
-    String localizacionFormateada,
-    String horaFormateada,
+    Usuario? usuario
   ) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
@@ -302,7 +237,7 @@ class _EventosState extends State<Eventos> {
     showDialog<bool>(
       context: context,
       barrierDismissible: true,
-      barrierColor: Colors.black.withOpacity(0.2),
+      barrierColor: Colors.black.withValues(alpha: 0.2),
       builder: (ctx) {
         return Dialog(
           backgroundColor: Colors.transparent,
@@ -348,7 +283,7 @@ class _EventosState extends State<Eventos> {
                                   children: [
                                     Expanded(
                                       child: Text(
-                                        tituloFormateado,
+                                        evento.titulo,
                                         style: textTheme.titleMedium?.copyWith(
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -407,25 +342,28 @@ class _EventosState extends State<Eventos> {
                                       Row(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          const Icon(
-                                            Icons.place_outlined,
-                                            size: 18,
-                                          ),
-                                          const SizedBox(width: 6),
                                           Expanded(
                                             child: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              crossAxisAlignment: .start,
                                               children: [
-                                                Text(
-                                                  localizacionFormateada,
-                                                  style: textTheme.bodyMedium,
+                                                TextButton.icon(
+                                                  onPressed: () => _abrirEnGoogleMaps(evento.localizacion),
+                                                  icon: const Icon(
+                                                    Icons.place_outlined,
+                                                    size: 18,
+                                                    color: Colors.white,
+                                                  ),
+                                                  label: Text(
+                                                    evento.localizacion,
+                                                    style: textTheme.bodyMedium?.copyWith(
+                                                      decoration: .underline
+                                                    ),
+                                                  ),
+                                                  style: TextButton.styleFrom(
+                                                    alignment: Alignment.centerLeft,
+                                                    padding: EdgeInsets.zero,
+                                                  ),
                                                 ),
-                                                const SizedBox(height: 4),
-                                                // TextButton.icon(
-                                                //   onPressed: () => _abrirEnGoogleMaps(localizacionFormateada),
-                                                //   icon: const Icon(Icons.map_outlined),
-                                                //   label: const Text('Abrir en Google Maps'),
-                                                // ),
                                               ],
                                             ),
                                           ),
@@ -440,7 +378,7 @@ class _EventosState extends State<Eventos> {
                                           ),
                                           const SizedBox(width: 6),
                                           Text(
-                                            fechaFormateada,
+                                            '${evento.fechaHora.day.toString().padLeft(2, '0')}/${evento.fechaHora.month.toString().padLeft(2, '0')}/${evento.fechaHora.year}',
                                             style: textTheme.bodyMedium
                                                 ?.copyWith(
                                                   fontWeight: FontWeight.w600,
@@ -453,7 +391,7 @@ class _EventosState extends State<Eventos> {
                                           ),
                                           const SizedBox(width: 4),
                                           Text(
-                                            horaFormateada,
+                                            '${evento.fechaHora.hour.toString().padLeft(2, '0')}:${evento.fechaHora.minute.toString().padLeft(2, '0')}',
                                             style: textTheme.bodyMedium,
                                           ),
                                         ],
@@ -520,9 +458,9 @@ class _EventosState extends State<Eventos> {
                                                 children: [
                                                   Icon(
                                                     estaGuardado
-                                                        ? Icons.bookmark
+                                                        ? Icons.check
                                                         : Icons
-                                                              .bookmark_border_outlined,
+                                                              .delete,
                                                     size: 20,
                                                     color: Colors.white,
                                                   ),
@@ -582,23 +520,31 @@ class _EventosState extends State<Eventos> {
     );
   }
 
-  // Future<void> _abrirEnGoogleMaps(String direccion) async {
-  //   final query = Uri.encodeComponent(direccion);
-  //   final uri = Uri.parse('https://www.google.com/maps/search/?api=1&query=$query');
-  //
-  //   if (await canLaunchUrl(uri)) {
-  //     await launchUrl(
-  //       uri,
-  //       mode: LaunchMode.externalApplication, // abre la app de Maps si puede
-  //     );
-  //   } else {
-  //     // Opcional: mostrar SnackBar de error
-  //     if (!mounted) return;
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       const SnackBar(content: Text('No se pudo abrir Google Maps')),
-  //     );
-  //   }
-  // }
+  Future<void> _abrirEnGoogleMaps(String direccion) async {
+    final limpia = direccion.trim();
+    final query = Uri.encodeComponent(limpia);
+    final uri = Uri.parse(
+      'https://www.google.com/maps/search/?api=1&query=$query',
+    );
+
+    try {
+      final ok = await launchUrl(
+        uri,
+        mode: LaunchMode.platformDefault,
+      );
+
+      if (!ok && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No se pudo abrir Google Maps')),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No se pudo abrir Google Maps')),
+      );
+    }
+  }
 
   bool comprobarEstadoEvento(Evento evento) {
     // si Evento tiene id, usa ese campo; si no, comparar por título + fechaHora
@@ -654,7 +600,7 @@ class _EventosState extends State<Eventos> {
     showDialog<void>(
       context: context,
       barrierDismissible: true,
-      barrierColor: Colors.black.withOpacity(0.3),
+      barrierColor: Colors.black.withValues(alpha: 0.3),
       builder: (ctx) {
         return Dialog(
           backgroundColor: Colors.transparent,
@@ -664,7 +610,7 @@ class _EventosState extends State<Eventos> {
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
               child: AlertDialog(
-                backgroundColor: colorScheme.surface.withOpacity(0.98),
+                backgroundColor: colorScheme.surface.withValues(alpha: 0.98),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
