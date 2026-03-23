@@ -337,7 +337,37 @@ class _RegistroState extends State<Registro> {
 
                             // Mostrar feedback al usuario SIEMPRE
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(mensaje)),
+                              SnackBar(
+                                content: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.check,
+                                      size: 20,
+                                      color: Colors.white,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      mensaje,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                backgroundColor: Colors.green,
+                                behavior:
+                                SnackBarBehavior.floating,
+                                margin: const EdgeInsets.only(
+                                  left: 16,
+                                  right: 16,
+                                  bottom: 16,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius:
+                                  BorderRadius.circular(12),
+                                ),
+                              ),
                             );
 
                             // Si el registro es correcto, guarda el usuario y navega
