@@ -40,7 +40,10 @@ class _LoginState extends State<Login> {
   // FUNCIONES AUXILIARES
   // ===========================================================================
 
-  InputDecoration _buildDecoration({required String labelText, Widget? suffixIcon}) {
+  InputDecoration _buildDecoration({
+    required String labelText,
+    Widget? suffixIcon,
+  }) {
     return InputDecoration(
       labelText: labelText,
       border: OutlineInputBorder(
@@ -59,6 +62,7 @@ class _LoginState extends State<Login> {
   }
 
   void _mostrarSnackBar(String mensaje, {required bool exito}) {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
@@ -141,6 +145,7 @@ class _LoginState extends State<Login> {
     );
 
     if (!mounted) return;
+
     context.go(AppRoutes.eventos);
   }
 
@@ -149,6 +154,8 @@ class _LoginState extends State<Login> {
   // ===========================================================================
 
   Widget _buildHeader() {
+    final puedeVolver = context.canPop();
+
     return SafeArea(
       top: true,
       left: false,
@@ -163,14 +170,18 @@ class _LoginState extends State<Login> {
           children: [
             Align(
               alignment: Alignment.centerLeft,
-              child: Navigator.canPop(context) ? IconButton(
-                icon: Icon(Icons.arrow_back, color: _cs.surface),
+              child: puedeVolver
+                  ? IconButton(
+                icon: Icon(
+                  Icons.arrow_back,
+                  color: _cs.surface,
+                ),
                 onPressed: () {
                   context.pop();
                 },
-              ) : const SizedBox.shrink(),
+              )
+                  : const SizedBox.shrink(),
             ),
-
             Text(
               'Iniciar sesión',
               style: TextStyle(

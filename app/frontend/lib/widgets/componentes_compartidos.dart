@@ -54,6 +54,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 // ===========================================================================
 // 2. MODAL DE DETALLE DEL EVENTO
 // ===========================================================================
+
 class ModalEvento extends StatefulWidget {
   final List<Evento> eventos;
   final Usuario? usuario;
@@ -346,9 +347,12 @@ class _ModalEventoState extends State<ModalEvento> {
                       Expanded(
                         child: FilledButton(
                           onPressed: () {
+                            final router = GoRouter.of(context);
+
                             Navigator.of(ctx).pop();
                             Navigator.of(context).pop();
-                            context.go(AppRoutes.registro);
+
+                            router.push(AppRoutes.registro);
                           },
                           child: Text(
                             'Registrarse',
@@ -360,9 +364,12 @@ class _ModalEventoState extends State<ModalEvento> {
                       Expanded(
                         child: FilledButton(
                           onPressed: () {
+                            final router = GoRouter.of(context);
+
                             Navigator.of(ctx).pop();
                             Navigator.of(context).pop();
-                            context.go(AppRoutes.login);
+
+                            router.push(AppRoutes.login);
                           },
                           child: Text(
                             'Iniciar sesión',
