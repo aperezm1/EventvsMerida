@@ -344,6 +344,29 @@ class _EventosState extends State<Eventos> {
     return eventos;
   }
 
+  String? _obtenerIconoCategoria(String nombreCategoria) {
+    final texto = nombreCategoria.trim();
+
+    if (texto.isEmpty) return null;
+
+    final primerRune = texto.runes.first;
+    final primerCaracter = String.fromCharCode(primerRune);
+    final pareceEmoji = primerRune >= 0x2600;
+
+    if (!pareceEmoji) return null;
+
+    return primerCaracter;
+  }
+
+  String _obtenerTextoCategoria(String nombreCategoria) {
+    final texto = nombreCategoria.trim();
+    final icono = _obtenerIconoCategoria(texto);
+
+    if (icono == null) return texto;
+
+    return texto.substring(icono.length).trimLeft();
+  }
+
   // ===========================================================================
   // MODALES
   // ===========================================================================
@@ -573,7 +596,8 @@ class _EventosState extends State<Eventos> {
           );
         }
 
-        final lista = resp.datos ?? const <Categoria>[];
+        final lista = List<Categoria>.from(resp.datos ?? const <Categoria>[])
+          ..sort((a, b) => a.id.compareTo(b.id));
 
         return ConstrainedBox(
           constraints: BoxConstraints(
@@ -611,6 +635,7 @@ class _EventosState extends State<Eventos> {
                   separatorBuilder: (_, __) => const SizedBox(height: 6),
                   itemBuilder: (context, index) {
                     final categoria = lista[index];
+
                     return _buildCategoriaFiltroItem(
                       categoria,
                       categoriasTemporales,
@@ -627,7 +652,9 @@ class _EventosState extends State<Eventos> {
   }
 
   Widget _buildCategoriaFiltroItem(Categoria categoria, Set<int> categoriasTemporales, void Function(void Function()) setStateModal) {
-    final seleccionado = categoriasTemporales.contains(categoria.id);
+    final bool seleccionado = categoriasTemporales.contains(categoria.id);
+    final String? iconoCategoria = _obtenerIconoCategoria(categoria.nombre);
+    final String textoCategoria = _obtenerTextoCategoria(categoria.nombre);
 
     return Material(
       color: Colors.transparent,
@@ -659,7 +686,15 @@ class _EventosState extends State<Eventos> {
                   shape: BoxShape.circle,
                 ),
                 child: Center(
-                  child: Icon(
+                  child: iconoCategoria != null
+                      ? Text(
+                    iconoCategoria,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      height: 1,
+                    ),
+                  )
+                      : Icon(
                     Icons.label,
                     size: 18,
                     color: _cs.primary,
@@ -669,7 +704,7 @@ class _EventosState extends State<Eventos> {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  categoria.nombre,
+                  textoCategoria,
                   style: TextStyle(
                     fontSize: 15,
                     color: _cs.onSurface,
