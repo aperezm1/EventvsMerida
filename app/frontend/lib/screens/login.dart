@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../core/router/app_routes.dart';
 import '../services/api_service.dart';
 import '../services/shared_preferences_service.dart';
+import '../widgets/componentes_compartidos.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -61,55 +62,20 @@ class _LoginState extends State<Login> {
     );
   }
 
-  void _mostrarSnackBar(String mensaje, {required bool exito}) {
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              exito ? Icons.check : Icons.error_outline,
-              size: 20,
-              color: Colors.white,
-            ),
-            const SizedBox(width: 8),
-            Flexible(
-              child: Text(
-                mensaje,
-                style: const TextStyle(color: Colors.white),
-              ),
-            ),
-          ],
-        ),
-        backgroundColor: exito ? Colors.green : _cs.error,
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.only(
-          left: 16,
-          right: 16,
-          bottom: 16,
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-      ),
-    );
-  }
-
   String? _validarCamposVacios() {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
     if (email.isEmpty && password.isEmpty) {
-      return 'Introduce tu correo y tu contraseña.';
+      return 'Introduce tu correo y tu contraseña';
     }
 
     if (email.isEmpty) {
-      return 'Introduce tu correo.';
+      return 'Introduce tu correo';
     }
 
     if (password.isEmpty) {
-      return 'Introduce tu contraseña.';
+      return 'Introduce tu contraseña';
     }
 
     return null;
@@ -119,7 +85,7 @@ class _LoginState extends State<Login> {
     final mensajeError = _validarCamposVacios();
 
     if (mensajeError != null) {
-      _mostrarSnackBar(mensajeError, exito: false);
+      Mensaje.mostrarSnackBar(context: context, mensaje: mensajeError, icon: Icons.person, color: _cs.error);
       return;
     }
 
@@ -131,14 +97,13 @@ class _LoginState extends State<Login> {
     if (!mounted) return;
 
     if (!respuesta.exito) {
-      _mostrarSnackBar(respuesta.mensaje, exito: false);
+      Mensaje.mostrarSnackBar(context: context, mensaje: respuesta.mensaje, icon: Icons.person, color: _cs.error);
       return;
     }
 
     final usuario = respuesta.datos!;
 
-    _mostrarSnackBar(respuesta.mensaje, exito: true);
-
+    Mensaje.mostrarSnackBar(context: context, mensaje: "¡Has iniciado sesión correctamente!", icon: Icons.person, color: Colors.green);
     await SharedPreferencesService.iniciarSesion(
       usuario: usuario,
       autoLogin: _autoLogin,

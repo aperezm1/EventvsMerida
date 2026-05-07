@@ -5,18 +5,17 @@ import 'package:flutter/services.dart';
 import 'dart:ui';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
-import 'package:linkify/linkify.dart';
 
 import '../core/router/app_routes.dart';
 import '../models/evento.dart';
 import '../models/usuario.dart';
 import '../services/api_service.dart';
-import '../utils/utils.dart';
+import '../utils/validation_utils.dart';
+import '../utils/fecha_utils.dart';
 
 // ===========================================================================
 // 1. BARRA SUPERIOR
@@ -87,10 +86,9 @@ class _ModalEventoState extends State<ModalEvento> {
   late final PageController _pageController;
   int _indiceActual = 0;
   late List<Evento> _eventosGuardados;
-
   ColorScheme get _cs => Theme.of(context).colorScheme;
-
   TextTheme get _tt => Theme.of(context).textTheme;
+  FechaUtils fu = FechaUtils();
 
   // ===========================================================================
   // CICLO DE VIDA
@@ -123,33 +121,22 @@ class _ModalEventoState extends State<ModalEvento> {
     return _eventosGuardados.any((e) => _esMismoEvento(e, evento));
   }
 
-  bool _esMismoDia(DateTime a, DateTime b) =>
-      a.year == b.year && a.month == b.month && a.day == b.day;
-
-  bool _esHoraCero(DateTime fecha) => fecha.hour == 0 && fecha.minute == 0;
-
-  String _formatearFecha(DateTime fecha) =>
-      DateFormat('dd/MM/yyyy').format(fecha);
-
-  String _formatearHora(DateTime fecha) => DateFormat('HH:mm').format(fecha);
-
   String _textoFechaHoraDetalle(Evento evento) {
-    final esMismoDia = _esMismoDia(evento.fechaInicio, evento.fechaFin);
-    final inicioFecha = _formatearFecha(evento.fechaInicio);
-    final finFecha = _formatearFecha(evento.fechaFin);
-    final inicioHora = _formatearHora(evento.fechaInicio);
-    final finHora = _formatearHora(evento.fechaFin);
+    final esMismoDia = fu.esMismoDia(evento.fechaInicio, evento.fechaFin);
+    final inicioFecha = fu.formatearFecha(evento.fechaInicio);
+    final finFecha = fu.formatearFecha(evento.fechaFin);
+    final inicioHora = fu.formatearHora(evento.fechaInicio);
+    final finHora = fu.formatearHora(evento.fechaFin);
     final horasIguales = inicioHora == finHora;
-    final ambasHorasCero =
-        _esHoraCero(evento.fechaInicio) && _esHoraCero(evento.fechaFin);
+    final ambasHorasCero = fu.esHoraCero(evento.fechaInicio) && fu.esHoraCero(evento.fechaFin);
 
     if (esMismoDia) {
       if (horasIguales && ambasHorasCero) return 'Fecha: $inicioFecha';
       if (horasIguales) return 'Fecha: $inicioFecha\nHora: $inicioHora';
       return 'Fecha: $inicioFecha\nHora: $inicioHora - $finHora';
     }
-    if (horasIguales && ambasHorasCero)
-      return 'Desde: $inicioFecha\nHasta: $finFecha';
+
+    if (horasIguales && ambasHorasCero) return 'Desde: $inicioFecha\nHasta: $finFecha';
     return 'Desde: $inicioFecha $inicioHora\nHasta: $finFecha $finHora';
   }
 
@@ -213,6 +200,8 @@ class _ModalEventoState extends State<ModalEvento> {
   Future<void> _gestionarGuardado() async {
     final usuario = widget.usuario;
     final evento = _eventoActual;
+    IconData icon = Icons.delete;
+    Color color = Colors.red;
 
     if (usuario == null) {
       _mostrarModalNoLogeado();
@@ -242,6 +231,8 @@ class _ModalEventoState extends State<ModalEvento> {
         if (yaGuardado) {
           _eventosGuardados.removeWhere((e) => _esMismoEvento(e, evento));
         } else {
+          icon = Icons.check;
+          color = Colors.green;
           _eventosGuardados.add(evento);
         }
       });
@@ -249,10 +240,7 @@ class _ModalEventoState extends State<ModalEvento> {
       widget.onEventosGuardadosActualizados(_eventosGuardados);
     }
 
-    _mostrarSnackBarResultado(
-      mensaje: respuesta.mensaje,
-      guardado: respuesta.exito ? !yaGuardado : yaGuardado,
-    );
+    Mensaje.mostrarSnackBar(context: context, mensaje: respuesta.mensaje, icon: icon, color: color);
   }
 
   Future<void> _abrirUrl(String urlTexto) async {
@@ -291,38 +279,6 @@ class _ModalEventoState extends State<ModalEvento> {
         const SnackBar(content: Text('No se pudo abrir el enlace')),
       );
     }
-  }
-
-  // ===========================================================================
-  // MENSAJES
-  // ===========================================================================
-
-  void _mostrarSnackBarResultado({
-    required String mensaje,
-    required bool guardado,
-  }) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              guardado ? Icons.check : Icons.delete,
-              size: 20,
-              color: Colors.white,
-            ),
-            const SizedBox(width: 8),
-            Flexible(
-              child: Text(mensaje, style: const TextStyle(color: Colors.white)),
-            ),
-          ],
-        ),
-        backgroundColor: guardado ? Colors.green : Colors.red,
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-    );
   }
 
   // ===========================================================================
@@ -696,6 +652,42 @@ class _ModalEventoState extends State<ModalEvento> {
   }
 }
 
+// ===========================================================================
+// 3. SNACKBAR
+// ===========================================================================
+
+class Mensaje {
+  static void mostrarSnackBar({required BuildContext context, required String mensaje, required IconData icon, required Color color}) {
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 20,
+              color: Colors.white,
+            ),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(mensaje, style: const TextStyle(color: Colors.white)),
+            ),
+          ],
+        ),
+        backgroundColor: color,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    );
+  }
+}
+
+// ===========================================================================
+// 4. TUTORIAL
+// ===========================================================================
+
 class Tutorial {
   static final pasosTutorial = <TargetFocus>[];
   static late TutorialCoachMark _tutorial;
@@ -708,7 +700,7 @@ class Tutorial {
 
   static TutorialCoachMark get tutorial => _tutorial;
 
-  static void set tutorial(TutorialCoachMark value) {
+  static set tutorial(TutorialCoachMark value) {
     _tutorial = value;
     tutorialInicializado = true;
   }

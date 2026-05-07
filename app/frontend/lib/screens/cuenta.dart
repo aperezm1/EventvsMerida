@@ -1,9 +1,7 @@
-import 'dart:convert';
-
 import 'package:eventvsmerida/services/api_service.dart';
+import 'package:eventvsmerida/utils/fecha_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image_picker/image_picker.dart';
 
 import '../core/router/app_routes.dart';
 import '../models/usuario.dart';
@@ -23,6 +21,7 @@ class _CuentaState extends State<Cuenta> {
   // ===========================================================================
 
   Usuario? _usuario;
+  FechaUtils fu = FechaUtils();
 
   ColorScheme get _cs => Theme.of(context).colorScheme;
 
@@ -85,13 +84,6 @@ class _CuentaState extends State<Cuenta> {
   // FUNCIONES AUXILIARES
   // ===========================================================================
 
-  String _formatearFechaNacimiento(DateTime fecha) {
-    final dia = fecha.day.toString().padLeft(2, '0');
-    final mes = fecha.month.toString().padLeft(2, '0');
-    final anio = fecha.year.toString();
-    return '$dia/$mes/$anio';
-  }
-
   Future<void> _editarImagenPerfil() async {
     final imagenSeleccionada = await elegirImagen(context);
 
@@ -116,19 +108,10 @@ class _CuentaState extends State<Cuenta> {
         autoLogin: await SharedPreferencesService.getAutoLogin(),
       );
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Imagen actualizada correctamente'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      if (!mounted) return;
+      Mensaje.mostrarSnackBar(context: context, mensaje: 'Imagen actualizada correctamente', icon: Icons.check, color: Colors.green);
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(respuesta.mensaje),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
-      );
+      Mensaje.mostrarSnackBar(context: context, mensaje: respuesta.mensaje, icon: Icons.close, color: _cs.error);
     }
   }
 
@@ -156,26 +139,8 @@ class _CuentaState extends State<Cuenta> {
     );
   }
 
-  String _obtenerFechaFormateada(DateTime fecha) {
-    final diaTxt = fecha.day.toString().padLeft(2, '0');
-    final mesTxt = fecha.month.toString().padLeft(2, '0');
-    final anio = fecha.year.toString().padLeft(2, '0');
-    return '$diaTxt/$mesTxt/$anio';
-  }
-
   String? _validarCampo(String label, String? value) {
     final texto = (value ?? '').trim();
-
-    // if (texto.isEmpty) {
-    //   return 'Este campo es obligatorio';
-    // }
-    //
-    //
-    // if (label == 'Nombre' || label == 'Apellidos') {
-    //   if (texto.isEmpty) {
-    //     return 'Este campo es obligatorio';
-    //   }
-    // }
 
     if (label == 'Correo') {
       final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
@@ -287,7 +252,7 @@ class _CuentaState extends State<Cuenta> {
           ),
           _infoTile(
             label: 'Fecha de nacimiento',
-            value: _formatearFechaNacimiento(_usuario!.fechaNacimiento),
+            value: fu.formatearFechaNacimiento(_usuario!.fechaNacimiento),
             icon: Icons.cake,
           ),
           _infoTile(
@@ -425,7 +390,7 @@ class _CuentaState extends State<Cuenta> {
     );
   }
 
-  Widget _buildLogoutButton() {
+  Widget _buildBotones() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
       child: Column(
@@ -493,6 +458,7 @@ class _CuentaState extends State<Cuenta> {
                       await SharedPreferencesService.cerrarSesion();
                       if (!mounted) return;
                       context.go(AppRoutes.eventos);
+                      Mensaje.mostrarSnackBar(context: context, mensaje: "Has cerrado sesión...", icon: Icons.person, color: _cs.error);
                     },
                   ),
                 ),
@@ -633,12 +599,7 @@ class _CuentaState extends State<Cuenta> {
                             );
 
                             if (fechaNacimiento == null) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: const Text('Fecha inválida o futura'),
-                                  backgroundColor: _cs.error,
-                                ),
-                              );
+                              Mensaje.mostrarSnackBar(context: context, mensaje: 'Fecha inválida o futura', icon: Icons.close, color: _cs.error);
                               return;
                             }
 
@@ -662,20 +623,9 @@ class _CuentaState extends State<Cuenta> {
                               );
 
                               if (!mounted) return;
-
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Datos actualizados correctamente'),
-                                  backgroundColor: Colors.green,
-                                ),
-                              );
+                              Mensaje.mostrarSnackBar(context: context, mensaje: 'Datos actualizados correctamente', icon: Icons.check, color: Colors.green);
                             } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(respuesta.mensaje),
-                                  backgroundColor: _cs.error,
-                                ),
-                              );
+                              Mensaje.mostrarSnackBar(context: context, mensaje: respuesta.mensaje, icon: Icons.close, color: _cs.error);
                             }
                           },
                           style: ElevatedButton.styleFrom(
@@ -811,22 +761,9 @@ class _CuentaState extends State<Cuenta> {
                               );
 
                               if (!mounted) return;
-
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    'Contraseña actualizada correctamente',
-                                  ),
-                                  backgroundColor: Colors.green,
-                                ),
-                              );
+                              Mensaje.mostrarSnackBar(context: context, mensaje: 'Contraseña actualizada correctamente', icon: Icons.check, color: Colors.green);
                             } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(respuesta.mensaje),
-                                  backgroundColor: _cs.error,
-                                ),
-                              );
+                              Mensaje.mostrarSnackBar(context: context, mensaje: respuesta.mensaje, icon: Icons.close, color: _cs.error);
                             }
                           },
                           style: ElevatedButton.styleFrom(
@@ -860,7 +797,7 @@ class _CuentaState extends State<Cuenta> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // CABECERA FIJA
+          // CABECERA
           _buildHeader(),
 
           Expanded(
@@ -873,7 +810,7 @@ class _CuentaState extends State<Cuenta> {
                   _buildUserInfo(),
 
                   // BOTONES
-                  _buildLogoutButton(),
+                  _buildBotones(),
                 ],
               ),
             ),
