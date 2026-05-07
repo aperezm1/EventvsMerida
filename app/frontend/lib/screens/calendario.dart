@@ -1,8 +1,8 @@
 import 'package:eventvsmerida/services/shared_preferences_service.dart';
+import 'package:eventvsmerida/utils/fecha_utils.dart';
 import 'package:eventvsmerida/widgets/componentes_compartidos.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 
@@ -58,6 +58,8 @@ class _CalendarioState extends State<Calendario> {
 
   GlobalKey keyCalendario = GlobalKey();
   GlobalKey keyListadoEventos = GlobalKey();
+
+  FechaUtils fu = FechaUtils();
 
   // ===========================================================================
   // CICLO DE VIDA
@@ -132,7 +134,7 @@ class _CalendarioState extends State<Calendario> {
         _mensajeError = respuesta.mensaje;
       });
 
-      _mostrarMensaje(respuesta.mensaje);
+      Mensaje.mostrarSnackBar(context: context, mensaje: respuesta.mensaje, icon: IconData(0xe6e7, fontFamily: 'MaterialIcons'), color: Colors.red);
       return;
     }
 
@@ -161,12 +163,12 @@ class _CalendarioState extends State<Calendario> {
     final mapa = <DateTime, List<Evento>>{};
 
     for (final evento in eventos) {
-      final inicio = _normalizarFecha(evento.fechaInicio);
-      final fin = _normalizarFecha(evento.fechaFin);
+      final inicio = fu.normalizarFecha(evento.fechaInicio);
+      final fin = fu.normalizarFecha(evento.fechaFin);
       final totalDias = fin.difference(inicio).inDays;
 
       for (var i = 0; i <= totalDias; i++) {
-        final dia = _normalizarFecha(inicio.add(Duration(days: i)));
+        final dia = fu.normalizarFecha(inicio.add(Duration(days: i)));
         mapa.putIfAbsent(dia, () => []);
         mapa[dia]!.add(evento);
       }
@@ -179,27 +181,6 @@ class _CalendarioState extends State<Calendario> {
   // FUNCIONES AUXILIARES
   // ===========================================================================
 
-  DateTime _normalizarFecha(DateTime fecha) {
-    final f = fecha.toLocal();
-    return DateTime(f.year, f.month, f.day);
-  }
-
-  bool _esMismoDia(DateTime a, DateTime b) {
-    return a.year == b.year && a.month == b.month && a.day == b.day;
-  }
-
-  bool _esHoraCero(DateTime fecha) {
-    return fecha.hour == 0 && fecha.minute == 0;
-  }
-
-  String _formatearHora(DateTime fecha) {
-    return DateFormat('HH:mm').format(fecha);
-  }
-
-  String _formatearFecha(DateTime fecha) {
-    return DateFormat('dd/MM/yyyy').format(fecha);
-  }
-
   bool _esAntesDelPrimerMes(DateTime fecha) {
     final mes = DateTime(fecha.year, fecha.month, 1);
     return mes.isBefore(_primerMesPermitido);
@@ -211,16 +192,12 @@ class _CalendarioState extends State<Calendario> {
   }
 
   bool _esEventoDeUnSoloDia(Evento evento) {
-    return _esMismoDia(evento.fechaInicio, evento.fechaFin);
-  }
-
-  int _minutosDelDia(DateTime fecha) {
-    return fecha.hour * 60 + fecha.minute;
+    return fu.esMismoDia(evento.fechaInicio, evento.fechaFin);
   }
 
   int _prioridadEvento(Evento evento, DateTime diaSeleccionado) {
-    final finalizaHoy = _esMismoDia(evento.fechaFin, diaSeleccionado);
-    final iniciaHoy = _esMismoDia(evento.fechaInicio, diaSeleccionado);
+    final finalizaHoy = fu.esMismoDia(evento.fechaFin, diaSeleccionado);
+    final iniciaHoy = fu.esMismoDia(evento.fechaInicio, diaSeleccionado);
 
     if (finalizaHoy) return 0;
     if (iniciaHoy) return 1;
@@ -228,13 +205,13 @@ class _CalendarioState extends State<Calendario> {
   }
 
   int _horaReferencia(Evento evento, DateTime diaSeleccionado) {
-    final finalizaHoy = _esMismoDia(evento.fechaFin, diaSeleccionado);
+    final finalizaHoy = fu.esMismoDia(evento.fechaFin, diaSeleccionado);
 
     if (finalizaHoy) {
-      return _minutosDelDia(evento.fechaFin);
+      return fu.minutosDelDia(evento.fechaFin);
     }
 
-    return _minutosDelDia(evento.fechaInicio);
+    return fu.minutosDelDia(evento.fechaInicio);
   }
 
   int _compararEventos(Evento a, Evento b, DateTime fecha) {
@@ -257,8 +234,8 @@ class _CalendarioState extends State<Calendario> {
 
   List<Evento> _eventosDelDiaSeleccionado() {
     final fechaSeleccionada = _selectedDay ?? _focusedDay;
-    final fechaNormalizada = _normalizarFecha(fechaSeleccionada);
-    final hoy = _normalizarFecha(DateTime.now());
+    final fechaNormalizada = fu.normalizarFecha(fechaSeleccionada);
+    final hoy = fu.normalizarFecha(DateTime.now());
 
     final esMesVisible =
         fechaNormalizada.month == _focusedDay.month &&
@@ -276,14 +253,14 @@ class _CalendarioState extends State<Calendario> {
   }
 
   String _textoEtiquetaTiempo(Evento evento, DateTime diaSeleccionado) {
-    final iniciaHoy = _esMismoDia(evento.fechaInicio, diaSeleccionado);
-    final finalizaHoy = _esMismoDia(evento.fechaFin, diaSeleccionado);
+    final iniciaHoy = fu.esMismoDia(evento.fechaInicio, diaSeleccionado);
+    final finalizaHoy = fu.esMismoDia(evento.fechaFin, diaSeleccionado);
 
-    final inicioHora = _formatearHora(evento.fechaInicio);
-    final finHora = _formatearHora(evento.fechaFin);
+    final inicioHora = fu.formatearHora(evento.fechaInicio);
+    final finHora = fu.formatearHora(evento.fechaFin);
 
-    final inicioCero = _esHoraCero(evento.fechaInicio);
-    final finCero = _esHoraCero(evento.fechaFin);
+    final inicioCero = fu.esHoraCero(evento.fechaInicio);
+    final finCero = fu.esHoraCero(evento.fechaFin);
 
     if (_esEventoDeUnSoloDia(evento)) {
       if (inicioCero && finCero) return 'Todo el día';
@@ -307,8 +284,8 @@ class _CalendarioState extends State<Calendario> {
   }
 
   String _textoFechaCard(Evento evento) {
-    final inicio = _formatearFecha(evento.fechaInicio);
-    final fin = _formatearFecha(evento.fechaFin);
+    final inicio = fu.formatearFecha(evento.fechaInicio);
+    final fin = fu.formatearFecha(evento.fechaFin);
 
     if (_esEventoDeUnSoloDia(evento)) {
       return 'Fecha: $inicio';
@@ -339,17 +316,7 @@ class _CalendarioState extends State<Calendario> {
   }
 
   void _actualizarFechaVisible(DateTime nuevaFecha) {
-    if (_esAntesDelPrimerMes(nuevaFecha)) {
-      _mostrarMensaje('No puedes ir a meses anteriores al actual');
-      return;
-    }
-
-    if (_esDespuesDelUltimoMes(nuevaFecha)) {
-      _mostrarMensaje('No puedes avanzar más allá de diciembre de 2030');
-      return;
-    }
-
-    final hoy = _normalizarFecha(DateTime.now());
+    final hoy = fu.normalizarFecha(DateTime.now());
     final nuevoMes = DateTime(nuevaFecha.year, nuevaFecha.month, 1);
 
     setState(() {
@@ -414,17 +381,6 @@ class _CalendarioState extends State<Calendario> {
         },
         mostrarBotonGuardado: true,
       ),
-    );
-  }
-
-  // ===========================================================================
-  // MENSAJES
-  // ===========================================================================
-
-  void _mostrarMensaje(String mensaje) {
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(mensaje)),
     );
   }
 
@@ -540,8 +496,8 @@ class _CalendarioState extends State<Calendario> {
       onPageChanged: _navegarAFecha,
       startingDayOfWeek: StartingDayOfWeek.monday,
       eventLoader: (day) {
-        final fechaNormalizada = _normalizarFecha(day);
-        final hoy = _normalizarFecha(DateTime.now());
+        final fechaNormalizada = fu.normalizarFecha(day);
+        final hoy = fu.normalizarFecha(DateTime.now());
 
         final esMesVisible =
             fechaNormalizada.month == _focusedDay.month &&
@@ -558,21 +514,21 @@ class _CalendarioState extends State<Calendario> {
         return _eventosMap[fechaNormalizada] ?? const [];
       },
       enabledDayPredicate: (day) {
-        final fechaNormalizada = _normalizarFecha(day);
+        final fechaNormalizada = fu.normalizarFecha(day);
 
         return fechaNormalizada.month == _focusedDay.month &&
             fechaNormalizada.year == _focusedDay.year;
       },
       selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
       onDaySelected: (selectedDay, focusedDay) {
-        final hoy = _normalizarFecha(DateTime.now());
-        final fechaSeleccionada = _normalizarFecha(selectedDay);
+        final hoy = fu.normalizarFecha(DateTime.now());
+        final fechaSeleccionada = fu.normalizarFecha(selectedDay);
 
         if (fechaSeleccionada.isBefore(hoy)) return;
 
         setState(() {
-          _selectedDay = _normalizarFecha(selectedDay);
-          _focusedDay = _normalizarFecha(focusedDay);
+          _selectedDay = fu.normalizarFecha(selectedDay);
+          _focusedDay = fu.normalizarFecha(focusedDay);
         });
       },
       daysOfWeekStyle: DaysOfWeekStyle(
@@ -632,7 +588,7 @@ class _CalendarioState extends State<Calendario> {
   }
 
   Widget _buildEventoCard(Evento evento) {
-    final fechaSeleccionada = _normalizarFecha(_selectedDay ?? _focusedDay);
+    final fechaSeleccionada = fu.normalizarFecha(_selectedDay ?? _focusedDay);
     final etiquetaTiempo = _textoEtiquetaTiempo(evento, fechaSeleccionada);
     final textoFecha = _textoFechaCard(evento);
 
@@ -682,18 +638,14 @@ class _CalendarioState extends State<Calendario> {
     );
   }
 
-  Widget _buildEstadoCentro({
-    required IconData icono,
-    required String mensaje,
-    Widget? accion,
-  }) {
+  Widget _buildEstadoCentro({required IconData icono, required String mensaje, Widget? accion}) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icono, size: 42),
+            Icon(icono, size: 42, color: _cs.primary),
             const SizedBox(height: 12),
             Text(mensaje, textAlign: TextAlign.center),
             if (accion != null) ...[

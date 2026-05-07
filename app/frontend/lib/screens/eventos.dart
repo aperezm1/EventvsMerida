@@ -2,10 +2,10 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:eventvsmerida/services/shared_preferences_service.dart';
+import 'package:eventvsmerida/utils/fecha_utils.dart';
 import 'package:eventvsmerida/widgets/componentes_compartidos.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 
 import '../models/api_response.dart';
@@ -40,6 +40,7 @@ class _EventosState extends State<Eventos> {
 
   Usuario? _usuario;
   List<Evento> _eventosGuardados = [];
+  FechaUtils fu = FechaUtils();
 
   Timer? _debounce;
   final TextEditingController _inputBusquedaController =
@@ -207,31 +208,14 @@ class _EventosState extends State<Eventos> {
     _actualizarResultadosBusqueda('');
   }
 
-  bool _esMismoDia(DateTime a, DateTime b) {
-    return a.year == b.year && a.month == b.month && a.day == b.day;
-  }
-
-  bool _esHoraCero(DateTime fecha) {
-    return fecha.hour == 0 && fecha.minute == 0;
-  }
-
-  String _formatearFecha(DateTime fecha) {
-    return DateFormat('dd/MM/yyyy').format(fecha);
-  }
-
-  String _formatearHora(DateTime fecha) {
-    return DateFormat('HH:mm').format(fecha);
-  }
-
   String _textoFechaHoraCard(Evento evento) {
-    final esMismoDia = _esMismoDia(evento.fechaInicio, evento.fechaFin);
-    final inicioFecha = _formatearFecha(evento.fechaInicio);
-    final finFecha = _formatearFecha(evento.fechaFin);
-    final inicioHora = _formatearHora(evento.fechaInicio);
-    final finHora = _formatearHora(evento.fechaFin);
+    final esMismoDia = fu.esMismoDia(evento.fechaInicio, evento.fechaFin);
+    final inicioFecha = fu.formatearFecha(evento.fechaInicio);
+    final finFecha = fu.formatearFecha(evento.fechaFin);
+    final inicioHora = fu.formatearHora(evento.fechaInicio);
+    final finHora = fu.formatearHora(evento.fechaFin);
     final horasIguales = inicioHora == finHora;
-    final ambasHorasCero =
-        _esHoraCero(evento.fechaInicio) && _esHoraCero(evento.fechaFin);
+    final ambasHorasCero = fu.esHoraCero(evento.fechaInicio) && fu.esHoraCero(evento.fechaFin);
 
     if (esMismoDia) {
       if (horasIguales && ambasHorasCero) return 'Fecha: $inicioFecha';
@@ -239,19 +223,13 @@ class _EventosState extends State<Eventos> {
       return 'Fecha: $inicioFecha · $inicioHora - $finHora';
     }
 
-    if (horasIguales && ambasHorasCero) {
-      return 'Fecha: $inicioFecha - $finFecha';
-    }
-
-    if (horasIguales) {
-      return 'Fecha: $inicioFecha - $finFecha · $inicioHora';
-    }
-
+    if (horasIguales && ambasHorasCero) return 'Fecha: $inicioFecha - $finFecha';
+    if (horasIguales) return 'Fecha: $inicioFecha - $finFecha · $inicioHora';
     return 'Fecha: $inicioFecha - $finFecha · $inicioHora - $finHora';
   }
 
   String _textoFechaBusqueda(Evento evento) {
-    return '${_formatearFecha(evento.fechaInicio)} · ${_formatearHora(evento.fechaInicio)}';
+    return '${fu.formatearFecha(evento.fechaInicio)} · ${fu.formatearHora(evento.fechaInicio)}';
   }
 
   void _onScroll() {
@@ -275,11 +253,7 @@ class _EventosState extends State<Eventos> {
     _fetchEventosPage();
   }
 
-  void _alternarCategoria(
-      Categoria categoria,
-      Set<int> categoriasTemporales,
-      void Function(void Function()) setStateModal,
-      ) {
+  void _alternarCategoria(Categoria categoria, Set<int> categoriasTemporales, void Function(void Function()) setStateModal) {
     setStateModal(() {
       if (categoriasTemporales.contains(categoria.id)) {
         categoriasTemporales.remove(categoria.id);
@@ -331,10 +305,7 @@ class _EventosState extends State<Eventos> {
     _limpiarFiltros();
   }
 
-  List<Evento> _obtenerEventosBusqueda(
-      ApiResponse<List<Evento>>? respuesta,
-      String tipo,
-      ) {
+  List<Evento> _obtenerEventosBusqueda(ApiResponse<List<Evento>>? respuesta, String tipo) {
     final eventos = List<Evento>.from(respuesta?.datos ?? const []);
 
     if (tipo.isEmpty) {
@@ -376,20 +347,16 @@ class _EventosState extends State<Eventos> {
       context: context,
       barrierDismissible: true,
       barrierColor: Colors.black.withValues(alpha: 0.2),
-      builder: (ctx) => Dialog(
-        backgroundColor: Colors.transparent,
-        insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-        child: ModalEvento(
-          eventos: [evento],
-          usuario: _usuario,
-          eventosGuardados: _eventosGuardados,
-          onEventosGuardadosActualizados: (nuevaLista) {
-            setState(() {
-              _eventosGuardados = nuevaLista;
-            });
-          },
-          mostrarBotonGuardado: true,
-        ),
+      builder: (ctx) => ModalEvento(
+        eventos: [evento],
+        usuario: _usuario,
+        eventosGuardados: _eventosGuardados,
+        onEventosGuardadosActualizados: (nuevaLista) {
+          setState(() {
+            _eventosGuardados = nuevaLista;
+          });
+        },
+        mostrarBotonGuardado: true,
       ),
     );
   }
@@ -766,17 +733,6 @@ class _EventosState extends State<Eventos> {
   }
 
   // ===========================================================================
-  // MENSAJES
-  // ===========================================================================
-
-  void _mostrarMensaje(String mensaje) {
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(mensaje)),
-    );
-  }
-
-  // ===========================================================================
   // INTERFAZ
   // ===========================================================================
 
@@ -857,16 +813,20 @@ class _EventosState extends State<Eventos> {
     );
   }
 
-  Widget _buildEstadoCentro({required IconData icono, required String mensaje}) {
+  Widget _buildEstadoCentro({required IconData icono, required String mensaje, Widget? accion}) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icono, size: 42),
+            Icon(icono, size: 42, color: _cs.primary),
             const SizedBox(height: 12),
             Text(mensaje, textAlign: TextAlign.center),
+            if (accion != null) ...[
+              const SizedBox(height: 12),
+              accion,
+            ],
           ],
         ),
       ),

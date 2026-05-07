@@ -330,28 +330,10 @@ class _PerfilState extends State<Perfil> {
     if (!mounted) return;
     Tutorial.numPantalla = 5;
     await SharedPreferencesService.finalizarTurorial();
+
+    if (!mounted) return;
     context.go('/eventos');
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.check, size: 20, color: Colors.white),
-            const SizedBox(width: 8),
-            Flexible(
-              child: Text(
-                '¡Has completado el tutorial!',
-                style: const TextStyle(color: Colors.white),
-              ),
-            ),
-          ],
-        ),
-        backgroundColor: Colors.green,
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-    );
+    Mensaje.mostrarSnackBar(context: context, mensaje: "¡Has completado el tutorial!", icon: Icons.help_outline, color: Colors.green);
   }
 
   void cargarPasosTutorial() {
