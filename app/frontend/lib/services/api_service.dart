@@ -148,7 +148,7 @@ class ApiService {
   /// PUT /api/usuarios/update/{id}
   static Future<ApiResponse<Usuario>> editarUsuario({
     required int idUsuario,
-    Map<String, dynamic>? datosUsuario,
+    required Map<String, dynamic>? datosUsuario,
     XFile? imagen,
   }) async {
     try {
@@ -156,7 +156,8 @@ class ApiService {
       final request = http.MultipartRequest('PUT', uri);
 
       // Enviar datos solo si vienen
-      request.fields['usuario'] = {}.toString();
+      request.fields['usuario'] = jsonEncode(datosUsuario);
+      print("AQUI ESTÁN LOS DATOS QUE SE ENVIAN: ${request.fields['usuario']}");
 
       // Enviar imagen solo si viene
       if (imagen != null) {
@@ -206,6 +207,11 @@ class ApiService {
           codigoEstado: 200,
         );
       }
+
+      print('========== RESPUESTA UPDATE ==========');
+      print('Status: ${response.statusCode}');
+      print('Body: ${response.body}');
+      print('======================================');
 
       return _manejarError<Usuario>(response);
     } on TimeoutException {

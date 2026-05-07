@@ -1,5 +1,6 @@
 import 'package:eventvsmerida/services/shared_preferences_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'dart:ui';
 import 'package:go_router/go_router.dart';
@@ -13,6 +14,7 @@ import '../core/router/app_routes.dart';
 import '../models/evento.dart';
 import '../models/usuario.dart';
 import '../services/api_service.dart';
+import '../utils/utils.dart';
 
 // ===========================================================================
 // 1. BARRA SUPERIOR
@@ -778,13 +780,8 @@ Future<XFile?> elegirImagen(BuildContext context) async {
     context: context,
     backgroundColor: Theme.of(context).colorScheme.surface,
     shape: RoundedRectangleBorder(
-      borderRadius: const BorderRadius.vertical(
-        top: Radius.circular(24),
-      ),
-      side: BorderSide(
-        color: Theme.of(context).colorScheme.primary,
-        width: 2,
-      ),
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      side: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
     ),
     builder: (context) {
       return SafeArea(
@@ -819,6 +816,313 @@ Future<XFile?> elegirImagen(BuildContext context) async {
 
     return imagen;
   } catch (e) {
-    debugPrint('Error al elegir imagen: $e');
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Error al seleccionar la imagen')),
+    );
+    return null;
+  }
+}
+
+typedef CampoTextoBuilder =
+    Widget Function(
+      String label, {
+      required TextEditingController controller,
+      TextInputType? keyboardType,
+      bool isPassword,
+      bool obscureText,
+      VoidCallback? onToggle,
+      bool readOnly,
+      bool isDropdown,
+      int? maxLength,
+      List<TextInputFormatter>? inputFormatters,
+    });
+
+typedef ValidadorCampo = String? Function(String label, String? value);
+
+class CampoTexto {
+  static Widget buildCampoTexto(String label, {
+    required BuildContext context,
+    required TextEditingController controller,
+    required ValidadorCampo validator,
+    TextInputType? keyboardType,
+    bool isPassword = false,
+    bool obscureText = false,
+    VoidCallback? onToggle,
+    bool readOnly = false,
+    bool isDropdown = false,
+    bool obligatorio = false,
+    int? maxLength,
+    List<TextInputFormatter>? inputFormatters,
+  }) {
+    final cs = Theme
+        .of(context)
+        .colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 15),
+      child: TextFormField(
+        controller: controller,
+        keyboardType: keyboardType,
+        readOnly: readOnly,
+        style: TextStyle(color: cs.onSurface),
+        validator: (value) => validator(label, value),
+        decoration: buildDecoration(
+          context: context,
+          label: label,
+          obligatorio: obligatorio,
+          suffixIcon: isPassword
+              ? IconButton(
+            icon: Icon(
+              obscureText ? Icons.visibility_off : Icons.visibility,
+              color: cs.primary.withValues(alpha: 0.6),
+            ),
+            onPressed: onToggle,
+          )
+              : (isDropdown ? const Icon(Icons.arrow_drop_down) : null),
+        ).copyWith(counterText: maxLength != null ? '' : null),
+        obscureText: isPassword ? obscureText : false,
+        maxLength: maxLength,
+        inputFormatters: inputFormatters,
+      ),
+    );
+  }
+
+  static InputDecoration buildDecoration({
+    required BuildContext context,
+    required String label,
+    Widget? suffixIcon,
+    bool obligatorio = false,
+  }) {
+    final cs = Theme
+        .of(context)
+        .colorScheme;
+
+    return InputDecoration(
+      label: RichText(
+        text: TextSpan(
+          text: label,
+          style: TextStyle(
+            color: cs.onSurface.withValues(alpha: 0.7),
+            fontSize: 16,
+          ),
+          children: obligatorio
+              ? const [
+            TextSpan(
+              text: ' *',
+              style: TextStyle(
+                color: Colors.red,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ]
+              : [],
+        ),
+      ),
+      suffixIcon: suffixIcon,
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(20),
+        borderSide: BorderSide(
+          color: cs.onSurface.withValues(alpha: 0.4),
+        ),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(20),
+        borderSide: BorderSide(
+          color: cs.primary,
+          width: 2,
+        ),
+      ),
+    );
+  }
+}
+
+class CampoObligatorio extends StatelessWidget {
+  final String texto;
+  final bool obligatorio;
+  final TextStyle? style;
+
+  const CampoObligatorio({
+    super.key,
+    required this.texto,
+    this.obligatorio = true,
+    this.style,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    return RichText(
+      text: TextSpan(
+        text: texto,
+        style: style ??
+            TextStyle(
+              color: cs.onSurface.withValues(alpha: 0.7),
+              fontSize: 16,
+            ),
+        children: obligatorio
+            ? const [
+          TextSpan(
+            text: ' *',
+            style: TextStyle(
+              color: Colors.red,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ]
+            : [],
+      ),
+    );
+  }
+}
+
+class SelectorFecha {
+  // ===========================================================================
+  // VARIABLES
+  // ===========================================================================
+
+  static String? mesSeleccionado;
+
+  static const List<String> meses = [
+    'Enero',
+    'Febrero',
+    'Marzo',
+    'Abril',
+    'Mayo',
+    'Junio',
+    'Julio',
+    'Agosto',
+    'Septiembre',
+    'Octubre',
+    'Noviembre',
+    'Diciembre',
+  ];
+
+  static const Map<String, String> mesNumero = {
+    'Enero': '01',
+    'Febrero': '02',
+    'Marzo': '03',
+    'Abril': '04',
+    'Mayo': '05',
+    'Junio': '06',
+    'Julio': '07',
+    'Agosto': '08',
+    'Septiembre': '09',
+    'Octubre': '10',
+    'Noviembre': '11',
+    'Diciembre': '12',
+  };
+
+  // ===========================================================================
+  // FUNCIONES AUXILIARES
+  // ===========================================================================
+
+  static String _mesANumero(String mes) {
+    return mesNumero[mes] ?? '01';
+  }
+
+  static String? obtenerFechaFormateada(
+    TextEditingController diaController,
+    TextEditingController anioController,
+  ) {
+    if (mesSeleccionado == null) {
+      return null;
+    }
+
+    final dia = int.tryParse(diaController.text.trim());
+    final anio = int.tryParse(anioController.text.trim());
+    final mes = int.parse(_mesANumero(mesSeleccionado!));
+
+    if (dia == null || anio == null) {
+      return null;
+    }
+
+    try {
+      final fecha = DateTime(anio, mes, dia);
+      final fechaValida =
+          fecha.day == dia && fecha.month == mes && fecha.year == anio;
+
+      if (!fechaValida || fecha.isAfter(DateTime.now())) {
+        return null;
+      }
+
+      final diaTxt = dia.toString().padLeft(2, '0');
+      final mesTxt = mes.toString().padLeft(2, '0');
+      return '$diaTxt/$mesTxt/$anio';
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static Widget buildFilaFecha({
+    required BuildContext context,
+    required TextEditingController diaController,
+    required TextEditingController mesController,
+    required TextEditingController anioController,
+    required ValueChanged<String> onSeleccionarMes,
+    required ValidadorCampo validator,
+    required bool obligatorio,
+  }) {
+    final cs = Theme.of(context).colorScheme;
+
+    return Row(
+      children: [
+        Expanded(
+          child: CampoTexto.buildCampoTexto(
+            'Día',
+            context: context,
+            controller: diaController,
+            validator: validator,
+            keyboardType: TextInputType.number,
+            maxLength: 2,
+            inputFormatters: [DayRangeTextInputFormatter()],
+            obligatorio: obligatorio
+          ),
+        ),
+
+        const SizedBox(width: 10),
+
+        Expanded(
+          child: PopupMenuButton<String>(
+            constraints: const BoxConstraints(maxHeight: 200, minWidth: 120),
+            onSelected: onSeleccionarMes,
+            itemBuilder: (context) {
+              return meses.map((mes) {
+                return PopupMenuItem<String>(
+                  value: mes,
+                  child: Text(mes, style: TextStyle(color: cs.onSurface)),
+                );
+              }).toList();
+            },
+            child: AbsorbPointer(
+              child: CampoTexto.buildCampoTexto(
+                'Mes',
+                context: context,
+                controller: mesController,
+                validator: validator,
+                readOnly: true,
+                isDropdown: true,
+                obligatorio: obligatorio
+              ),
+            ),
+          ),
+        ),
+
+        const SizedBox(width: 10),
+
+        Expanded(
+          child: CampoTexto.buildCampoTexto(
+            'Año',
+            context: context,
+            controller: anioController,
+            validator: validator,
+            keyboardType: TextInputType.number,
+            maxLength: 4,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            obligatorio: obligatorio
+          ),
+        ),
+      ],
+    );
   }
 }

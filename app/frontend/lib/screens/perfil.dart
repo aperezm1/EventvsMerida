@@ -183,24 +183,34 @@ class _PerfilState extends State<Perfil> {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        CircleAvatar(
-          backgroundColor: _cs.surface.withValues(alpha: 0.9),
-          radius: 45,
-          child: _usuario?.fotoUrl != null && _usuario!.fotoUrl!.isNotEmpty
-              ? ClipOval(
-            child: FadeInImage.assetNetwork(
-              placeholder: 'assets/images/icono.gif',
-              image: _usuario!.fotoUrl!,
-              width: 90,
-              height: 90,
-              fit: BoxFit.cover,
-              placeholderFit: BoxFit.contain,
+        Container(
+          width: 96,
+          height: 96,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: _cs.surface,
+              width: 2,
             ),
-          )
-              : Icon(
-            Icons.person,
-            color: _cs.primary,
-            size: 34,
+          ),
+          child: ClipOval(
+            child: Container(
+              color: _cs.surface.withValues(alpha: 0.9),
+              child: _usuario?.fotoUrl != null && _usuario!.fotoUrl!.isNotEmpty
+                  ? FadeInImage.assetNetwork(
+                placeholder: 'assets/images/icono.gif',
+                image: _usuario!.fotoUrl!,
+                width: 90,
+                height: 90,
+                fit: BoxFit.cover,
+                placeholderFit: BoxFit.contain,
+              )
+                  : Icon(
+                Icons.person,
+                color: _cs.primary,
+                size: 34,
+              ),
+            ),
           ),
         ),
         const SizedBox(height: 8),
