@@ -40,37 +40,7 @@ class _RegistroState extends State<Registro> {
   bool _aceptaTerminos = false;
   bool _ocultarPassword = true;
   bool _ocultarRepetirPassword = true;
-  String? _mesSeleccionado;
 
-  static const List<String> _meses = [
-    'Enero',
-    'Febrero',
-    'Marzo',
-    'Abril',
-    'Mayo',
-    'Junio',
-    'Julio',
-    'Agosto',
-    'Septiembre',
-    'Octubre',
-    'Noviembre',
-    'Diciembre',
-  ];
-
-  static const Map<String, String> _mesNumero = {
-    'Enero': '01',
-    'Febrero': '02',
-    'Marzo': '03',
-    'Abril': '04',
-    'Mayo': '05',
-    'Junio': '06',
-    'Julio': '07',
-    'Agosto': '08',
-    'Septiembre': '09',
-    'Octubre': '10',
-    'Noviembre': '11',
-    'Diciembre': '12',
-  };
 
   ColorScheme get _cs => Theme.of(context).colorScheme;
 
@@ -90,14 +60,6 @@ class _RegistroState extends State<Registro> {
     _mesController.dispose();
     _anioController.dispose();
     super.dispose();
-  }
-
-  // ===========================================================================
-  // FUNCIONES AUXILIARES
-  // ===========================================================================
-
-  String _mesANumero(String mes) {
-    return _mesNumero[mes] ?? '01';
   }
 
   String? _validarCampo(String label, String? value) {
@@ -135,35 +97,6 @@ class _RegistroState extends State<Registro> {
     return null;
   }
 
-  String? _obtenerFechaFormateada() {
-    if (_mesSeleccionado == null) {
-      return null;
-    }
-
-    final dia = int.tryParse(_diaController.text.trim());
-    final anio = int.tryParse(_anioController.text.trim());
-    final mes = int.parse(_mesANumero(_mesSeleccionado!));
-
-    if (dia == null || anio == null) {
-      return null;
-    }
-
-    try {
-      final fecha = DateTime(anio, mes, dia);
-      final fechaValida = fecha.day == dia && fecha.month == mes && fecha.year == anio;
-
-      if (!fechaValida || fecha.isAfter(DateTime.now())) {
-        return null;
-      }
-
-      final diaTxt = dia.toString().padLeft(2, '0');
-      final mesTxt = mes.toString().padLeft(2, '0');
-      return '$diaTxt/$mesTxt/$anio';
-    } catch (_) {
-      return null;
-    }
-  }
-
   Map<String, dynamic> _crearBodyRegistro(String fechaNacimiento) {
     return {
       'nombre': _nombreController.text.trim(),
@@ -187,12 +120,12 @@ class _RegistroState extends State<Registro> {
       return;
     }
 
-    if (_mesSeleccionado == null) {
+    if (SelectorFecha.mesSeleccionado == null) {
       _mostrarSnackBar('Selecciona un mes', exito: false);
       return;
     }
 
-    final fechaNacimiento = _obtenerFechaFormateada();
+    final fechaNacimiento = SelectorFecha.obtenerFechaFormateada(_diaController, _anioController);
     if (fechaNacimiento == null) {
       _mostrarSnackBar('Fecha inválida o futura', exito: false);
       return;
@@ -218,9 +151,9 @@ class _RegistroState extends State<Registro> {
     context.go(AppRoutes.eventos);
   }
 
-  void _seleccionarMes(String mes) {
+  void seleccionarMes(String mes) {
     setState(() {
-      _mesSeleccionado = mes;
+      SelectorFecha.mesSeleccionado = mes;
       _mesController.text = mes;
     });
   }
@@ -245,6 +178,43 @@ class _RegistroState extends State<Registro> {
 
   void _irALogin() {
     context.push(AppRoutes.login);
+  }
+
+  Widget _buildHeader() {
+    return SafeArea(
+      top: true,
+      left: false,
+      right: false,
+      bottom: false,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 35.0, horizontal: 16.0),
+        color: _cs.primary,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Navigator.canPop(context) ? IconButton(
+                icon: Icon(Icons.arrow_back, color: _cs.surface),
+                onPressed: () {
+                  context.pop();
+                },
+              ) : const SizedBox.shrink(),
+            ),
+
+            Text(
+              'Crear cuenta',
+              style: TextStyle(
+                color: _cs.surface,
+                fontSize: 25,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   // ===========================================================================
@@ -289,166 +259,24 @@ class _RegistroState extends State<Registro> {
   // INTERFAZ
   // ===========================================================================
 
-  InputDecoration _buildDecoration({required String label, Widget? suffixIcon}) {
-    return InputDecoration(
-      labelText: label,
-      labelStyle: TextStyle(color: _cs.onSurface.withValues(alpha: 0.7)),
-      suffixIcon: suffixIcon,
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(20),
-        borderSide: BorderSide(color: _cs.onSurface.withValues(alpha: 0.4)),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(20),
-        borderSide: BorderSide(color: _cs.primary, width: 2),
-      ),
-    );
-  }
-
-  Widget _buildHeader() {
-    return SafeArea(
-      top: true,
-      left: false,
-      right: false,
-      bottom: false,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 35.0, horizontal: 16.0),
-        color: _cs.primary,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Navigator.canPop(context) ? IconButton(
-                icon: Icon(Icons.arrow_back, color: _cs.surface),
-                onPressed: () {
-                  context.pop();
-                },
-              ) : const SizedBox.shrink(),
-            ),
-
-            Text(
-              'Crear cuenta',
-              style: TextStyle(
-                color: _cs.surface,
-                fontSize: 25,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCampoTexto(
-      String label, {
-        required TextEditingController controller,
-        TextInputType? keyboardType,
-        bool isPassword = false,
-        bool obscureText = false,
-        VoidCallback? onToggle,
-        bool readOnly = false,
-        bool isDropdown = false,
-        int? maxLength,
-        List<TextInputFormatter>? inputFormatters,
-      }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 15),
-      child: TextFormField(
-        controller: controller,
-        keyboardType: keyboardType,
-        readOnly: readOnly,
-        style: TextStyle(color: _cs.onSurface),
-        validator: (value) => _validarCampo(label, value),
-        decoration: _buildDecoration(
-          label: label,
-          suffixIcon: isPassword
-              ? IconButton(
-            icon: Icon(
-              obscureText ? Icons.visibility_off : Icons.visibility,
-              color: _cs.primary.withValues(alpha: 0.6),
-            ),
-            onPressed: onToggle,
-          )
-              : (isDropdown ? const Icon(Icons.arrow_drop_down) : null),
-        ).copyWith(counterText: maxLength != null ? '' : null),
-        obscureText: isPassword ? obscureText : false,
-        maxLength: maxLength,
-        inputFormatters: inputFormatters,
-      ),
-    );
-  }
-
   Widget _buildFilaNombreApellidos() {
     return Row(
       children: [
         Expanded(
-          child: _buildCampoTexto(
+          child: CampoTexto.buildCampoTexto(
             'Nombre',
             controller: _nombreController,
+            validator: _validarCampo,
+            context: context
           ),
         ),
         const SizedBox(width: 15),
         Expanded(
-          child: _buildCampoTexto(
+          child: CampoTexto.buildCampoTexto(
             'Apellido',
             controller: _apellidosController,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildFilaFecha() {
-    return Row(
-      children: [
-        Expanded(
-          child: _buildCampoTexto(
-            'Día',
-            controller: _diaController,
-            keyboardType: TextInputType.number,
-            maxLength: 2,
-            inputFormatters: [DayRangeTextInputFormatter()],
-          ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: PopupMenuButton<String>(
-            constraints: const BoxConstraints(maxHeight: 200, minWidth: 120),
-            onSelected: _seleccionarMes,
-            itemBuilder: (context) {
-              return _meses
-                  .map(
-                    (mes) => PopupMenuItem<String>(
-                      value: mes,
-                      child: Text(
-                        mes,
-                        style: TextStyle(color: _cs.onSurface),
-                      ),
-                    ),
-                  )
-                  .toList();
-            },
-            child: AbsorbPointer(
-              child: _buildCampoTexto(
-                'Mes',
-                controller: _mesController,
-                readOnly: true,
-                isDropdown: true,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: _buildCampoTexto(
-            'Año',
-            controller: _anioController,
-            keyboardType: TextInputType.number,
-            maxLength: 4,
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            validator: _validarCampo,
+            context: context
           ),
         ),
       ],
@@ -586,32 +414,40 @@ class _RegistroState extends State<Registro> {
         mainAxisSize: MainAxisSize.min,
         children: [
           _buildFilaNombreApellidos(),
-          _buildCampoTexto(
+          CampoTexto.buildCampoTexto(
             'Correo',
             controller: _correoController,
             keyboardType: TextInputType.emailAddress,
+            validator: _validarCampo,
+            context: context
           ),
-          _buildCampoTexto(
+          CampoTexto.buildCampoTexto(
             'Contraseña',
             controller: _passwordController,
             isPassword: true,
             obscureText: _ocultarPassword,
             onToggle: _alternarPassword,
+            validator: _validarCampo,
+            context: context
           ),
-          _buildCampoTexto(
+          CampoTexto.buildCampoTexto(
             'Repetir contraseña',
             controller: _repetirPasswordController,
             isPassword: true,
             obscureText: _ocultarRepetirPassword,
             onToggle: _alternarRepetirPassword,
+            validator: _validarCampo,
+            context: context
           ),
-          _buildCampoTexto(
+          CampoTexto.buildCampoTexto(
             'Número de teléfono',
             controller: _telefonoController,
             keyboardType: TextInputType.number,
+            validator: _validarCampo,
+            context: context
           ),
           const SizedBox(height: 10),
-          _buildFilaFecha(),
+          SelectorFecha.buildFilaFecha(context: context, diaController: _diaController, mesController: _mesController, anioController: _anioController, onSeleccionarMes: seleccionarMes, validator: _validarCampo),
           const SizedBox(height: 10),
           _buildSelectorImagen(),
           const SizedBox(height: 15),

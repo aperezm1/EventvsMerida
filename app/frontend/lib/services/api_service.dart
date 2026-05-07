@@ -148,7 +148,7 @@ class ApiService {
   /// PUT /api/usuarios/update/{id}
   static Future<ApiResponse<Usuario>> editarUsuario({
     required int idUsuario,
-    Map<String, dynamic>? datosUsuario,
+    required Map<String, dynamic>? datosUsuario,
     XFile? imagen,
   }) async {
     try {

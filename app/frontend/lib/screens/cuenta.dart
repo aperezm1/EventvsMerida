@@ -26,15 +26,18 @@ class _CuentaState extends State<Cuenta> {
 
   ColorScheme get _cs => Theme.of(context).colorScheme;
 
-  final _nombreController = TextEditingController();
-  final _apellidosController = TextEditingController();
-  final _fechaNacController = TextEditingController();
-  final _correoController = TextEditingController();
-  final _telefonoController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _repetirPasswordController = TextEditingController();
+  final TextEditingController _nombreController = TextEditingController();
+  final TextEditingController _apellidosController = TextEditingController();
+  final TextEditingController _correoController = TextEditingController();
+  final TextEditingController _telefonoController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _repetirPasswordController = TextEditingController();
+  final TextEditingController _diaController = TextEditingController();
+  final TextEditingController _mesController = TextEditingController();
+  final TextEditingController _anioController = TextEditingController();
 
-  final _formKey = GlobalKey<FormState>();
+  final _formDatosKey = GlobalKey<FormState>();
+  final _formContraseniaKey = GlobalKey<FormState>();
 
   // ===========================================================================
   // CICLO DE VIDA
@@ -54,7 +57,9 @@ class _CuentaState extends State<Cuenta> {
     _passwordController.dispose();
     _repetirPasswordController.dispose();
     _telefonoController.dispose();
-    _fechaNacController.dispose();
+    _diaController.dispose();
+    _mesController.dispose();
+    _anioController.dispose();
     super.dispose();
   }
 
@@ -71,11 +76,7 @@ class _CuentaState extends State<Cuenta> {
       _usuario = usuario;
 
       if (usuario != null) {
-        _nombreController.text = usuario.nombre;
-        _apellidosController.text = usuario.apellidos;
-        _fechaNacController.text = _formatearFechaNacimiento(usuario.fechaNacimiento);
-        _correoController.text = usuario.email;
-        _telefonoController.text = usuario.telefono;
+        _rellenarControllersDesdeUsuario(usuario);
       }
     });
   }
@@ -99,6 +100,7 @@ class _CuentaState extends State<Cuenta> {
 
     final respuesta = await ApiService.editarUsuario(
       idUsuario: _usuario!.id,
+      datosUsuario: {},
       imagen: imagenSeleccionada,
     );
 
@@ -159,6 +161,74 @@ class _CuentaState extends State<Cuenta> {
     final mesTxt = fecha.month.toString().padLeft(2, '0');
     final anio = fecha.year.toString().padLeft(2, '0');
     return '$diaTxt/$mesTxt/$anio';
+  }
+
+  String? _validarCampo(String label, String? value) {
+    final texto = (value ?? '').trim();
+
+    if (texto.isEmpty) {
+      return 'Este campo es obligatorio';
+    }
+
+
+    if (label == 'Nombre' || label == 'Apellidos') {
+      if (texto.isEmpty) {
+        return 'Este campo es obligatorio';
+      }
+    }
+
+    if (label == 'Correo') {
+      final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
+      if (!emailRegex.hasMatch(texto)) {
+        return 'Introduce un email válido';
+      }
+    }
+
+    if (label == 'Teléfono') {
+      final phoneRegex = RegExp(r'^[679]\d{8}$');
+      if (!phoneRegex.hasMatch(texto)) {
+        return 'Debe tener 9 dígitos y empezar por 6, 7 o 9';
+      }
+    }
+
+    if (label == 'Contraseña') {
+      final passwordRegex = RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$');
+      if (!passwordRegex.hasMatch(texto)) {
+        return 'Debe tener 8 carácteres, mayúscula, minúscula y número';
+      }
+    }
+
+    if (label == 'Confirmar contraseña' && texto != _passwordController.text) {
+      return 'Las contraseñas deben coincidir';
+    }
+
+    return null;
+  }
+
+  void seleccionarMes(String mes) {
+    setState(() {
+      SelectorFecha.mesSeleccionado = mes;
+      _mesController.text = mes;
+    });
+  }
+
+  void _limpiarCamposContrasenia() {
+    _passwordController.clear();
+    _repetirPasswordController.clear();
+  }
+
+  void _rellenarControllersDesdeUsuario(Usuario usuario) {
+    _nombreController.text = usuario.nombre;
+    _apellidosController.text = usuario.apellidos;
+    _correoController.text = usuario.email;
+    _telefonoController.text = usuario.telefono;
+
+    final fecha = usuario.fechaNacimiento;
+
+    _diaController.text = fecha.day.toString().padLeft(2, '0');
+    _mesController.text = SelectorFecha.meses[fecha.month - 1];
+    SelectorFecha.mesSeleccionado = _mesController.text;
+    _anioController.text = fecha.year.toString();
   }
 
   // ===========================================================================
@@ -343,6 +413,7 @@ class _CuentaState extends State<Cuenta> {
                   minimumSize: const Size.fromHeight(48),
                 ),
                 onPressed: () {
+                  _limpiarCamposContrasenia();
                   _buildModalEditarContrasenia();
                 },
               ),
@@ -400,25 +471,16 @@ class _CuentaState extends State<Cuenta> {
     );
   }
 
-  Map<String, dynamic> _buildBodyEditar() {
-    final body = {
+  Map<String, dynamic> _buildBodyEditar(String fechaNacimiento, {bool incluirPassword = false}) {
+   return {
       'nombre': _nombreController.text.trim(),
       'apellidos': _apellidosController.text.trim(),
-      'fechaNacimiento': _fechaNacController.text.trim(),
+      'fechaNacimiento': fechaNacimiento,
       'email': _correoController.text.trim(),
       'telefono': _telefonoController.text.trim(),
-      'password': _passwordController.text.trim(),
+      'password': incluirPassword ? _passwordController.text.trim() : null,
       'fotoPath': null,
     };
-
-    debugPrint('========== BODY EDITAR ==========');
-    debugPrint('ID usuario: ${_usuario?.id}');
-    debugPrint('Body enviado: ${jsonEncode(body)}');
-    debugPrint('Password: ${_passwordController.text}');
-    debugPrint('Repetir password: ${_repetirPasswordController.text}');
-    debugPrint('=================================');
-
-    return body;
   }
 
   Future<void> _buildModalEditarDatos() async {
@@ -439,7 +501,7 @@ class _CuentaState extends State<Cuenta> {
             bottom: MediaQuery.of(context).viewInsets.bottom + 24,
           ),
           child: Form(
-            key: _formKey,
+            key: _formDatosKey,
             child: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -457,7 +519,7 @@ class _CuentaState extends State<Cuenta> {
                   Text(
                     'Editar datos',
                     style: TextStyle(
-                      color: _cs.primary,
+                      color: _cs.surface,
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
@@ -468,12 +530,7 @@ class _CuentaState extends State<Cuenta> {
                   TextFormField(
                     controller: _nombreController,
                     decoration: _decorationModal('Nombre', Icons.person),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'El nombre es obligatorio';
-                      }
-                      return null;
-                    },
+                    validator: (value) => _validarCampo('Nombre', value),
                   ),
 
                   const SizedBox(height: 12),
@@ -481,30 +538,12 @@ class _CuentaState extends State<Cuenta> {
                   TextFormField(
                     controller: _apellidosController,
                     decoration: _decorationModal('Apellidos', Icons.badge),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Los apellidos son obligatorios';
-                      }
-                      return null;
-                    },
+                    validator: (value) => _validarCampo('Apellidos', value),
                   ),
 
                   const SizedBox(height: 12),
 
-                  TextFormField(
-                    controller: _fechaNacController,
-                    decoration: _decorationModal(
-                      'Fecha de nacimiento',
-                      Icons.cake,
-                    ),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'La fecha de nacimiento es obligatoria';
-                      }
-                      return null;
-                    },
-                  ),
-
+                  SelectorFecha.buildFilaFecha(context: context, diaController: _diaController, mesController: _mesController, anioController: _anioController, onSeleccionarMes: seleccionarMes, validator: _validarCampo),
                   const SizedBox(height: 12),
 
                   TextFormField(
@@ -514,20 +553,7 @@ class _CuentaState extends State<Cuenta> {
                       'Correo electrónico',
                       Icons.email,
                     ),
-                    validator: (value) {
-                      final texto = value?.trim() ?? '';
-                      final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
-
-                      if (texto.isEmpty) {
-                        return 'El correo es obligatorio';
-                      }
-
-                      if (!emailRegex.hasMatch(texto)) {
-                        return 'Introduce un correo válido';
-                      }
-
-                      return null;
-                    },
+                    validator: (value) => _validarCampo('Correo', value),
                   ),
 
                   const SizedBox(height: 12),
@@ -536,20 +562,7 @@ class _CuentaState extends State<Cuenta> {
                     controller: _telefonoController,
                     keyboardType: TextInputType.phone,
                     decoration: _decorationModal('Teléfono', Icons.phone),
-                    validator: (value) {
-                      final texto = value?.trim() ?? '';
-                      final phoneRegex = RegExp(r'^[679]\d{8}$');
-
-                      if (texto.isEmpty) {
-                        return 'El teléfono es obligatorio';
-                      }
-
-                      if (!phoneRegex.hasMatch(texto)) {
-                        return 'Debe tener 9 dígitos y empezar por 6, 7 o 9';
-                      }
-
-                      return null;
-                    },
+                    validator: (value) => _validarCampo('Teléfono', value),
                   ),
 
                   const SizedBox(height: 24),
@@ -559,7 +572,11 @@ class _CuentaState extends State<Cuenta> {
                       Expanded(
                         child: OutlinedButton(
                           onPressed: () {
-                            Navigator.pop(context);
+                              if (_usuario != null) {
+                                _rellenarControllersDesdeUsuario(_usuario!);
+                              }
+
+                              Navigator.pop(context);
                           },
                           style: OutlinedButton.styleFrom(
                             foregroundColor: _cs.primary,
@@ -575,11 +592,26 @@ class _CuentaState extends State<Cuenta> {
                       Expanded(
                         child: ElevatedButton(
                           onPressed: () async {
-                            if (!_formKey.currentState!.validate()) return;
+                            if (!_formDatosKey.currentState!.validate()) return;
+
+                            final fechaNacimiento = SelectorFecha.obtenerFechaFormateada(
+                              _diaController,
+                              _anioController,
+                            );
+
+                            if (fechaNacimiento == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: const Text('Fecha inválida o futura'),
+                                  backgroundColor: _cs.error,
+                                ),
+                              );
+                              return;
+                            }
 
                             final respuesta = await ApiService.editarUsuario(
                               idUsuario: _usuario!.id,
-                              datosUsuario: _buildBodyEditar(),
+                              datosUsuario: _buildBodyEditar(fechaNacimiento),
                             );
 
                             if (!mounted) return;
@@ -593,16 +625,14 @@ class _CuentaState extends State<Cuenta> {
 
                               await SharedPreferencesService.iniciarSesion(
                                 usuario: respuesta.datos!,
-                                autoLogin: false,
+                                autoLogin: await SharedPreferencesService.getAutoLogin(),
                               );
 
                               if (!mounted) return;
 
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content: Text(
-                                    'Datos actualizados correctamente',
-                                  ),
+                                  content: Text('Datos actualizados correctamente'),
                                   backgroundColor: Colors.green,
                                 ),
                               );
@@ -620,7 +650,7 @@ class _CuentaState extends State<Cuenta> {
                             foregroundColor: _cs.onPrimary,
                             minimumSize: const Size.fromHeight(48),
                           ),
-                          child: const Text('Guardar'),
+                          child: Text('Editar datos', style: TextStyle(color: _cs.surface)),
                         ),
                       ),
                     ],
@@ -632,6 +662,7 @@ class _CuentaState extends State<Cuenta> {
         );
       },
     );
+    _rellenarControllersDesdeUsuario(_usuario!);
   }
 
   Future<void> _buildModalEditarContrasenia() async {
@@ -652,7 +683,7 @@ class _CuentaState extends State<Cuenta> {
             bottom: MediaQuery.of(context).viewInsets.bottom + 24,
           ),
           child: Form(
-            key: _formKey,
+            key: _formContraseniaKey,
             child: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -682,12 +713,7 @@ class _CuentaState extends State<Cuenta> {
                     controller: _passwordController,
                     keyboardType: TextInputType.visiblePassword,
                     decoration: _decorationModal('Contraseña nueva', Icons.key),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'La contraseña es obligatoria';
-                      }
-                      return null;
-                    },
+                    validator: (value) => _validarCampo('Contraseña', value),
                   ),
 
                   const SizedBox(height: 20),
@@ -699,12 +725,7 @@ class _CuentaState extends State<Cuenta> {
                       'Confirmar contraseña',
                       Icons.key,
                     ),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'La confirmación de contraseña es obligatoria';
-                      }
-                      return null;
-                    },
+                    validator: (value) => _validarCampo('Confirmar contraseña', value),
                   ),
 
                   const SizedBox(height: 20),
@@ -730,11 +751,16 @@ class _CuentaState extends State<Cuenta> {
                       Expanded(
                         child: ElevatedButton(
                           onPressed: () async {
-                            if (!_formKey.currentState!.validate()) return;
+                            if (!_formContraseniaKey.currentState!.validate()) return;
+
+                            final fechaNacimiento = SelectorFecha.obtenerFechaFormateada(
+                              _diaController,
+                              _anioController,
+                            );
 
                             final respuesta = await ApiService.editarUsuario(
                               idUsuario: _usuario!.id,
-                              datosUsuario: _buildBodyEditar(),
+                              datosUsuario: _buildBodyEditar(fechaNacimiento!, incluirPassword: true),
                             );
 
                             if (!mounted) return;
@@ -787,6 +813,7 @@ class _CuentaState extends State<Cuenta> {
         );
       },
     );
+    _limpiarCamposContrasenia();
   }
 
   // ===========================================================================
