@@ -267,7 +267,8 @@ class _RegistroState extends State<Registro> {
             'Nombre',
             controller: _nombreController,
             validator: _validarCampo,
-            context: context
+            context: context,
+            obligatorio: true
           ),
         ),
         const SizedBox(width: 15),
@@ -276,7 +277,8 @@ class _RegistroState extends State<Registro> {
             'Apellido',
             controller: _apellidosController,
             validator: _validarCampo,
-            context: context
+            context: context,
+            obligatorio: true
           ),
         ),
       ],
@@ -294,10 +296,13 @@ class _RegistroState extends State<Registro> {
           side: BorderSide(color: _cs.onSurface.withValues(alpha: 0.5)),
         ),
         Expanded(
-          child: Text(
-            'He leído y acepto los Terminos y condiciones y la Política de Privacidad',
-            style: TextStyle(color: _cs.onSurface, fontSize: 12),
-          ),
+          child: CampoObligatorio(
+            texto: 'He leído y acepto los Terminos y condiciones y la Política de Privacidad',
+            style: TextStyle(
+              color: _cs.onSurface,
+              fontSize: 12,
+            ),
+          )
         ),
       ],
     );
@@ -335,8 +340,8 @@ class _RegistroState extends State<Registro> {
                       color: _cs.primary,
                     ),
                     SizedBox(width: 12),
-                    Text(
-                      'Seleccionar foto de perfil',
+                    CampoObligatorio(
+                      texto: 'Seleccionar foto de perfil',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -419,7 +424,8 @@ class _RegistroState extends State<Registro> {
             controller: _correoController,
             keyboardType: TextInputType.emailAddress,
             validator: _validarCampo,
-            context: context
+            context: context,
+            obligatorio: true
           ),
           CampoTexto.buildCampoTexto(
             'Contraseña',
@@ -428,7 +434,8 @@ class _RegistroState extends State<Registro> {
             obscureText: _ocultarPassword,
             onToggle: _alternarPassword,
             validator: _validarCampo,
-            context: context
+            context: context,
+            obligatorio: true
           ),
           CampoTexto.buildCampoTexto(
             'Repetir contraseña',
@@ -437,17 +444,19 @@ class _RegistroState extends State<Registro> {
             obscureText: _ocultarRepetirPassword,
             onToggle: _alternarRepetirPassword,
             validator: _validarCampo,
-            context: context
+            context: context,
+            obligatorio: true
           ),
           CampoTexto.buildCampoTexto(
             'Número de teléfono',
             controller: _telefonoController,
             keyboardType: TextInputType.number,
             validator: _validarCampo,
-            context: context
+            context: context,
+            obligatorio: true
           ),
           const SizedBox(height: 10),
-          SelectorFecha.buildFilaFecha(context: context, diaController: _diaController, mesController: _mesController, anioController: _anioController, onSeleccionarMes: seleccionarMes, validator: _validarCampo),
+          SelectorFecha.buildFilaFecha(context: context, diaController: _diaController, mesController: _mesController, anioController: _anioController, onSeleccionarMes: seleccionarMes, validator: _validarCampo, obligatorio: true),
           const SizedBox(height: 10),
           _buildSelectorImagen(),
           const SizedBox(height: 15),

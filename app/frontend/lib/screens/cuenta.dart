@@ -166,16 +166,16 @@ class _CuentaState extends State<Cuenta> {
   String? _validarCampo(String label, String? value) {
     final texto = (value ?? '').trim();
 
-    if (texto.isEmpty) {
-      return 'Este campo es obligatorio';
-    }
-
-
-    if (label == 'Nombre' || label == 'Apellidos') {
-      if (texto.isEmpty) {
-        return 'Este campo es obligatorio';
-      }
-    }
+    // if (texto.isEmpty) {
+    //   return 'Este campo es obligatorio';
+    // }
+    //
+    //
+    // if (label == 'Nombre' || label == 'Apellidos') {
+    //   if (texto.isEmpty) {
+    //     return 'Este campo es obligatorio';
+    //   }
+    // }
 
     if (label == 'Correo') {
       final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
@@ -351,16 +351,29 @@ class _CuentaState extends State<Cuenta> {
 
             GestureDetector(
               onTap: _editarImagenPerfil,
-              child: Stack(
-                alignment: Alignment.bottomRight,
-                children: [
-                  CircleAvatar(
-                    backgroundColor: _cs.surface.withValues(alpha: 0.9),
-                    radius: 45,
-                    child:
-                        _usuario?.fotoUrl != null &&
-                            _usuario!.fotoUrl!.isNotEmpty
-                        ? ClipOval(
+              child: SizedBox(
+                width: 104,
+                height: 104,
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 96,
+                        height: 96,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: _cs.surface,
+                            width: 0.5,
+                          ),
+                        ),
+                        child: CircleAvatar(
+                          backgroundColor: _cs.surface.withValues(alpha: 0.9),
+                          radius: 45,
+                          child: _usuario?.fotoUrl != null &&
+                              _usuario!.fotoUrl!.isNotEmpty
+                              ? ClipOval(
                             child: FadeInImage.assetNetwork(
                               placeholder: 'assets/images/icono.gif',
                               image: _usuario!.fotoUrl!,
@@ -370,21 +383,41 @@ class _CuentaState extends State<Cuenta> {
                               placeholderFit: BoxFit.contain,
                             ),
                           )
-                        : Icon(Icons.person, color: _cs.primary, size: 34),
-                  ),
-                  Container(
-                    width: 24,
-                    height: 24,
-                    decoration: BoxDecoration(
-                      color: _cs.surface,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: _cs.surface, width: 2),
+                              : Icon(
+                            Icons.person,
+                            color: _cs.primary,
+                            size: 34,
+                          ),
+                        ),
+                      ),
                     ),
-                    child: Icon(Icons.edit, color: _cs.primary, size: 14),
-                  ),
-                ],
+
+                    Positioned(
+                      right: 8,
+                      bottom: 8,
+                      child: Container(
+                        width: 26,
+                        height: 26,
+                        decoration: BoxDecoration(
+                          color: _cs.surface,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: _cs.primary,
+                            width: 2,
+                          ),
+                        ),
+                        child: Icon(
+                          Icons.edit,
+                          color: _cs.primary,
+                          size: 15,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
+
             const SizedBox(height: 8),
           ],
         ),
@@ -473,11 +506,11 @@ class _CuentaState extends State<Cuenta> {
 
   Map<String, dynamic> _buildBodyEditar(String fechaNacimiento, {bool incluirPassword = false}) {
    return {
-      'nombre': _nombreController.text.trim(),
-      'apellidos': _apellidosController.text.trim(),
-      'fechaNacimiento': fechaNacimiento,
-      'email': _correoController.text.trim(),
-      'telefono': _telefonoController.text.trim(),
+      'nombre': _nombreController.text.trim().isEmpty ? null : _nombreController.text.trim(),
+      'apellidos': _apellidosController.text.trim().isEmpty ? null : _apellidosController.text.trim(),
+      'fechaNacimiento': fechaNacimiento.isEmpty ? null : fechaNacimiento,
+      'email': _correoController.text.trim().isEmpty ? null : _correoController.text.trim(),
+      'telefono': _telefonoController.text.trim().isEmpty ? null : _telefonoController.text.trim(),
       'password': incluirPassword ? _passwordController.text.trim() : null,
       'fotoPath': null,
     };
@@ -543,7 +576,7 @@ class _CuentaState extends State<Cuenta> {
 
                   const SizedBox(height: 12),
 
-                  SelectorFecha.buildFilaFecha(context: context, diaController: _diaController, mesController: _mesController, anioController: _anioController, onSeleccionarMes: seleccionarMes, validator: _validarCampo),
+                  SelectorFecha.buildFilaFecha(context: context, diaController: _diaController, mesController: _mesController, anioController: _anioController, onSeleccionarMes: seleccionarMes, validator: _validarCampo, obligatorio: false),
                   const SizedBox(height: 12),
 
                   TextFormField(

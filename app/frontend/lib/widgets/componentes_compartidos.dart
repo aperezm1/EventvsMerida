@@ -840,8 +840,7 @@ typedef CampoTextoBuilder =
 typedef ValidadorCampo = String? Function(String label, String? value);
 
 class CampoTexto {
-  static Widget buildCampoTexto(
-    String label, {
+  static Widget buildCampoTexto(String label, {
     required BuildContext context,
     required TextEditingController controller,
     required ValidadorCampo validator,
@@ -851,10 +850,13 @@ class CampoTexto {
     VoidCallback? onToggle,
     bool readOnly = false,
     bool isDropdown = false,
+    bool obligatorio = false,
     int? maxLength,
     List<TextInputFormatter>? inputFormatters,
   }) {
-    final cs = Theme.of(context).colorScheme;
+    final cs = Theme
+        .of(context)
+        .colorScheme;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 15),
@@ -867,14 +869,15 @@ class CampoTexto {
         decoration: buildDecoration(
           context: context,
           label: label,
+          obligatorio: obligatorio,
           suffixIcon: isPassword
               ? IconButton(
-                  icon: Icon(
-                    obscureText ? Icons.visibility_off : Icons.visibility,
-                    color: cs.primary.withValues(alpha: 0.6),
-                  ),
-                  onPressed: onToggle,
-                )
+            icon: Icon(
+              obscureText ? Icons.visibility_off : Icons.visibility,
+              color: cs.primary.withValues(alpha: 0.6),
+            ),
+            onPressed: onToggle,
+          )
               : (isDropdown ? const Icon(Icons.arrow_drop_down) : null),
         ).copyWith(counterText: maxLength != null ? '' : null),
         obscureText: isPassword ? obscureText : false,
@@ -888,20 +891,86 @@ class CampoTexto {
     required BuildContext context,
     required String label,
     Widget? suffixIcon,
+    bool obligatorio = false,
   }) {
-    final cs = Theme.of(context).colorScheme;
+    final cs = Theme
+        .of(context)
+        .colorScheme;
 
     return InputDecoration(
-      labelText: label,
-      labelStyle: TextStyle(color: cs.onSurface.withValues(alpha: 0.7)),
+      label: RichText(
+        text: TextSpan(
+          text: label,
+          style: TextStyle(
+            color: cs.onSurface.withValues(alpha: 0.7),
+            fontSize: 16,
+          ),
+          children: obligatorio
+              ? const [
+            TextSpan(
+              text: ' *',
+              style: TextStyle(
+                color: Colors.red,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ]
+              : [],
+        ),
+      ),
       suffixIcon: suffixIcon,
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(20),
-        borderSide: BorderSide(color: cs.onSurface.withValues(alpha: 0.4)),
+        borderSide: BorderSide(
+          color: cs.onSurface.withValues(alpha: 0.4),
+        ),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(20),
-        borderSide: BorderSide(color: cs.primary, width: 2),
+        borderSide: BorderSide(
+          color: cs.primary,
+          width: 2,
+        ),
+      ),
+    );
+  }
+}
+
+class CampoObligatorio extends StatelessWidget {
+  final String texto;
+  final bool obligatorio;
+  final TextStyle? style;
+
+  const CampoObligatorio({
+    super.key,
+    required this.texto,
+    this.obligatorio = true,
+    this.style,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    return RichText(
+      text: TextSpan(
+        text: texto,
+        style: style ??
+            TextStyle(
+              color: cs.onSurface.withValues(alpha: 0.7),
+              fontSize: 16,
+            ),
+        children: obligatorio
+            ? const [
+          TextSpan(
+            text: ' *',
+            style: TextStyle(
+              color: Colors.red,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ]
+            : [],
       ),
     );
   }
@@ -992,6 +1061,7 @@ class SelectorFecha {
     required TextEditingController anioController,
     required ValueChanged<String> onSeleccionarMes,
     required ValidadorCampo validator,
+    required bool obligatorio,
   }) {
     final cs = Theme.of(context).colorScheme;
 
@@ -1006,6 +1076,7 @@ class SelectorFecha {
             keyboardType: TextInputType.number,
             maxLength: 2,
             inputFormatters: [DayRangeTextInputFormatter()],
+            obligatorio: obligatorio
           ),
         ),
 
@@ -1031,6 +1102,7 @@ class SelectorFecha {
                 validator: validator,
                 readOnly: true,
                 isDropdown: true,
+                obligatorio: obligatorio
               ),
             ),
           ),
@@ -1047,6 +1119,7 @@ class SelectorFecha {
             keyboardType: TextInputType.number,
             maxLength: 4,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            obligatorio: obligatorio
           ),
         ),
       ],
