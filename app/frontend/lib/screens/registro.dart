@@ -1,14 +1,12 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../core/router/app_routes.dart';
 import '../services/api_service.dart';
 import '../services/shared_preferences_service.dart';
-import '../utils/utils.dart';
 import '../widgets/componentes_compartidos.dart';
 
 class Registro extends StatefulWidget {
@@ -116,18 +114,18 @@ class _RegistroState extends State<Registro> {
     }
 
     if (!_aceptaTerminos) {
-      _mostrarSnackBar('Debes aceptar los términos y condiciones', exito: false);
+      Mensaje.mostrarSnackBar(context: context, mensaje: 'Debes aceptar los términos y condiciones', icon: Icons.contact_page_rounded, color: _cs.error);
       return;
     }
 
     if (SelectorFecha.mesSeleccionado == null) {
-      _mostrarSnackBar('Selecciona un mes', exito: false);
+      Mensaje.mostrarSnackBar(context: context, mensaje: 'Selecciona un mes', icon: Icons.calendar_month, color: _cs.error);
       return;
     }
 
     final fechaNacimiento = SelectorFecha.obtenerFechaFormateada(_diaController, _anioController);
     if (fechaNacimiento == null) {
-      _mostrarSnackBar('Fecha inválida o futura', exito: false);
+      Mensaje.mostrarSnackBar(context: context, mensaje: 'Fecha inválida o futura', icon: Icons.date_range, color: _cs.error);
       return;
     }
 
@@ -136,7 +134,7 @@ class _RegistroState extends State<Registro> {
 
     if (!mounted) return;
 
-    _mostrarSnackBar(respuesta.mensaje, exito: respuesta.exito);
+    Mensaje.mostrarSnackBar(context: context, mensaje: respuesta.mensaje, icon: Icons.contact_page_rounded, color: respuesta.exito ? Colors.green : _cs.error);
 
     if (!respuesta.exito || respuesta.datos == null) {
       return;
@@ -212,44 +210,6 @@ class _RegistroState extends State<Registro> {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  // ===========================================================================
-  // MENSAJES
-  // ===========================================================================
-
-  void _mostrarSnackBar(String mensaje, {required bool exito}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              exito ? Icons.check : Icons.error_outline,
-              size: 20,
-              color: Colors.white,
-            ),
-            const SizedBox(width: 8),
-            Flexible(
-              child: Text(
-                mensaje,
-                style: const TextStyle(color: Colors.white),
-              ),
-            ),
-          ],
-        ),
-        backgroundColor: exito ? Colors.green : _cs.error,
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.only(
-          left: 16,
-          right: 16,
-          bottom: 16,
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
         ),
       ),
     );
@@ -340,8 +300,8 @@ class _RegistroState extends State<Registro> {
                       color: _cs.primary,
                     ),
                     SizedBox(width: 12),
-                    CampoObligatorio(
-                      texto: 'Seleccionar foto de perfil',
+                    Text (
+                      'Seleccionar foto de perfil',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,

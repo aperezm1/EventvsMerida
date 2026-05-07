@@ -5,16 +5,17 @@ import 'package:flutter/services.dart';
 import 'dart:ui';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_linkify/flutter_linkify.dart';
 
 import '../core/router/app_routes.dart';
 import '../models/evento.dart';
 import '../models/usuario.dart';
 import '../services/api_service.dart';
-import '../utils/utils.dart';
+import '../utils/validation_utils.dart';
+import '../utils/fecha_utils.dart';
 
 // ===========================================================================
 // 1. BARRA SUPERIOR
@@ -54,6 +55,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 // ===========================================================================
 // 2. MODAL DE DETALLE DEL EVENTO
 // ===========================================================================
+
 class ModalEvento extends StatefulWidget {
   final List<Evento> eventos;
   final Usuario? usuario;
@@ -84,10 +86,9 @@ class _ModalEventoState extends State<ModalEvento> {
   late final PageController _pageController;
   int _indiceActual = 0;
   late List<Evento> _eventosGuardados;
-
   ColorScheme get _cs => Theme.of(context).colorScheme;
-
   TextTheme get _tt => Theme.of(context).textTheme;
+  FechaUtils fu = FechaUtils();
 
   // ===========================================================================
   // CICLO DE VIDA
@@ -120,33 +121,22 @@ class _ModalEventoState extends State<ModalEvento> {
     return _eventosGuardados.any((e) => _esMismoEvento(e, evento));
   }
 
-  bool _esMismoDia(DateTime a, DateTime b) =>
-      a.year == b.year && a.month == b.month && a.day == b.day;
-
-  bool _esHoraCero(DateTime fecha) => fecha.hour == 0 && fecha.minute == 0;
-
-  String _formatearFecha(DateTime fecha) =>
-      DateFormat('dd/MM/yyyy').format(fecha);
-
-  String _formatearHora(DateTime fecha) => DateFormat('HH:mm').format(fecha);
-
   String _textoFechaHoraDetalle(Evento evento) {
-    final esMismoDia = _esMismoDia(evento.fechaInicio, evento.fechaFin);
-    final inicioFecha = _formatearFecha(evento.fechaInicio);
-    final finFecha = _formatearFecha(evento.fechaFin);
-    final inicioHora = _formatearHora(evento.fechaInicio);
-    final finHora = _formatearHora(evento.fechaFin);
+    final esMismoDia = fu.esMismoDia(evento.fechaInicio, evento.fechaFin);
+    final inicioFecha = fu.formatearFecha(evento.fechaInicio);
+    final finFecha = fu.formatearFecha(evento.fechaFin);
+    final inicioHora = fu.formatearHora(evento.fechaInicio);
+    final finHora = fu.formatearHora(evento.fechaFin);
     final horasIguales = inicioHora == finHora;
-    final ambasHorasCero =
-        _esHoraCero(evento.fechaInicio) && _esHoraCero(evento.fechaFin);
+    final ambasHorasCero = fu.esHoraCero(evento.fechaInicio) && fu.esHoraCero(evento.fechaFin);
 
     if (esMismoDia) {
       if (horasIguales && ambasHorasCero) return 'Fecha: $inicioFecha';
       if (horasIguales) return 'Fecha: $inicioFecha\nHora: $inicioHora';
       return 'Fecha: $inicioFecha\nHora: $inicioHora - $finHora';
     }
-    if (horasIguales && ambasHorasCero)
-      return 'Desde: $inicioFecha\nHasta: $finFecha';
+
+    if (horasIguales && ambasHorasCero) return 'Desde: $inicioFecha\nHasta: $finFecha';
     return 'Desde: $inicioFecha $inicioHora\nHasta: $finFecha $finHora';
   }
 
@@ -210,6 +200,8 @@ class _ModalEventoState extends State<ModalEvento> {
   Future<void> _gestionarGuardado() async {
     final usuario = widget.usuario;
     final evento = _eventoActual;
+    IconData icon = Icons.delete;
+    Color color = Colors.red;
 
     if (usuario == null) {
       _mostrarModalNoLogeado();
@@ -239,6 +231,8 @@ class _ModalEventoState extends State<ModalEvento> {
         if (yaGuardado) {
           _eventosGuardados.removeWhere((e) => _esMismoEvento(e, evento));
         } else {
+          icon = Icons.check;
+          color = Colors.green;
           _eventosGuardados.add(evento);
         }
       });
@@ -246,42 +240,45 @@ class _ModalEventoState extends State<ModalEvento> {
       widget.onEventosGuardadosActualizados(_eventosGuardados);
     }
 
-    _mostrarSnackBarResultado(
-      mensaje: respuesta.mensaje,
-      guardado: respuesta.exito ? !yaGuardado : yaGuardado,
-    );
+    Mensaje.mostrarSnackBar(context: context, mensaje: respuesta.mensaje, icon: icon, color: color);
   }
 
-  // ===========================================================================
-  // MENSAJES
-  // ===========================================================================
+  Future<void> _abrirUrl(String urlTexto) async {
+    final urlLimpia = urlTexto.trim();
 
-  void _mostrarSnackBarResultado({
-    required String mensaje,
-    required bool guardado,
-  }) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              guardado ? Icons.check : Icons.delete,
-              size: 20,
-              color: Colors.white,
-            ),
-            const SizedBox(width: 8),
-            Flexible(
-              child: Text(mensaje, style: const TextStyle(color: Colors.white)),
-            ),
-          ],
-        ),
-        backgroundColor: guardado ? Colors.green : Colors.red,
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-    );
+    if (urlLimpia.isEmpty) return;
+
+    final urlConEsquema =
+        urlLimpia.startsWith('http://') || urlLimpia.startsWith('https://')
+        ? urlLimpia
+        : 'https://$urlLimpia';
+
+    final uri = Uri.tryParse(urlConEsquema);
+
+    if (uri == null) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('El enlace no es válido')));
+      return;
+    }
+
+    try {
+      final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+
+      if (!ok && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No se pudo abrir el enlace')),
+        );
+      }
+    } catch (_) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No se pudo abrir el enlace')),
+      );
+    }
   }
 
   // ===========================================================================
@@ -346,9 +343,12 @@ class _ModalEventoState extends State<ModalEvento> {
                       Expanded(
                         child: FilledButton(
                           onPressed: () {
+                            final router = GoRouter.of(context);
+
                             Navigator.of(ctx).pop();
                             Navigator.of(context).pop();
-                            context.go(AppRoutes.registro);
+
+                            router.push(AppRoutes.registro);
                           },
                           child: Text(
                             'Registrarse',
@@ -360,9 +360,12 @@ class _ModalEventoState extends State<ModalEvento> {
                       Expanded(
                         child: FilledButton(
                           onPressed: () {
+                            final router = GoRouter.of(context);
+
                             Navigator.of(ctx).pop();
                             Navigator.of(context).pop();
-                            context.go(AppRoutes.login);
+
+                            router.push(AppRoutes.login);
                           },
                           child: Text(
                             'Iniciar sesión',
@@ -506,7 +509,21 @@ class _ModalEventoState extends State<ModalEvento> {
                   style: _tt.titleSmall?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 4),
-                Text(evento.descripcion, style: _tt.bodyMedium),
+                Linkify(
+                  text: evento.descripcion,
+                  style: _tt.bodyMedium,
+                  linkStyle: _tt.bodyMedium?.copyWith(
+                    color: _cs.primary,
+                    decoration: TextDecoration.underline,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  onOpen: (link) => _abrirUrl(link.url),
+                  options: const LinkifyOptions(
+                    humanize: false,
+                    removeWww: false,
+                  ),
+                  linkifiers: const [UrlLinkifier()],
+                ),
               ],
             ),
           ),
@@ -635,6 +652,42 @@ class _ModalEventoState extends State<ModalEvento> {
   }
 }
 
+// ===========================================================================
+// 3. SNACKBAR
+// ===========================================================================
+
+class Mensaje {
+  static void mostrarSnackBar({required BuildContext context, required String mensaje, required IconData icon, required Color color}) {
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 20,
+              color: Colors.white,
+            ),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(mensaje, style: const TextStyle(color: Colors.white)),
+            ),
+          ],
+        ),
+        backgroundColor: color,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    );
+  }
+}
+
+// ===========================================================================
+// 4. TUTORIAL
+// ===========================================================================
+
 class Tutorial {
   static final pasosTutorial = <TargetFocus>[];
   static late TutorialCoachMark _tutorial;
@@ -647,7 +700,7 @@ class Tutorial {
 
   static TutorialCoachMark get tutorial => _tutorial;
 
-  static void set tutorial(TutorialCoachMark value) {
+  static set tutorial(TutorialCoachMark value) {
     _tutorial = value;
     tutorialInicializado = true;
   }
@@ -840,7 +893,8 @@ typedef CampoTextoBuilder =
 typedef ValidadorCampo = String? Function(String label, String? value);
 
 class CampoTexto {
-  static Widget buildCampoTexto(String label, {
+  static Widget buildCampoTexto(
+    String label, {
     required BuildContext context,
     required TextEditingController controller,
     required ValidadorCampo validator,
@@ -854,9 +908,7 @@ class CampoTexto {
     int? maxLength,
     List<TextInputFormatter>? inputFormatters,
   }) {
-    final cs = Theme
-        .of(context)
-        .colorScheme;
+    final cs = Theme.of(context).colorScheme;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 15),
@@ -872,12 +924,12 @@ class CampoTexto {
           obligatorio: obligatorio,
           suffixIcon: isPassword
               ? IconButton(
-            icon: Icon(
-              obscureText ? Icons.visibility_off : Icons.visibility,
-              color: cs.primary.withValues(alpha: 0.6),
-            ),
-            onPressed: onToggle,
-          )
+                  icon: Icon(
+                    obscureText ? Icons.visibility_off : Icons.visibility,
+                    color: cs.primary.withValues(alpha: 0.6),
+                  ),
+                  onPressed: onToggle,
+                )
               : (isDropdown ? const Icon(Icons.arrow_drop_down) : null),
         ).copyWith(counterText: maxLength != null ? '' : null),
         obscureText: isPassword ? obscureText : false,
@@ -893,9 +945,7 @@ class CampoTexto {
     Widget? suffixIcon,
     bool obligatorio = false,
   }) {
-    final cs = Theme
-        .of(context)
-        .colorScheme;
+    final cs = Theme.of(context).colorScheme;
 
     return InputDecoration(
       label: RichText(
@@ -907,30 +957,25 @@ class CampoTexto {
           ),
           children: obligatorio
               ? const [
-            TextSpan(
-              text: ' *',
-              style: TextStyle(
-                color: Colors.red,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ]
+                  TextSpan(
+                    text: ' *',
+                    style: TextStyle(
+                      color: Colors.red,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ]
               : [],
         ),
       ),
       suffixIcon: suffixIcon,
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(20),
-        borderSide: BorderSide(
-          color: cs.onSurface.withValues(alpha: 0.4),
-        ),
+        borderSide: BorderSide(color: cs.onSurface.withValues(alpha: 0.4)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(20),
-        borderSide: BorderSide(
-          color: cs.primary,
-          width: 2,
-        ),
+        borderSide: BorderSide(color: cs.primary, width: 2),
       ),
     );
   }
@@ -955,21 +1000,19 @@ class CampoObligatorio extends StatelessWidget {
     return RichText(
       text: TextSpan(
         text: texto,
-        style: style ??
-            TextStyle(
-              color: cs.onSurface.withValues(alpha: 0.7),
-              fontSize: 16,
-            ),
+        style:
+            style ??
+            TextStyle(color: cs.onSurface.withValues(alpha: 0.7), fontSize: 16),
         children: obligatorio
             ? const [
-          TextSpan(
-            text: ' *',
-            style: TextStyle(
-              color: Colors.red,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ]
+                TextSpan(
+                  text: ' *',
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ]
             : [],
       ),
     );
@@ -1076,7 +1119,7 @@ class SelectorFecha {
             keyboardType: TextInputType.number,
             maxLength: 2,
             inputFormatters: [DayRangeTextInputFormatter()],
-            obligatorio: obligatorio
+            obligatorio: obligatorio,
           ),
         ),
 
@@ -1102,7 +1145,7 @@ class SelectorFecha {
                 validator: validator,
                 readOnly: true,
                 isDropdown: true,
-                obligatorio: obligatorio
+                obligatorio: obligatorio,
               ),
             ),
           ),
@@ -1119,7 +1162,7 @@ class SelectorFecha {
             keyboardType: TextInputType.number,
             maxLength: 4,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            obligatorio: obligatorio
+            obligatorio: obligatorio,
           ),
         ),
       ],

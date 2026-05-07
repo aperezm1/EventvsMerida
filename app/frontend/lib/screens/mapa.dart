@@ -91,7 +91,7 @@ class _MapaState extends State<Mapa> {
         _mensajeError = respuesta.mensaje;
       });
 
-      _mostrarMensaje(respuesta.mensaje);
+      Mensaje.mostrarSnackBar(context: context, mensaje: respuesta.mensaje, icon: IconData(0xe6e7, fontFamily: 'MaterialIcons'), color: Colors.red);
       return;
     }
 
@@ -178,17 +178,6 @@ class _MapaState extends State<Mapa> {
         mostrarBotonGuardado: true,
         mostrarFlechasDeslizamiento: true,
       ),
-    );
-  }
-
-  // ===========================================================================
-  // MENSAJES
-  // ===========================================================================
-
-  void _mostrarMensaje(String mensaje) {
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(mensaje)),
     );
   }
 
