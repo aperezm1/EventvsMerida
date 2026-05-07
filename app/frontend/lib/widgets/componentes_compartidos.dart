@@ -9,6 +9,8 @@ import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_linkify/flutter_linkify.dart';
+import 'package:linkify/linkify.dart';
 
 import '../core/router/app_routes.dart';
 import '../models/evento.dart';
@@ -251,6 +253,44 @@ class _ModalEventoState extends State<ModalEvento> {
       mensaje: respuesta.mensaje,
       guardado: respuesta.exito ? !yaGuardado : yaGuardado,
     );
+  }
+
+  Future<void> _abrirUrl(String urlTexto) async {
+    final urlLimpia = urlTexto.trim();
+
+    if (urlLimpia.isEmpty) return;
+
+    final urlConEsquema =
+        urlLimpia.startsWith('http://') || urlLimpia.startsWith('https://')
+        ? urlLimpia
+        : 'https://$urlLimpia';
+
+    final uri = Uri.tryParse(urlConEsquema);
+
+    if (uri == null) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('El enlace no es válido')));
+      return;
+    }
+
+    try {
+      final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+
+      if (!ok && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No se pudo abrir el enlace')),
+        );
+      }
+    } catch (_) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No se pudo abrir el enlace')),
+      );
+    }
   }
 
   // ===========================================================================
@@ -513,7 +553,21 @@ class _ModalEventoState extends State<ModalEvento> {
                   style: _tt.titleSmall?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 4),
-                Text(evento.descripcion, style: _tt.bodyMedium),
+                Linkify(
+                  text: evento.descripcion,
+                  style: _tt.bodyMedium,
+                  linkStyle: _tt.bodyMedium?.copyWith(
+                    color: _cs.primary,
+                    decoration: TextDecoration.underline,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  onOpen: (link) => _abrirUrl(link.url),
+                  options: const LinkifyOptions(
+                    humanize: false,
+                    removeWww: false,
+                  ),
+                  linkifiers: const [UrlLinkifier()],
+                ),
               ],
             ),
           ),
@@ -847,7 +901,8 @@ typedef CampoTextoBuilder =
 typedef ValidadorCampo = String? Function(String label, String? value);
 
 class CampoTexto {
-  static Widget buildCampoTexto(String label, {
+  static Widget buildCampoTexto(
+    String label, {
     required BuildContext context,
     required TextEditingController controller,
     required ValidadorCampo validator,
@@ -861,9 +916,7 @@ class CampoTexto {
     int? maxLength,
     List<TextInputFormatter>? inputFormatters,
   }) {
-    final cs = Theme
-        .of(context)
-        .colorScheme;
+    final cs = Theme.of(context).colorScheme;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 15),
@@ -879,12 +932,12 @@ class CampoTexto {
           obligatorio: obligatorio,
           suffixIcon: isPassword
               ? IconButton(
-            icon: Icon(
-              obscureText ? Icons.visibility_off : Icons.visibility,
-              color: cs.primary.withValues(alpha: 0.6),
-            ),
-            onPressed: onToggle,
-          )
+                  icon: Icon(
+                    obscureText ? Icons.visibility_off : Icons.visibility,
+                    color: cs.primary.withValues(alpha: 0.6),
+                  ),
+                  onPressed: onToggle,
+                )
               : (isDropdown ? const Icon(Icons.arrow_drop_down) : null),
         ).copyWith(counterText: maxLength != null ? '' : null),
         obscureText: isPassword ? obscureText : false,
@@ -900,9 +953,7 @@ class CampoTexto {
     Widget? suffixIcon,
     bool obligatorio = false,
   }) {
-    final cs = Theme
-        .of(context)
-        .colorScheme;
+    final cs = Theme.of(context).colorScheme;
 
     return InputDecoration(
       label: RichText(
@@ -914,30 +965,25 @@ class CampoTexto {
           ),
           children: obligatorio
               ? const [
-            TextSpan(
-              text: ' *',
-              style: TextStyle(
-                color: Colors.red,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ]
+                  TextSpan(
+                    text: ' *',
+                    style: TextStyle(
+                      color: Colors.red,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ]
               : [],
         ),
       ),
       suffixIcon: suffixIcon,
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(20),
-        borderSide: BorderSide(
-          color: cs.onSurface.withValues(alpha: 0.4),
-        ),
+        borderSide: BorderSide(color: cs.onSurface.withValues(alpha: 0.4)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(20),
-        borderSide: BorderSide(
-          color: cs.primary,
-          width: 2,
-        ),
+        borderSide: BorderSide(color: cs.primary, width: 2),
       ),
     );
   }
@@ -962,21 +1008,19 @@ class CampoObligatorio extends StatelessWidget {
     return RichText(
       text: TextSpan(
         text: texto,
-        style: style ??
-            TextStyle(
-              color: cs.onSurface.withValues(alpha: 0.7),
-              fontSize: 16,
-            ),
+        style:
+            style ??
+            TextStyle(color: cs.onSurface.withValues(alpha: 0.7), fontSize: 16),
         children: obligatorio
             ? const [
-          TextSpan(
-            text: ' *',
-            style: TextStyle(
-              color: Colors.red,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ]
+                TextSpan(
+                  text: ' *',
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ]
             : [],
       ),
     );
@@ -1083,7 +1127,7 @@ class SelectorFecha {
             keyboardType: TextInputType.number,
             maxLength: 2,
             inputFormatters: [DayRangeTextInputFormatter()],
-            obligatorio: obligatorio
+            obligatorio: obligatorio,
           ),
         ),
 
@@ -1109,7 +1153,7 @@ class SelectorFecha {
                 validator: validator,
                 readOnly: true,
                 isDropdown: true,
-                obligatorio: obligatorio
+                obligatorio: obligatorio,
               ),
             ),
           ),
@@ -1126,7 +1170,7 @@ class SelectorFecha {
             keyboardType: TextInputType.number,
             maxLength: 4,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            obligatorio: obligatorio
+            obligatorio: obligatorio,
           ),
         ),
       ],
