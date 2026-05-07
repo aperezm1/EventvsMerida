@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:ui';
 
-import 'package:eventvsmerida/models/evento.dart';
 import 'package:eventvsmerida/services/shared_preferences_service.dart';
 import 'package:eventvsmerida/widgets/componentes_compartidos.dart';
 import 'package:flutter/material.dart';
@@ -10,8 +9,10 @@ import 'package:intl/intl.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 
 import '../models/api_response.dart';
-import '../models/usuario.dart';
 import '../models/categoria.dart';
+import '../models/evento.dart';
+import '../models/usuario.dart';
+
 import '../services/api_service.dart';
 import '../services/eventos_guardados_service.dart';
 
@@ -33,23 +34,31 @@ class _EventosState extends State<Eventos> {
 
   String _textoBusqueda = '';
 
-  //late Future<ApiResponse<List<Evento>>> _eventos;
   late Future<ApiResponse<List<Evento>>> _eventosEncontrados;
   Future<ApiResponse<List<Evento>>>? _eventosFuture;
+  late Future<ApiResponse<List<Categoria>>> _categorias;
+
   Usuario? _usuario;
   List<Evento> _eventosGuardados = [];
+
   Timer? _debounce;
-  final _inputBusquedaController = TextEditingController();
+  final TextEditingController _inputBusquedaController =
+  TextEditingController();
+
   bool _modalBusquedaAbierto = false;
-  late Future<ApiResponse<List<Categoria>>> _categorias;
+
   final Set<int> _categoriasSeleccionadas = {};
   final List<Evento> _eventosList = [];
+
   int _page = 0;
   final int _pageSize = 15;
+
   bool _isLoadingEventos = false;
   bool _hasMoreEventos = true;
   bool _usandoFiltros = false;
+
   final ScrollController _scrollController = ScrollController();
+  final ScrollController _categoriasScrollController = ScrollController();
 
   ColorScheme get _cs => Theme.of(context).colorScheme;
 
@@ -60,9 +69,12 @@ class _EventosState extends State<Eventos> {
   @override
   void initState() {
     super.initState();
+
     _eventosEncontrados = ApiService.buscarEventos(_textoBusqueda);
     _categorias = ApiService.obtenerCategorias();
+
     _cargarDatosUsuarioYGuardados();
+
     _scrollController.addListener(_onScroll);
     _resetAndFetchEventos();
   }
@@ -71,22 +83,24 @@ class _EventosState extends State<Eventos> {
   void dispose() {
     _debounce?.cancel();
     _inputBusquedaController.dispose();
+
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
+
+    _categoriasScrollController.dispose();
+
     super.dispose();
   }
 
-  // @override
-  // Future<void> didChangeDependencies() async {
-  //   if (await SharedPreferencesService.cargarTutorial()) {
-  //     WidgetsBinding.instance.addPostFrameCallback((_) async {
-  //       await Future.delayed(const Duration(milliseconds: 300));
-  //       if (!mounted) return;
-  //       _comprobarInicializacionTutorial();
-  //     });
-  //   }
-  // super.didChangeDependencies();
-  // }
+  bool _targetEstaListo(GlobalKey key) {
+    final ctx = key.currentContext;
+    if (ctx == null) return false;
+
+    final renderObject = ctx.findRenderObject();
+    return renderObject is RenderBox &&
+        renderObject.attached &&
+        renderObject.hasSize;
+  }
 
   // ===========================================================================
   // CARGA DE DATOS
@@ -94,7 +108,7 @@ class _EventosState extends State<Eventos> {
 
   Future<void> _cargarDatosUsuarioYGuardados() async {
     final (usuario, guardados) =
-        await EventosGuardadosService.cargarUsuarioYEventosGuardados();
+    await EventosGuardadosService.cargarUsuarioYEventosGuardados();
 
     if (!mounted) return;
 
@@ -104,25 +118,93 @@ class _EventosState extends State<Eventos> {
     });
   }
 
+  Future<void> _fetchEventosPage() async {
+    if (_isLoadingEventos || !_hasMoreEventos) return;
+
+    setState(() {
+      _isLoadingEventos = true;
+    });
+
+    try {
+      final mapaResp = await ApiService.obtenerEventosPaginados(
+        page: _page,
+        size: _pageSize,
+        fechaFinDesde: DateTime.now(),
+      );
+
+      if (!mounted) return;
+
+      if (mapaResp == null) {
+        setState(() {
+          _hasMoreEventos = false;
+        });
+        return;
+      }
+
+      final items = (mapaResp['items'] as List<Evento>?) ?? [];
+      final last = mapaResp['last'] as bool? ?? items.length < _pageSize;
+      final esPrimeraPagina = _page == 0;
+
+      setState(() {
+        _eventosList.addAll(items);
+        _page++;
+        _hasMoreEventos = !last;
+      });
+
+      if (esPrimeraPagina) {
+        await _cargarTutorial();
+      }
+    } catch (_) {
+      if (!mounted) return;
+
+      setState(() {
+        _hasMoreEventos = false;
+      });
+    } finally {
+      if (!mounted) return;
+
+      setState(() {
+        _isLoadingEventos = false;
+      });
+    }
+  }
+
+  Future<void> _cargarTutorial() async {
+    if (await SharedPreferencesService.cargarTutorial()) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        await Future.delayed(const Duration(milliseconds: 300));
+        if (!mounted) return;
+        _comprobarInicializacionTutorial();
+      });
+    }
+  }
+
   // ===========================================================================
   // FUNCIONES AUXILIARES
   // ===========================================================================
 
-  void _buscarEventos(
-    String text,
-    void Function(void Function()) setStateModal,
-  ) {
+  void _buscarEventos(String text, void Function(void Function()) setStateModal) {
     if (_debounce?.isActive ?? false) {
       _debounce?.cancel();
     }
+
     _debounce = Timer(const Duration(milliseconds: 500), () {
-      if (!mounted || !_modalBusquedaAbierto) {
-        return;
-      }
-      _textoBusqueda = text;
-      _eventosEncontrados = ApiService.buscarEventos(_textoBusqueda);
+      if (!mounted || !_modalBusquedaAbierto) return;
+
+      _actualizarResultadosBusqueda(text);
       setStateModal(() {});
     });
+  }
+
+  void _actualizarResultadosBusqueda(String texto) {
+    _textoBusqueda = texto;
+    _eventosEncontrados = ApiService.buscarEventos(_textoBusqueda);
+  }
+
+  void _reiniciarBusqueda() {
+    _debounce?.cancel();
+    _inputBusquedaController.clear();
+    _actualizarResultadosBusqueda('');
   }
 
   bool _esMismoDia(DateTime a, DateTime b) {
@@ -160,18 +242,26 @@ class _EventosState extends State<Eventos> {
     if (horasIguales && ambasHorasCero) {
       return 'Fecha: $inicioFecha - $finFecha';
     }
+
     if (horasIguales) {
       return 'Fecha: $inicioFecha - $finFecha · $inicioHora';
     }
+
     return 'Fecha: $inicioFecha - $finFecha · $inicioHora - $finHora';
+  }
+
+  String _textoFechaBusqueda(Evento evento) {
+    return '${_formatearFecha(evento.fechaInicio)} · ${_formatearHora(evento.fechaInicio)}';
   }
 
   void _onScroll() {
     if (!_scrollController.hasClients ||
         _isLoadingEventos ||
         !_hasMoreEventos ||
-        _usandoFiltros)
+        _usandoFiltros) {
       return;
+    }
+
     if (_scrollController.position.extentAfter < 200) {
       _fetchEventosPage();
     }
@@ -185,58 +275,96 @@ class _EventosState extends State<Eventos> {
     _fetchEventosPage();
   }
 
-  Future<void> _fetchEventosPage() async {
-    if (_isLoadingEventos || !_hasMoreEventos) return;
-    setState(() => _isLoadingEventos = true);
-
-    try {
-      final mapaResp = await ApiService.obtenerEventosPaginados(
-        page: _page,
-        size: _pageSize,
-        fechaFinDesde: DateTime.now(),
-      );
-
-      if (mapaResp == null) {
-        setState(() => _hasMoreEventos = false);
-        return;
+  void _alternarCategoria(
+      Categoria categoria,
+      Set<int> categoriasTemporales,
+      void Function(void Function()) setStateModal,
+      ) {
+    setStateModal(() {
+      if (categoriasTemporales.contains(categoria.id)) {
+        categoriasTemporales.remove(categoria.id);
+      } else {
+        categoriasTemporales.add(categoria.id);
       }
-
-      final items = (mapaResp['items'] as List<Evento>?) ?? [];
-      final bool last = mapaResp['last'] as bool? ?? (items.length < _pageSize);
-
-      setState(() {
-        _eventosList.addAll(items);
-        _page++;
-        _hasMoreEventos = !last;
-      });
-
-      if(_page == 1){
-        if (await SharedPreferencesService.cargarTutorial()) {
-          WidgetsBinding.instance.addPostFrameCallback((_) async {
-            await Future.delayed(const Duration(milliseconds: 300));
-            if (!mounted) return;
-            _comprobarInicializacionTutorial();
-          });
-        }
-      }
-    } catch (e) {
-      setState(() => _hasMoreEventos = false);
-    } finally {
-      setState(() => _isLoadingEventos = false);
-    }
+    });
   }
 
-  void _comprobarInicializacionTutorial() {
-    if (!mounted || _eventosList.isEmpty) return;
+  void _aplicarFiltros(Set<int> categoriasTemporales) {
+    Navigator.of(context, rootNavigator: true).maybePop();
 
-    // Solo empezar aquí si toca comenzar en Eventos
-    if (Tutorial.numPantalla != 1) return;
+    setState(() {
+      _categoriasSeleccionadas
+        ..clear()
+        ..addAll(categoriasTemporales);
+    });
 
-    if (Tutorial.tutorialInicializado) return;
+    if (_categoriasSeleccionadas.isEmpty) {
+      setState(() {
+        _usandoFiltros = false;
+        _eventosFuture = null;
+      });
 
-    Tutorial.tutorialInicializado = true;
-    print('he comprobado inicialización del tutorial en eventos, ahora lo configuro y muestro');
-    _configurarTutorial();
+      _resetAndFetchEventos();
+      return;
+    }
+
+    setState(() {
+      _usandoFiltros = true;
+      _eventosFuture = ApiService.obtenerEventosFiltradosPorCategorias(
+        _categoriasSeleccionadas.toList(),
+      );
+    });
+  }
+
+  void _limpiarFiltros() {
+    setState(() {
+      _categoriasSeleccionadas.clear();
+      _usandoFiltros = false;
+      _eventosFuture = null;
+    });
+
+    _resetAndFetchEventos();
+  }
+
+  void _limpiarFiltrosDesdeModal() {
+    Navigator.of(context, rootNavigator: true).maybePop();
+    _limpiarFiltros();
+  }
+
+  List<Evento> _obtenerEventosBusqueda(
+      ApiResponse<List<Evento>>? respuesta,
+      String tipo,
+      ) {
+    final eventos = List<Evento>.from(respuesta?.datos ?? const []);
+
+    if (tipo.isEmpty) {
+      eventos.sort((a, b) => a.fechaInicio.compareTo(b.fechaInicio));
+    }
+
+    return eventos;
+  }
+
+  String? _obtenerIconoCategoria(String nombreCategoria) {
+    final texto = nombreCategoria.trim();
+
+    if (texto.isEmpty) return null;
+
+    final primerRune = texto.runes.first;
+    final primerCaracter = String.fromCharCode(primerRune);
+    final pareceEmoji = primerRune >= 0x2600;
+
+    if (!pareceEmoji) return null;
+
+    return primerCaracter;
+  }
+
+  String _obtenerTextoCategoria(String nombreCategoria) {
+    final texto = nombreCategoria.trim();
+    final icono = _obtenerIconoCategoria(texto);
+
+    if (icono == null) return texto;
+
+    return texto.substring(icono.length).trimLeft();
   }
 
   // ===========================================================================
@@ -256,12 +384,44 @@ class _EventosState extends State<Eventos> {
           usuario: _usuario,
           eventosGuardados: _eventosGuardados,
           onEventosGuardadosActualizados: (nuevaLista) {
-            setState(() => _eventosGuardados = nuevaLista);
+            setState(() {
+              _eventosGuardados = nuevaLista;
+            });
           },
           mostrarBotonGuardado: true,
         ),
       ),
     );
+  }
+
+  void _abrirModalBusqueda() {
+    _modalBusquedaAbierto = true;
+
+    showDialog(
+      context: context,
+      useRootNavigator: true,
+      barrierDismissible: true,
+      barrierColor: Colors.black.withValues(alpha: 0.15),
+      builder: (ctx) {
+        return Stack(
+          children: [
+            _buildFondoModalDesenfocado(),
+            StatefulBuilder(
+              builder: (context, setStateModal) {
+                return _buildModalBusqueda(setStateModal);
+              },
+            ),
+          ],
+        );
+      },
+    ).then((_) {
+      _modalBusquedaAbierto = false;
+
+      if (!mounted) return;
+
+      _reiniciarBusqueda();
+      setState(() {});
+    });
   }
 
   Widget _buildModalBusqueda(void Function(void Function()) setStateModal) {
@@ -293,14 +453,10 @@ class _EventosState extends State<Eventos> {
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.clear),
                   onPressed: () {
-                    if (!_modalBusquedaAbierto) {
-                      return;
-                    }
+                    if (!_modalBusquedaAbierto) return;
+
                     _inputBusquedaController.clear();
-                    _textoBusqueda = '';
-                    _eventosEncontrados = ApiService.buscarEventos(
-                      _textoBusqueda,
-                    );
+                    _actualizarResultadosBusqueda('');
                     setStateModal(() {});
                   },
                 ),
@@ -311,7 +467,10 @@ class _EventosState extends State<Eventos> {
               onChanged: (text) => _buscarEventos(text, setStateModal),
             ),
             const SizedBox(height: 12),
-            _buildEventosFiltradosBusquedaBody(_eventosEncontrados, 'busqueda'),
+            _buildEventosFiltradosBusquedaBody(
+              _eventosEncontrados,
+              'busqueda',
+            ),
           ],
         ),
       ),
@@ -319,6 +478,8 @@ class _EventosState extends State<Eventos> {
   }
 
   void _abrirModalFiltros() {
+    final categoriasTemporales = Set<int>.from(_categoriasSeleccionadas);
+
     showDialog(
       context: context,
       useRootNavigator: true,
@@ -327,15 +488,7 @@ class _EventosState extends State<Eventos> {
       builder: (ctx) {
         return Stack(
           children: [
-            Positioned.fill(
-              child: IgnorePointer(
-                ignoring: true,
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-                  child: Container(color: Colors.transparent),
-                ),
-              ),
-            ),
+            _buildFondoModalDesenfocado(),
             Dialog(
               backgroundColor: Colors.transparent,
               insetPadding: const EdgeInsets.symmetric(
@@ -344,213 +497,9 @@ class _EventosState extends State<Eventos> {
               ),
               child: StatefulBuilder(
                 builder: (contextModal, setStateModal) {
-                  return Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: _cs.surface,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                'Filtrar por categoría',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: _cs.onSurface,
-                                ),
-                              ),
-                            ),
-                            IconButton(
-                              icon: Icon(Icons.close, color: _cs.primary),
-                              onPressed: () => Navigator.of(
-                                context,
-                                rootNavigator: true,
-                              ).maybePop(),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        FutureBuilder<ApiResponse<List<Categoria>>>(
-                          future: _categorias,
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              return const Padding(
-                                padding: EdgeInsets.symmetric(vertical: 24),
-                                child: Center(
-                                  child: CircularProgressIndicator(),
-                                ),
-                              );
-                            }
-                            if (snapshot.hasError) {
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 24,
-                                ),
-                                child: Text(
-                                  'Error: ${snapshot.error}',
-                                  textAlign: TextAlign.center,
-                                ),
-                              );
-                            }
-                            final resp = snapshot.data;
-                            if (resp == null || !resp.exito) {
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 24,
-                                ),
-                                child: Text(
-                                  resp?.mensaje ??
-                                      'No se pudieron cargar las categorías',
-                                  textAlign: TextAlign.center,
-                                ),
-                              );
-                            }
-                            final lista = resp.datos ?? const [];
-
-                            return ConstrainedBox(
-                              constraints: BoxConstraints(
-                                maxHeight:
-                                    MediaQuery.of(context).size.height * 0.5,
-                              ),
-                              child: ListView.separated(
-                                shrinkWrap: true,
-                                itemCount: lista.length,
-                                separatorBuilder: (_, __) =>
-                                    const SizedBox(height: 6),
-                                itemBuilder: (context, index) {
-                                  final cat = lista[index];
-                                  final seleccionado = _categoriasSeleccionadas
-                                      .contains(cat.id);
-                                  return Material(
-                                    color: Colors.transparent,
-                                    child: InkWell(
-                                      borderRadius: BorderRadius.circular(12),
-                                      onTap: () {
-                                        setStateModal(() {
-                                          if (seleccionado) {
-                                            _categoriasSeleccionadas.remove(
-                                              cat.id,
-                                            );
-                                          } else {
-                                            _categoriasSeleccionadas.add(
-                                              cat.id,
-                                            );
-                                          }
-                                        });
-                                      },
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 8,
-                                          vertical: 6,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: _cs.surface,
-                                          borderRadius: BorderRadius.circular(
-                                            12,
-                                          ),
-                                          border: Border.all(
-                                            color: seleccionado
-                                                ? _cs.primary
-                                                : _cs.onSurface.withAlpha(24),
-                                          ),
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            Container(
-                                              width: 36,
-                                              height: 36,
-                                              decoration: BoxDecoration(
-                                                color: _cs.primary.withAlpha(
-                                                  40,
-                                                ),
-                                                shape: BoxShape.circle,
-                                              ),
-                                              child: Center(
-                                                child: Icon(
-                                                  Icons.label,
-                                                  size: 18,
-                                                  color: _cs.primary,
-                                                ),
-                                              ),
-                                            ),
-                                            const SizedBox(width: 12),
-                                            Expanded(
-                                              child: Text(
-                                                cat.nombre,
-                                                style: TextStyle(
-                                                  fontSize: 15,
-                                                  color: _cs.onSurface,
-                                                ),
-                                              ),
-                                            ),
-                                            Checkbox(
-                                              value: seleccionado,
-                                              onChanged: (v) {
-                                                setStateModal(() {
-                                                  if (v == true) {
-                                                    _categoriasSeleccionadas
-                                                        .add(cat.id);
-                                                  } else {
-                                                    _categoriasSeleccionadas
-                                                        .remove(cat.id);
-                                                  }
-                                                });
-                                              },
-                                              activeColor: _cs.primary,
-                                              checkColor: _cs.surface,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                            );
-                          },
-                        ),
-                        const SizedBox(height: 12),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              Navigator.of(
-                                context,
-                                rootNavigator: true,
-                              ).maybePop();
-                              setState(() {
-                                if (_categoriasSeleccionadas.isEmpty) {
-                                  _usandoFiltros = false;
-                                  _eventosFuture = null;
-                                  _resetAndFetchEventos();
-                                } else {
-                                  _usandoFiltros = true;
-                                  _eventosFuture =
-                                      ApiService.obtenerEventosFiltradosPorCategorias(
-                                        _categoriasSeleccionadas.toList(),
-                                      );
-                                }
-                              });
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: _cs.primary,
-                              foregroundColor: _cs.surface,
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                            child: const Text('Aplicar filtros'),
-                          ),
-                        ),
-                      ],
-                    ),
+                  return _buildModalFiltros(
+                    categoriasTemporales,
+                    setStateModal,
                   );
                 },
               ),
@@ -561,30 +510,310 @@ class _EventosState extends State<Eventos> {
     );
   }
 
+  Widget _buildModalFiltros(Set<int> categoriasTemporales, void Function(void Function()) setStateModal) {
+    final hayFiltrosAplicados = _categoriasSeleccionadas.isNotEmpty;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: _cs.surface,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildCabeceraModalFiltros(),
+          const SizedBox(height: 8),
+          _buildListaCategoriasFiltro(
+            categoriasTemporales,
+            setStateModal,
+          ),
+
+          if (hayFiltrosAplicados) ...[
+            const SizedBox(height: 12),
+            _buildBotonLimpiarFiltros(),
+          ],
+
+          const SizedBox(height: 12),
+          _buildBotonAplicarFiltros(categoriasTemporales),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCabeceraModalFiltros() {
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            'Filtrar por categoría',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: _cs.onSurface,
+            ),
+          ),
+        ),
+        IconButton(
+          icon: Icon(Icons.close, color: _cs.primary),
+          onPressed: () {
+            Navigator.of(context, rootNavigator: true).maybePop();
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildListaCategoriasFiltro(Set<int> categoriasTemporales, void Function(void Function()) setStateModal) {
+    return FutureBuilder<ApiResponse<List<Categoria>>>(
+      future: _categorias,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: 24),
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        if (snapshot.hasError) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 24),
+            child: Text(
+              'Error: ${snapshot.error}',
+              textAlign: TextAlign.center,
+            ),
+          );
+        }
+
+        final resp = snapshot.data;
+        if (resp == null || !resp.exito) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 24),
+            child: Text(
+              resp?.mensaje ?? 'No se pudieron cargar las categorías',
+              textAlign: TextAlign.center,
+            ),
+          );
+        }
+
+        final lista = List<Categoria>.from(resp.datos ?? const <Categoria>[])
+          ..sort((a, b) => a.id.compareTo(b.id));
+
+        return ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.5,
+          ),
+          child: Stack(
+            children: [
+              Positioned(
+                top: 0,
+                bottom: 0,
+                right: 4,
+                child: Container(
+                  width: 6,
+                  decoration: BoxDecoration(
+                    color: _cs.primary.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+              ),
+              RawScrollbar(
+                controller: _categoriasScrollController,
+                thumbVisibility: true,
+                trackVisibility: false,
+                interactive: true,
+                thickness: 6,
+                radius: const Radius.circular(20),
+                mainAxisMargin: 0,
+                crossAxisMargin: 4,
+                thumbColor: _cs.primary,
+                child: ListView.separated(
+                  controller: _categoriasScrollController,
+                  shrinkWrap: true,
+                  padding: const EdgeInsets.only(right: 14),
+                  itemCount: lista.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 6),
+                  itemBuilder: (context, index) {
+                    final categoria = lista[index];
+
+                    return _buildCategoriaFiltroItem(
+                      categoria,
+                      categoriasTemporales,
+                      setStateModal,
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildCategoriaFiltroItem(Categoria categoria, Set<int> categoriasTemporales, void Function(void Function()) setStateModal) {
+    final bool seleccionado = categoriasTemporales.contains(categoria.id);
+    final String? iconoCategoria = _obtenerIconoCategoria(categoria.nombre);
+    final String textoCategoria = _obtenerTextoCategoria(categoria.nombre);
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () => _alternarCategoria(
+          categoria,
+          categoriasTemporales,
+          setStateModal,
+        ),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+          decoration: BoxDecoration(
+            color: _cs.surface,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: seleccionado
+                  ? _cs.primary
+                  : _cs.onSurface.withValues(alpha: 0.10),
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: _cs.primary.withValues(alpha: 0.16),
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: iconoCategoria != null
+                      ? Text(
+                    iconoCategoria,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      height: 1,
+                    ),
+                  )
+                      : Icon(
+                    Icons.label,
+                    size: 18,
+                    color: _cs.primary,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  textoCategoria,
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: _cs.onSurface,
+                  ),
+                ),
+              ),
+              Checkbox(
+                value: seleccionado,
+                onChanged: (_) => _alternarCategoria(
+                  categoria,
+                  categoriasTemporales,
+                  setStateModal,
+                ),
+                activeColor: _cs.primary,
+                checkColor: _cs.surface,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBotonAplicarFiltros(Set<int> categoriasTemporales) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: () => _aplicarFiltros(categoriasTemporales),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: _cs.primary,
+          foregroundColor: _cs.surface,
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+        child: const Text('Aplicar filtros'),
+      ),
+    );
+  }
+
+  Widget _buildBotonLimpiarFiltros() {
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
+        icon: Icon(Icons.filter_alt_off, color: _cs.primary),
+        label: const Text('Limpiar filtros'),
+        onPressed: _limpiarFiltrosDesdeModal,
+        style: OutlinedButton.styleFrom(
+          foregroundColor: _cs.primary,
+          side: BorderSide(color: _cs.primary),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ===========================================================================
+  // MENSAJES
+  // ===========================================================================
+
+  void _mostrarMensaje(String mensaje) {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(mensaje)),
+    );
+  }
+
   // ===========================================================================
   // INTERFAZ
   // ===========================================================================
 
-  Widget _buildAppBarAction({
-    required IconData icon,
-    required String tooltip,
-    VoidCallback? onPressed,
-    int badgeCount = 0,
-    key,
-  }) {
-    if (badgeCount <= 0) {
-      return IconButton(
-        key: key,
-        onPressed: onPressed,
-        icon: Icon(icon, color: _cs.primary),
-        tooltip: tooltip,
-      );
-    }
+  Widget _buildFondoModalDesenfocado() {
+    return Positioned.fill(
+      child: IgnorePointer(
+        ignoring: true,
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+          child: Container(color: Colors.transparent),
+        ),
+      ),
+    );
+  }
 
-    final String text = badgeCount > 9 ? '9+' : badgeCount.toString();
-    const double badgeHeight = 14.0;
-    const double badgeWidth = 22.0;
-    const double fontSize = 10.0;
+  Widget _buildAppBarAction({required IconData icon, required String tooltip, VoidCallback? onPressed, int badgeCount = 0, Key? widgetKey}) {
+    final action = badgeCount <= 0
+        ? IconButton(
+      onPressed: onPressed,
+      icon: Icon(icon, color: _cs.primary),
+      tooltip: tooltip,
+    )
+        : _buildAppBarActionConBadge(
+      icon: icon,
+      tooltip: tooltip,
+      onPressed: onPressed,
+      badgeCount: badgeCount,
+    );
+
+    return KeyedSubtree(
+      key: widgetKey,
+      child: action,
+    );
+  }
+
+  Widget _buildAppBarActionConBadge({required IconData icon, required String tooltip, VoidCallback? onPressed, required int badgeCount}) {
+    final text = badgeCount > 9 ? '9+' : badgeCount.toString();
 
     return Stack(
       clipBehavior: Clip.none,
@@ -598,12 +827,12 @@ class _EventosState extends State<Eventos> {
           right: 0,
           top: 6,
           child: Container(
-            width: badgeWidth,
-            height: badgeHeight,
+            width: 22,
+            height: 14,
             decoration: BoxDecoration(
               color: _cs.primary,
               borderRadius: BorderRadius.circular(999),
-              border: Border.all(color: _cs.surface, width: 1.0),
+              border: Border.all(color: _cs.surface, width: 1),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.12),
@@ -617,9 +846,9 @@ class _EventosState extends State<Eventos> {
               text,
               style: TextStyle(
                 color: _cs.surface,
-                fontSize: fontSize,
+                fontSize: 10,
                 fontWeight: FontWeight.w700,
-                height: 1.0,
+                height: 1,
               ),
             ),
           ),
@@ -628,10 +857,7 @@ class _EventosState extends State<Eventos> {
     );
   }
 
-  Widget _buildEstadoCentro({
-    required IconData icono,
-    required String mensaje,
-  }) {
+  Widget _buildEstadoCentro({required IconData icono, required String mensaje}) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -663,72 +889,80 @@ class _EventosState extends State<Eventos> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ClipRRect(
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(16),
-              ),
-              child: AspectRatio(
-                aspectRatio: 16 / 9,
-                child: FadeInImage.assetNetwork(
-                  placeholder: 'assets/images/icono.gif',
-                  image: evento.foto,
-                  fit: BoxFit.cover,
-                  alignment: Alignment.topCenter,
-                  placeholderFit: BoxFit.cover,
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(15),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    evento.titulo,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: Colors.black,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    evento.nombreCategoria,
-                    style: const TextStyle(color: Colors.black, fontSize: 14),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    evento.localizacion,
-                    style: const TextStyle(color: Colors.black, fontSize: 14),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    _textoFechaHoraCard(evento),
-                    style: const TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.w500,
-                      fontSize: 14,
-                      height: 1.25,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
+            _buildImagenEventoPrincipal(evento.foto),
+            _buildContenidoEventoCard(evento),
           ],
         ),
       ),
     );
   }
 
-  Widget _imagenEvento(String foto) {
+  Widget _buildImagenEventoPrincipal(String foto) {
+    return ClipRRect(
+      borderRadius: const BorderRadius.vertical(
+        top: Radius.circular(16),
+      ),
+      child: AspectRatio(
+        aspectRatio: 16 / 9,
+        child: FadeInImage.assetNetwork(
+          placeholder: 'assets/images/icono.gif',
+          image: foto,
+          fit: BoxFit.cover,
+          alignment: Alignment.topCenter,
+          placeholderFit: BoxFit.cover,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContenidoEventoCard(Evento evento) {
+    return Padding(
+      padding: const EdgeInsets.all(15),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            evento.titulo,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              color: Colors.black,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 6),
+          Text(
+            evento.nombreCategoria,
+            style: const TextStyle(color: Colors.black, fontSize: 14),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 6),
+          Text(
+            evento.localizacion,
+            style: const TextStyle(color: Colors.black, fontSize: 14),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            _textoFechaHoraCard(evento),
+            style: const TextStyle(
+              color: Colors.black,
+              fontWeight: FontWeight.w500,
+              fontSize: 14,
+              height: 1.25,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildImagenEventoBusqueda(String foto) {
     return ClipRRect(
       borderRadius: const BorderRadius.only(
         topLeft: Radius.circular(18),
@@ -760,7 +994,7 @@ class _EventosState extends State<Eventos> {
               border: Border.all(color: _cs.primary, width: 1),
               boxShadow: [
                 BoxShadow(
-                  color: _cs.onPrimary.withAlpha(64),
+                  color: _cs.onPrimary.withValues(alpha: 0.25),
                   blurRadius: 5,
                   offset: const Offset(0, 6),
                 ),
@@ -768,56 +1002,64 @@ class _EventosState extends State<Eventos> {
             ),
             child: Row(
               children: [
-                _imagenEvento(evento.foto),
+                _buildImagenEventoBusqueda(evento.foto),
                 Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          evento.titulo,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                            color: _cs.primary,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          evento.localizacion,
-                          style: TextStyle(
-                            color: _cs.onSurface.withAlpha(178),
-                            fontSize: 14,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          '${_formatearFecha(evento.fechaInicio)} · ${_formatearHora(evento.fechaInicio)}',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: _cs.onSurface,
-                            height: 1.25,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
+                  child: _buildContenidoEventoBusquedaCard(evento),
                 ),
               ],
             ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildContenidoEventoBusquedaCard(Evento evento) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            evento.titulo,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              color: _cs.primary,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            evento.localizacion,
+            style: TextStyle(
+              color: _cs.onSurface.withValues(alpha: 0.70),
+              fontSize: 14,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 6),
+          Text(
+            _textoFechaBusqueda(evento),
+            style: TextStyle(
+              fontSize: 13,
+              color: _cs.onSurface,
+              height: 1.25,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildIndicadorCargaLista() {
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: 16),
+      child: Center(child: CircularProgressIndicator()),
     );
   }
 
@@ -839,69 +1081,173 @@ class _EventosState extends State<Eventos> {
       itemBuilder: (context, index) {
         if (index < _eventosList.length) {
           final evento = _eventosList[index];
+
           return _buildEventoCard(
             evento,
             key: index == 0 ? keyTarjetaEvento : null,
           );
         }
 
-        return const Padding(
-          padding: EdgeInsets.symmetric(vertical: 16),
-          child: Center(child: CircularProgressIndicator()),
+        return _buildIndicadorCargaLista();
+      },
+    );
+  }
+
+  Widget _buildEventosFiltradosBusquedaBody(Future<ApiResponse<List<Evento>>> listadoEventos, String tipo) {
+    return FutureBuilder<ApiResponse<List<Evento>>>(
+      future: listadoEventos,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasError) {
+          return _buildEstadoCentro(
+            icono: Icons.error_outline,
+            mensaje: 'Error: ${snapshot.error}',
+          );
+        }
+
+        final respuesta = snapshot.data;
+
+        if (respuesta == null || !respuesta.exito) {
+          return _buildEstadoCentro(
+            icono: Icons.error_outline,
+            mensaje:
+            respuesta?.mensaje ?? 'No se han podido cargar los eventos',
+          );
+        }
+
+        final eventos = _obtenerEventosBusqueda(respuesta, tipo);
+
+        if (tipo == 'busqueda' && _textoBusqueda.isEmpty) {
+          return _buildEstadoCentro(
+            icono: Icons.search,
+            mensaje: 'Ingresa un término de búsqueda para encontrar eventos',
+          );
+        }
+
+        if (eventos.isEmpty) {
+          return _buildEstadoCentro(
+            icono: tipo == 'busqueda' ? Icons.search_off : Icons.event_busy,
+            mensaje: tipo == 'busqueda'
+                ? 'No se han encontrado eventos para "$_textoBusqueda"'
+                : 'No hay eventos disponibles',
+          );
+        }
+
+        if (tipo == 'busqueda') {
+          return _buildResultadosBusqueda(eventos);
+        }
+
+        return ListView.builder(
+          itemCount: eventos.length,
+          itemBuilder: (context, index) {
+            return _buildEventoCard(eventos[index]);
+          },
         );
       },
     );
+  }
+
+  Widget _buildResultadosBusqueda(List<Evento> eventos) {
+    const double itemHeight = 110;
+    final visibleCount = eventos.length < 3 ? eventos.length : 3;
+    final maxHeight = itemHeight * visibleCount;
+
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxHeight: maxHeight),
+      child: ListView.builder(
+        shrinkWrap: true,
+        itemCount: eventos.length,
+        itemBuilder: (context, index) {
+          return _buildEventoBusquedaCard(eventos[index]);
+        },
+      ),
+    );
+  }
+
+  Widget _buildBody() {
+    if (_usandoFiltros) {
+      if (_eventosFuture == null) {
+        return const Center(child: CircularProgressIndicator());
+      }
+
+      return _buildEventosFiltradosBusquedaBody(_eventosFuture!, '');
+    }
+
+    return _buildEventosPaginatedBody();
   }
 
   // ===========================================================================
   // TUTORIAL
   // ===========================================================================
 
+  void _comprobarInicializacionTutorial() {
+    if (!mounted) return;
+    if (Tutorial.numPantalla != 1) return;
+    if (Tutorial.tutorialInicializado) return;
+    if (_eventosList.isEmpty) return;
+    if (!_targetEstaListo(keyTarjetaEvento) ||
+        !_targetEstaListo(keyBtnBuscar) ||
+        !_targetEstaListo(keyBtnFiltro)) {
+      return;
+    }
+
+    Tutorial.tutorialInicializado = true;
+    _configurarTutorial();
+  }
+
   void _configurarTutorial() {
     Tutorial.pasosTutorial.clear();
     cargarPasosTutorial();
+
     Tutorial.tutorial = Tutorial.crearTutorial(
       context: context,
       pasosTutorial: Tutorial.pasosTutorial,
       color: Theme.of(context).colorScheme.primary,
     );
+
     Tutorial.mostrarTutorial(context);
   }
 
   void cargarPasosTutorial() {
     Tutorial.navPasoActivo.value = false;
+
     Tutorial.pasosTutorial.add(
       Tutorial.crearPaso(
         context: context,
         key: keyTarjetaEvento,
         titulo: 'Eventos disponibles',
         descripcion:
-            'Aquí puedes ver todos los eventos disponibles. Toca en cualquiera para verlo en detalle.',
+        'Aquí puedes ver todos los eventos disponibles. Toca en cualquiera para verlo en detalle.',
         icon: Icons.event,
         siguiente: true,
         onNext: () => Tutorial.tutorial.next(),
         forma: ShapeLightFocus.RRect,
       ),
     );
+
     Tutorial.pasosTutorial.add(
       Tutorial.crearPaso(
         context: context,
         key: keyBtnBuscar,
         titulo: 'Buscar eventos',
         descripcion:
-            'Desde aquí puedes buscar eventos por nombre, ubicación o categoría.',
+        'Desde aquí puedes buscar eventos por nombre, ubicación o categoría.',
         icon: Icons.search,
         siguiente: true,
         onNext: () => Tutorial.tutorial.next(),
       ),
     );
+
     Tutorial.pasosTutorial.add(
       Tutorial.crearPaso(
         context: context,
         key: keyBtnFiltro,
         titulo: 'Filtrar eventos',
         descripcion:
-            'Desde aquí puedes filtrar los eventos por categoría para encontrar más rápido segun tus gustos.',
+        'Desde aquí puedes filtrar los eventos por categoría para encontrar más rápido segun tus gustos.',
         icon: Icons.filter_alt,
         siguiente: true,
         onNext: () {
@@ -910,6 +1256,7 @@ class _EventosState extends State<Eventos> {
         },
       ),
     );
+
     Tutorial.pasosTutorial.add(
       Tutorial.crearPaso(
         alineamientoTarjeta: ContentAlign.top,
@@ -917,7 +1264,7 @@ class _EventosState extends State<Eventos> {
         key: Tutorial.keyNavMapa,
         titulo: 'Mapa',
         descripcion:
-            'A continuación, pasemos al mapa. Pulsa el botón de continuar para ir al mapa.',
+        'A continuación, pasemos al mapa. Pulsa el botón de continuar para ir al mapa.',
         icon: Icons.map,
         siguiente: true,
         onNext: () async {
@@ -928,85 +1275,8 @@ class _EventosState extends State<Eventos> {
 
           await Future.delayed(const Duration(milliseconds: 300));
           if (!mounted) return;
+
           context.go('/mapa');
-        },
-      ),
-    );
-  }
-
-  Widget _buildEventosFiltradosBusquedaBody(
-    Future<ApiResponse<List<Evento>>> listadoEventos,
-    String tipo,
-  ) {
-    return Center(
-      child: FutureBuilder<ApiResponse<List<Evento>>>(
-        future: listadoEventos,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const CircularProgressIndicator();
-          }
-          if (snapshot.hasError) {
-            return _buildEstadoCentro(
-              icono: Icons.error_outline,
-              mensaje: 'Error: ${snapshot.error}',
-            );
-          }
-
-          final respuesta = snapshot.data;
-          if (respuesta == null || !respuesta.exito) {
-            return _buildEstadoCentro(
-              icono: Icons.error_outline,
-              mensaje:
-                  respuesta?.mensaje ?? 'No se han podido cargar los eventos',
-            );
-          }
-
-          final eventos = List<Evento>.from(respuesta.datos ?? const []);
-          if (tipo.isEmpty) {
-            eventos.sort((a, b) => a.fechaInicio.compareTo(b.fechaInicio));
-          }
-
-          if (tipo == 'busqueda' && _textoBusqueda.isEmpty) {
-            return _buildEstadoCentro(
-              icono: Icons.search,
-              mensaje: 'Ingresa un término de búsqueda para encontrar eventos',
-            );
-          }
-
-          if (eventos.isEmpty) {
-            return _buildEstadoCentro(
-              icono: tipo == 'busqueda' ? Icons.search_off : Icons.event_busy,
-              mensaje: tipo == 'busqueda'
-                  ? 'No se han encontrado eventos para "$_textoBusqueda"'
-                  : 'No hay eventos disponibles',
-            );
-          }
-
-          if (tipo == 'busqueda') {
-            const double itemHeight = 110;
-            final int visibleCount = eventos.length < 3 ? eventos.length : 3;
-            final double maxHeight = itemHeight * visibleCount;
-
-            return ConstrainedBox(
-              constraints: BoxConstraints(maxHeight: maxHeight),
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: eventos.length,
-                itemBuilder: (context, index) {
-                  return _buildEventoBusquedaCard(eventos[index]);
-                },
-              ),
-            );
-          }
-
-          return ListView.builder(
-            itemCount: eventos.length,
-            itemBuilder: (context, index) {
-              return tipo == 'busqueda'
-                  ? _buildEventoBusquedaCard(eventos[index])
-                  : _buildEventoCard(eventos[index]);
-            },
-          );
         },
       ),
     );
@@ -1028,69 +1298,22 @@ class _EventosState extends State<Eventos> {
                 _buildAppBarAction(
                   icon: Icons.search,
                   tooltip: 'Buscar',
-                  onPressed: () {
-                    _modalBusquedaAbierto = true;
-                    showDialog(
-                      context: context,
-                      useRootNavigator: true,
-                      barrierDismissible: true,
-                      barrierColor: Colors.black.withValues(alpha: 0.15),
-                      builder: (ctx) {
-                        return Stack(
-                          children: [
-                            Positioned.fill(
-                              child: IgnorePointer(
-                                ignoring: true,
-                                child: BackdropFilter(
-                                  filter: ImageFilter.blur(
-                                    sigmaX: 6,
-                                    sigmaY: 6,
-                                  ),
-                                  child: Container(color: Colors.transparent),
-                                ),
-                              ),
-                            ),
-                            StatefulBuilder(
-                              builder: (context, setStateModal) {
-                                return _buildModalBusqueda(setStateModal);
-                              },
-                            ),
-                          ],
-                        );
-                      },
-                    ).then((_) {
-                      _modalBusquedaAbierto = false;
-                      _debounce?.cancel();
-                      if (!mounted) {
-                        return;
-                      }
-                      _inputBusquedaController.clear();
-                      _textoBusqueda = '';
-                      _eventosEncontrados = ApiService.buscarEventos(
-                        _textoBusqueda,
-                      );
-                      setState(() {});
-                    });
-                  },
-                  key: keyBtnBuscar,
+                  onPressed: _abrirModalBusqueda,
+                  widgetKey: keyBtnBuscar,
                 ),
                 _buildAppBarAction(
                   icon: Icons.filter_alt_rounded,
                   tooltip: 'Filtrar',
                   onPressed: _abrirModalFiltros,
                   badgeCount: _categoriasSeleccionadas.length,
-                  key: keyBtnFiltro,
+                  widgetKey: keyBtnFiltro,
                 ),
               ],
             ),
           ),
         ],
       ),
-      body: _usandoFiltros
-          ? (_eventosFuture == null
-                ? const Center(child: CircularProgressIndicator())
-                : _buildEventosFiltradosBusquedaBody(_eventosFuture!, ''))
-          : _buildEventosPaginatedBody(),
+      body: _buildBody(),
     );
   }
 }
