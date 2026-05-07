@@ -1,6 +1,8 @@
 package es.nullpointers.eventvsmerida.service;
 
 import es.nullpointers.eventvsmerida.dto.request.EventoCrearRequest;
+import es.nullpointers.eventvsmerida.dto.response.EventosPorCategoriaResponse;
+import es.nullpointers.eventvsmerida.dto.response.EventosPorMesResponse;
 import es.nullpointers.eventvsmerida.dto.response.EventoResponse;
 import es.nullpointers.eventvsmerida.dto.request.EventoActualizarRequest;
 import es.nullpointers.eventvsmerida.entity.Categoria;
@@ -275,6 +277,50 @@ public class EventoService {
     public long contarEventos() {
         return eventoRepository.count();
     }
+
+
+    /**
+     * Método para contar la cantidad de eventos en cada mes.
+     *
+     * @return Listado de cada mes con el número de eventos que comienzan en ese mes. Si un mes no tiene eventos, se incluye con cantidad 0.
+     */
+    public List<EventosPorMesResponse> obtenerEventosPorMes() {
+        List<Object[]> resultados = eventoRepository.contarEventosPorMes();
+
+        Long[] contadorMeses = new Long[12];
+
+        for (int i = 0; i < 12; i++) {
+            contadorMeses[i] = 0L;
+        }
+
+        for (Object[] fila : resultados) {
+            int mes = ((Number) fila[0]).intValue();
+            long total = ((Number) fila[1]).longValue();
+
+            contadorMeses[mes - 1] = total;
+        }
+
+        List<EventosPorMesResponse> eventosMes = new ArrayList<>();
+
+        for (int i = 0; i < 12; i++) {
+            eventosMes.add(new EventosPorMesResponse(
+                    i + 1,
+                    contadorMeses[i]
+            ));
+        }
+
+        return eventosMes;
+    }
+
+        /**
+        * Método para contar la cantidad de eventos agrupados por categoría.
+        *
+        * @return Listado de cada categoría con el número de eventos que pertenecen a esa categoría. Si una categoría no tiene eventos, se incluye con cantidad 0.
+        */
+    public List<EventosPorCategoriaResponse> obtenerEventosPorCategoria() {
+        return eventoRepository.contarEventosPorCategoria();
+    }
+
 
     // ==================
     // Metodos Auxiliares

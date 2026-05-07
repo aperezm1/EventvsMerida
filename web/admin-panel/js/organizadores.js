@@ -73,7 +73,13 @@ window.addEventListener("DOMContentLoaded", async () => {
           password: contraseniaModificada ? contrasenia : null,
           idRol: 2,
         };
-        editarOrganizador(URL_BASE, formEditar.dataset.id, organizador);
+        const formData = new FormData();
+        formData.append("usuario", JSON.stringify(organizador));
+        const fotoFile = document.getElementById("formFileEditar")?.files?.[0];
+        if (fotoFile) {
+          formData.append("foto", fotoFile);
+        }
+        editarOrganizador(URL_BASE, formEditar.dataset.id, formData);
       }
       formEditar.classList.add("was-validated");
     },
@@ -317,11 +323,8 @@ async function editarOrganizador(URL_BASE, id, datosFormulario) {
   try {
     const options = {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
       credentials: "include",
-      body: JSON.stringify(datosFormulario),
+      body: datosFormulario,
     };
     const resp = await fetch(URL_BASE + "usuarios/update/" + id, options);
     const respuesta = await resp.json();

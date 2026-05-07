@@ -11907,3 +11907,11 @@ body.auth-pending {
   background-color: #111;
   color: #666;
 }
+
+#btnLogin:disabled,
+#btnLogin.loading:disabled {
+  cursor: not-allowed !important;
+  background-color: #5F9FE3 !important;
+  pointer-events: auto !important;
+  opacity: 0.7;
+}

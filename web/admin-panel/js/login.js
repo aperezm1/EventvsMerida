@@ -20,8 +20,13 @@ window.addEventListener("DOMContentLoaded", async (event) => {
 
 async function login(datos) {
     const URL = "https://eventvsmerida-x2t1.onrender.com/api/auth/login?admin=true";
+    const btnLogin = document.getElementById("btnLogin");
 
     try {
+        btnLogin.setAttribute("disabled", true);
+        btnLogin.textContent = 'Iniciando sesión...';
+        btnLogin.classList.add("loading");
+
         const respuesta = await fetch(URL, {
             method: "POST",
             credentials: "include",
@@ -51,6 +56,10 @@ async function login(datos) {
             return { éxito: false, mensaje: "Problema de red o CORS" };
         }
         return { éxito: false, mensaje: error.message };
+    } finally {
+        btnLogin.removeAttribute("disabled");
+        btnLogin.textContent = 'Iniciar sesión';
+        btnLogin.classList.remove("loading");
     }
 }
 
