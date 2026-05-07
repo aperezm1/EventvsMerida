@@ -1,5 +1,5 @@
+import 'package:eventvsmerida/utils/fecha_utils.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../models/evento.dart';
 import '../models/usuario.dart';
@@ -22,6 +22,7 @@ class _EventosGuardadosState extends State<EventosGuardados> {
   Usuario? _usuario;
   List<Evento> _eventos = [];
   bool _cargando = true;
+  FechaUtils fu = FechaUtils();
 
   ColorScheme get _cs => Theme.of(context).colorScheme;
 
@@ -52,7 +53,7 @@ class _EventosGuardadosState extends State<EventosGuardados> {
     });
 
     if (!respuesta.exito) {
-      _mostrarMensajeCarga(respuesta.mensaje);
+      Mensaje.mostrarSnackBar(context: context, mensaje: respuesta.mensaje, icon: Icons.event_busy, color: _cs.error);
     }
   }
 
@@ -60,27 +61,19 @@ class _EventosGuardadosState extends State<EventosGuardados> {
   // FUNCIONES AUXILIARES
   // ===========================================================================
 
-  bool _esMismoDia(DateTime a, DateTime b) {
-    return a.year == b.year && a.month == b.month && a.day == b.day;
-  }
-
   bool _esMismoEvento(Evento a, Evento b) {
     return a.titulo == b.titulo &&
         a.fechaInicio == b.fechaInicio &&
         a.fechaFin == b.fechaFin;
   }
 
-  String _fecha(DateTime fecha) => DateFormat('dd/MM/yyyy').format(fecha);
-
-  String _hora(DateTime fecha) => DateFormat('HH:mm').format(fecha);
-
   String _textoFechaEvento(Evento evento) {
-    if (_esMismoDia(evento.fechaInicio, evento.fechaFin)) {
-      return 'Fecha: ${_fecha(evento.fechaInicio)} · ${_hora(evento.fechaInicio)} - ${_hora(evento.fechaFin)}';
+    if (fu.esMismoDia(evento.fechaInicio, evento.fechaFin)) {
+      return 'Fecha: ${fu.formatearFecha(evento.fechaInicio)} · ${fu.formatearHora(evento.fechaInicio)} - ${fu.formatearHora(evento.fechaFin)}';
     }
 
-    return 'Desde: ${_fecha(evento.fechaInicio)} ${_hora(evento.fechaInicio)}\n'
-        'Hasta: ${_fecha(evento.fechaFin)} ${_hora(evento.fechaFin)}';
+    return 'Desde: ${fu.formatearFecha(evento.fechaInicio)} ${fu.formatearHora(evento.fechaInicio)}\n'
+        'Hasta: ${fu.formatearFecha(evento.fechaFin)} ${fu.formatearHora(evento.fechaFin)}';
   }
 
   Future<void> _borrarEvento(Evento evento) async {
@@ -100,8 +93,13 @@ class _EventosGuardadosState extends State<EventosGuardados> {
       });
     }
 
-    _mostrarMensajeEliminacion(respuesta.mensaje, respuesta.exito);
+    if (!mounted) return;
+    Mensaje.mostrarSnackBar(context: context, mensaje: respuesta.mensaje, icon: Icons.event_busy, color: _cs.error);
   }
+
+  // ===========================================================================
+  // MODALES
+  // ===========================================================================
 
   void _abrirModalEvento(Evento evento) {
     showDialog(
@@ -118,46 +116,6 @@ class _EventosGuardadosState extends State<EventosGuardados> {
           });
         },
         mostrarBotonGuardado: false,
-      ),
-    );
-  }
-
-  // ===========================================================================
-  // MENSAJES
-  // ===========================================================================
-
-  void _mostrarMensajeCarga(String mensaje) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(mensaje)),
-    );
-  }
-
-  void _mostrarMensajeEliminacion(String mensaje, bool exito) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.delete, size: 20, color: Colors.white),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                mensaje,
-                style: const TextStyle(color: Colors.white),
-              ),
-            ),
-          ],
-        ),
-        backgroundColor: exito ? Colors.red : Colors.orange,
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.only(
-          left: 16,
-          right: 16,
-          bottom: 16,
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
       ),
     );
   }

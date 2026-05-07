@@ -39,7 +39,7 @@
 
 ```
 EventvsMerida/
-├── app/          # Aplicación móvil (Flutter / Dart)
+├── app/          # Aplicación móvil (Flutter / Spring Boot)
 ├── web/          # Landing page y panel de administración
 ├── scripts/      # Scripts auxiliares y automatización
 ├── docs/         # Documentación técnica del proyecto
