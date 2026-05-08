@@ -791,7 +791,9 @@ class SalidaApp {
                 },
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-                  child: Container(color: Colors.black.withValues(alpha: 0.08)),
+                  child: Container(
+                    color: Colors.black.withValues(alpha: 0.08),
+                  ),
                 ),
               ),
             ),
@@ -822,6 +824,9 @@ class SalidaApp {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
+                            // ─────────────────────────────
+                            // CABECERA
+                            // ─────────────────────────────
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -843,15 +848,42 @@ class SalidaApp {
 
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text(
-                                        'Salir de la aplicación',
-                                        style: tt.titleMedium?.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                          color: cs.onSurface,
-                                        ),
+                                      // TÍTULO + CERRAR
+                                      Row(
+                                        crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              'Salir de la aplicación',
+                                              style: tt.titleMedium?.copyWith(
+                                                fontWeight: FontWeight.bold,
+                                                color: cs.onSurface,
+                                              ),
+                                            ),
+                                          ),
+                                          IconButton(
+                                            visualDensity:
+                                            VisualDensity.compact,
+                                            padding: EdgeInsets.zero,
+                                            constraints: const BoxConstraints(
+                                              minWidth: 32,
+                                              minHeight: 32,
+                                            ),
+                                            icon: Icon(
+                                              Icons.close,
+                                              color: cs.onSurface,
+                                            ),
+                                            onPressed: () {
+                                              Navigator.of(
+                                                dialogContext,
+                                                rootNavigator: true,
+                                              ).pop(false);
+                                            },
+                                          ),
+                                        ],
                                       ),
 
                                       const SizedBox(height: 8),
@@ -866,23 +898,14 @@ class SalidaApp {
                                     ],
                                   ),
                                 ),
-
-                                IconButton(
-                                  padding: EdgeInsets.zero,
-                                  constraints: const BoxConstraints(),
-                                  icon: Icon(Icons.close, color: cs.onSurface),
-                                  onPressed: () {
-                                    Navigator.of(
-                                      dialogContext,
-                                      rootNavigator: true,
-                                    ).pop(false);
-                                  },
-                                ),
                               ],
                             ),
 
                             const SizedBox(height: 20),
 
+                            // ─────────────────────────────
+                            // ACCIONES
+                            // ─────────────────────────────
                             Row(
                               children: [
                                 Expanded(
@@ -921,7 +944,8 @@ class SalidaApp {
                                     ),
                                     label: Text(
                                       'Continuar',
-                                      style: TextStyle(color: cs.surface),
+                                      style:
+                                      TextStyle(color: cs.surface),
                                     ),
                                     style: FilledButton.styleFrom(
                                       backgroundColor: cs.primary,

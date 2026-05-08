@@ -469,6 +469,18 @@ class _EventosState extends State<Eventos> {
           decoration: BoxDecoration(
             color: _cs.surface,
             borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: _cs.onSurface.withValues(alpha: 0.14),
+              width: 1,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: _cs.onSurface.withValues(alpha: 0.22),
+                blurRadius: 14,
+                spreadRadius: 1,
+                offset: const Offset(0, 6),
+              ),
+            ],
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -571,7 +583,10 @@ class _EventosState extends State<Eventos> {
     );
   }
 
-  Widget _buildModalFiltros(Set<int> categoriasTemporales, void Function(void Function()) setStateModal) {
+  Widget _buildModalFiltros(
+      Set<int> categoriasTemporales,
+      void Function(void Function()) setStateModal,
+      ) {
     final hayFiltrosAplicados = _categoriasSeleccionadas.isNotEmpty;
 
     return Container(
@@ -579,12 +594,26 @@ class _EventosState extends State<Eventos> {
       decoration: BoxDecoration(
         color: _cs.surface,
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: _cs.onSurface.withValues(alpha: 0.14),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: _cs.onSurface.withValues(alpha: 0.22),
+            blurRadius: 14,
+            spreadRadius: 1,
+            offset: const Offset(0, 6),
+          ),
+        ],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           _buildCabeceraModalFiltros(),
+
           const SizedBox(height: 8),
+
           _buildListaCategoriasFiltro(
             categoriasTemporales,
             setStateModal,
@@ -596,6 +625,7 @@ class _EventosState extends State<Eventos> {
           ],
 
           const SizedBox(height: 12),
+
           _buildBotonAplicarFiltros(categoriasTemporales),
         ],
       ),
@@ -1175,6 +1205,16 @@ class _EventosState extends State<Eventos> {
         }
 
         if (snapshot.hasError) {
+          if (tipo == 'busqueda') {
+            return SizedBox(
+              height: 125,
+              child: _buildEstadoCentro(
+                icono: Icons.error_outline,
+                mensaje: 'Error: ${snapshot.error}',
+              ),
+            );
+          }
+
           return _buildEstadoCentro(
             icono: Icons.error_outline,
             mensaje: 'Error: ${snapshot.error}',
@@ -1190,6 +1230,16 @@ class _EventosState extends State<Eventos> {
           final esErrorConexion = mensaje.toLowerCase().contains('conexión') ||
               mensaje.toLowerCase().contains('conexion') ||
               mensaje.toLowerCase().contains('internet');
+
+          if (tipo == 'busqueda') {
+            return SizedBox(
+              height: 125,
+              child: _buildEstadoCentro(
+                icono: esErrorConexion ? Icons.wifi_off : Icons.error_outline,
+                mensaje: mensaje,
+              ),
+            );
+          }
 
           return _buildEstadoCentro(
             icono: esErrorConexion ? Icons.wifi_off : Icons.error_outline,
