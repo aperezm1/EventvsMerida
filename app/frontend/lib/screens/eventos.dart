@@ -65,6 +65,7 @@ class _EventosState extends State<Eventos> {
 
   final ScrollController _scrollController = ScrollController();
   final ScrollController _categoriasScrollController = ScrollController();
+  final ScrollController _busquedaScrollController = ScrollController();
 
   ColorScheme get _cs => Theme.of(context).colorScheme;
 
@@ -94,6 +95,7 @@ class _EventosState extends State<Eventos> {
     _scrollController.dispose();
 
     _categoriasScrollController.dispose();
+    _busquedaScrollController.dispose();
 
     super.dispose();
   }
@@ -447,53 +449,90 @@ class _EventosState extends State<Eventos> {
   }
 
   Widget _buildModalBusqueda(void Function(void Function()) setStateModal) {
+    final mediaQuery = MediaQuery.of(context);
+    final busquedaVacia = _inputBusquedaController.text.trim().isEmpty;
+
+    final altoDisponible = mediaQuery.size.height -
+        mediaQuery.viewInsets.bottom -
+        96;
+
     return Dialog(
       backgroundColor: Colors.transparent,
       alignment: Alignment.topCenter,
       insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 48),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: _cs.surface,
-          borderRadius: BorderRadius.circular(12),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: altoDisponible.clamp(220.0, 520.0),
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: _inputBusquedaController,
-              decoration: InputDecoration(
-                hintText: 'Buscar eventos...',
-                prefixIcon: IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () {
-                    _modalBusquedaAbierto = false;
-                    _debounce?.cancel();
-                    Navigator.of(context, rootNavigator: true).maybePop();
-                  },
-                ),
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.clear),
-                  onPressed: () {
-                    if (!_modalBusquedaAbierto) return;
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: _cs.surface,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _inputBusquedaController,
+                decoration: InputDecoration(
+                  hintText: 'Buscar eventos...',
+                  prefixIcon: IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: () {
+                      _modalBusquedaAbierto = false;
+                      _debounce?.cancel();
+                      Navigator.of(context, rootNavigator: true).maybePop();
+                    },
+                  ),
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.clear),
+                    onPressed: () {
+                      if (!_modalBusquedaAbierto) return;
 
-                    _inputBusquedaController.clear();
+                      _inputBusquedaController.clear();
+                      _debounce?.cancel();
+                      _actualizarResultadosBusqueda('');
+                      setStateModal(() {});
+                    },
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                onChanged: (text) {
+                  if (text.trim().isEmpty) {
+                    _debounce?.cancel();
                     _actualizarResultadosBusqueda('');
                     setStateModal(() {});
-                  },
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
+                    return;
+                  }
+
+                  setStateModal(() {});
+                  _buscarEventos(text, setStateModal);
+                },
               ),
-              onChanged: (text) => _buscarEventos(text, setStateModal),
-            ),
-            const SizedBox(height: 12),
-            _buildEventosFiltradosBusquedaBody(
-              _eventosEncontrados,
-              'busqueda',
-            ),
-          ],
+
+              const SizedBox(height: 12),
+
+              if (busquedaVacia)
+                SizedBox(
+                  height: 125,
+                  child: _buildEstadoCentro(
+                    icono: Icons.search,
+                    mensaje:
+                    'Ingresa un término de búsqueda para encontrar eventos',
+                  ),
+                )
+              else
+                Flexible(
+                  child: _buildEventosFiltradosBusquedaBody(
+                    _eventosEncontrados,
+                    'busqueda',
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -1161,18 +1200,29 @@ class _EventosState extends State<Eventos> {
         final eventos = _obtenerEventosBusqueda(respuesta, tipo);
 
         if (tipo == 'busqueda' && _textoBusqueda.isEmpty) {
-          return _buildEstadoCentro(
-            icono: Icons.search,
-            mensaje: 'Ingresa un término de búsqueda para encontrar eventos',
+          return SizedBox(
+            height: 125,
+            child: _buildEstadoCentro(
+              icono: Icons.search,
+              mensaje: 'Ingresa un término de búsqueda para encontrar eventos',
+            ),
           );
         }
 
         if (eventos.isEmpty) {
+          if (tipo == 'busqueda') {
+            return SizedBox(
+              height: 125,
+              child: _buildEstadoCentro(
+                icono: Icons.search_off,
+                mensaje: 'No se han encontrado eventos para "$_textoBusqueda"',
+              ),
+            );
+          }
+
           return _buildEstadoCentro(
-            icono: tipo == 'busqueda' ? Icons.search_off : Icons.event_busy,
-            mensaje: tipo == 'busqueda'
-                ? 'No se han encontrado eventos para "$_textoBusqueda"'
-                : 'No hay eventos disponibles',
+            icono: Icons.event_busy,
+            mensaje: 'No hay eventos disponibles',
           );
         }
 
@@ -1191,19 +1241,43 @@ class _EventosState extends State<Eventos> {
   }
 
   Widget _buildResultadosBusqueda(List<Evento> eventos) {
-    const double itemHeight = 110;
+    const double itemHeight = 130;
     final visibleCount = eventos.length < 3 ? eventos.length : 3;
-    final maxHeight = itemHeight * visibleCount;
+    final alturaDeseada = (itemHeight * visibleCount) + 8;
+    final mostrarScroll = eventos.length > 3;
 
-    return ConstrainedBox(
-      constraints: BoxConstraints(maxHeight: maxHeight),
-      child: ListView.builder(
-        shrinkWrap: true,
-        itemCount: eventos.length,
-        itemBuilder: (context, index) {
-          return _buildEventoBusquedaCard(eventos[index]);
-        },
-      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final alturaMaximaDisponible = constraints.maxHeight.isFinite
+            ? constraints.maxHeight
+            : alturaDeseada;
+
+        final alturaFinal = alturaDeseada > alturaMaximaDisponible
+            ? alturaMaximaDisponible
+            : alturaDeseada;
+
+        return ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: alturaFinal),
+          child: RawScrollbar(
+            controller: _busquedaScrollController,
+            thumbVisibility: mostrarScroll,
+            trackVisibility: false,
+            interactive: true,
+            thickness: 5,
+            radius: const Radius.circular(20),
+            thumbColor: _cs.primary,
+            child: ListView.builder(
+              controller: _busquedaScrollController,
+              shrinkWrap: true,
+              padding: const EdgeInsets.only(bottom: 8, right: 8),
+              itemCount: eventos.length,
+              itemBuilder: (context, index) {
+                return _buildEventoBusquedaCard(eventos[index]);
+              },
+            ),
+          ),
+        );
+      },
     );
   }
 
