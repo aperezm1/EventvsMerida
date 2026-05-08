@@ -135,7 +135,7 @@ class _CalendarioState extends State<Calendario> {
         _mensajeError = respuesta.mensaje;
       });
 
-      Mensaje.mostrarSnackBar(context: context, mensaje: respuesta.mensaje, icon: const IconData(0xe6e7, fontFamily: 'MaterialIcons'), color: Colors.red);
+      Mensaje.mostrarSnackBar(context: context, mensaje: respuesta.mensaje, icon: Icons.wifi_off, color: Colors.red);
       return;
     }
 
@@ -666,7 +666,7 @@ class _CalendarioState extends State<Calendario> {
 
     if (_mensajeError != null) {
       return _buildEstadoCentro(
-        icono: Icons.error_outline,
+        icono: Icons.wifi_off,
         mensaje: _mensajeError!,
         accion: TextButton(
           onPressed: _cargarEventos,

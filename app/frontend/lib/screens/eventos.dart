@@ -60,6 +60,9 @@ class _EventosState extends State<Eventos> {
   bool _hasMoreEventos = true;
   bool _usandoFiltros = false;
 
+  String? _mensajeErrorEventos;
+  bool _snackbarErrorEventosMostrado = false;
+
   final ScrollController _scrollController = ScrollController();
   final ScrollController _categoriasScrollController = ScrollController();
 
@@ -138,9 +141,26 @@ class _EventosState extends State<Eventos> {
       if (!mounted) return;
 
       if (mapaResp == null) {
+        const mensaje = 'No hay conexión. Intenta de nuevo más tarde.';
+
         setState(() {
+          _mensajeErrorEventos = mensaje;
           _hasMoreEventos = false;
         });
+
+        _mostrarSnackBarErrorEventos(mensaje);
+        return;
+      }
+
+      final error = mapaResp['error'] as String?;
+
+      if (error != null && error.trim().isNotEmpty) {
+        setState(() {
+          _mensajeErrorEventos = error;
+          _hasMoreEventos = false;
+        });
+
+        _mostrarSnackBarErrorEventos(error);
         return;
       }
 
@@ -149,6 +169,8 @@ class _EventosState extends State<Eventos> {
       final esPrimeraPagina = _page == 0;
 
       setState(() {
+        _mensajeErrorEventos = null;
+        _snackbarErrorEventosMostrado = false;
         _eventosList.addAll(items);
         _page++;
         _hasMoreEventos = !last;
@@ -160,9 +182,14 @@ class _EventosState extends State<Eventos> {
     } catch (_) {
       if (!mounted) return;
 
+      const mensaje = 'No hay conexión. Intenta de nuevo más tarde.';
+
       setState(() {
+        _mensajeErrorEventos = mensaje;
         _hasMoreEventos = false;
       });
+
+      _mostrarSnackBarErrorEventos(mensaje);
     } finally {
       if (!mounted) return;
 
@@ -248,10 +275,15 @@ class _EventosState extends State<Eventos> {
   }
 
   void _resetAndFetchEventos() {
-    _eventosList.clear();
-    _page = 0;
-    _hasMoreEventos = true;
-    _isLoadingEventos = false;
+    setState(() {
+      _eventosList.clear();
+      _page = 0;
+      _hasMoreEventos = true;
+      _isLoadingEventos = false;
+      _mensajeErrorEventos = null;
+      _snackbarErrorEventosMostrado = false;
+    });
+
     _fetchEventosPage();
   }
 
@@ -338,6 +370,27 @@ class _EventosState extends State<Eventos> {
     if (icono == null) return texto;
 
     return texto.substring(icono.length).trimLeft();
+  }
+
+  // ===========================================================================
+  // MENSAJES
+  // ===========================================================================
+
+  void _mostrarSnackBarErrorEventos(String mensaje) {
+    if (_snackbarErrorEventosMostrado) return;
+
+    _snackbarErrorEventosMostrado = true;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
+      Mensaje.mostrarSnackBar(
+        context: context,
+        mensaje: mensaje,
+        icon: Icons.wifi_off,
+        color: _cs.error,
+      );
+    });
   }
 
   // ===========================================================================
@@ -1030,6 +1083,22 @@ class _EventosState extends State<Eventos> {
       return const Center(child: CircularProgressIndicator());
     }
 
+    if (_eventosList.isEmpty && _mensajeErrorEventos != null) {
+      return _buildEstadoCentro(
+        icono: Icons.wifi_off,
+        mensaje: _mensajeErrorEventos!,
+        accion: ElevatedButton.icon(
+          onPressed: _resetAndFetchEventos,
+          icon: const Icon(Icons.refresh),
+          label: const Text('Reintentar'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: _cs.primary,
+            foregroundColor: _cs.surface,
+          ),
+        ),
+      );
+    }
+
     if (_eventosList.isEmpty) {
       return _buildEstadoCentro(
         icono: Icons.event_busy,
@@ -1055,7 +1124,10 @@ class _EventosState extends State<Eventos> {
     );
   }
 
-  Widget _buildEventosFiltradosBusquedaBody(Future<ApiResponse<List<Evento>>> listadoEventos, String tipo) {
+  Widget _buildEventosFiltradosBusquedaBody(
+      Future<ApiResponse<List<Evento>>> listadoEventos,
+      String tipo,
+      ) {
     return FutureBuilder<ApiResponse<List<Evento>>>(
       future: listadoEventos,
       builder: (context, snapshot) {
@@ -1073,10 +1145,16 @@ class _EventosState extends State<Eventos> {
         final respuesta = snapshot.data;
 
         if (respuesta == null || !respuesta.exito) {
+          final mensaje =
+              respuesta?.mensaje ?? 'No se han podido cargar los eventos';
+
+          final esErrorConexion = mensaje.toLowerCase().contains('conexión') ||
+              mensaje.toLowerCase().contains('conexion') ||
+              mensaje.toLowerCase().contains('internet');
+
           return _buildEstadoCentro(
-            icono: Icons.error_outline,
-            mensaje:
-            respuesta?.mensaje ?? 'No se han podido cargar los eventos',
+            icono: esErrorConexion ? Icons.wifi_off : Icons.error_outline,
+            mensaje: mensaje,
           );
         }
 

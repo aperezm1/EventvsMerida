@@ -881,21 +881,11 @@ Future<XFile?> elegirImagen(BuildContext context) async {
   }
 }
 
-typedef CampoTextoBuilder =
-    Widget Function(
-      String label, {
-      required TextEditingController controller,
-      TextInputType? keyboardType,
-      bool isPassword,
-      bool obscureText,
-      VoidCallback? onToggle,
-      bool readOnly,
-      bool isDropdown,
-      int? maxLength,
-      List<TextInputFormatter>? inputFormatters,
-    });
-
 typedef ValidadorCampo = String? Function(String label, String? value);
+
+// ===========================================================================
+// 5. CAMPOS DE FORMULARIO
+// ===========================================================================
 
 class CampoTexto {
   static Widget buildCampoTexto(
