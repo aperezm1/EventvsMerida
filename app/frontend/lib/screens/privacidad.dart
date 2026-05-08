@@ -16,31 +16,34 @@ class _PrivacidadState extends State<Privacidad> {
   static const String _textoPrivacidad = '''
 Política de Privacidad
 
-1. Responsable del tratamiento
-Eventvs Mérida es responsable de tus datos personales. Puedes contactar a través del email: info@eventvsmerida.com
+En Eventvs Mérida nos comprometemos a proteger tu privacidad y a tratar tus datos personales de forma transparente y segura.
 
-2. Datos recopilados
-Recopilamos los datos proporcionados en el registro (nombre, apellidos, correo electrónico, fecha de nacimiento y teléfono) y únicamente empleamos cookies técnicas.
+1. Responsable del tratamiento  
+El responsable del tratamiento de los datos es Eventvs Mérida.  
+Correo de contacto: info@eventvsmerida.com
 
-3. Finalidad
-Tus datos se emplean para la gestión de usuarios y eventos. No compartimos tu información con terceros, salvo requerimiento legal.
+2. Datos personales tratados  
+Recopilamos los datos que nos facilitas durante el registro y uso de la aplicación, como nombre, apellidos, correo electrónico, fecha de nacimiento y teléfono. La aplicación únicamente utiliza cookies técnicas necesarias para su funcionamiento.
 
-4. Legitimación
-La base legal para el tratamiento es tu consentimiento al registrarte.
+3. Finalidad del tratamiento  
+Los datos se tratan con la finalidad de gestionar tu cuenta de usuario, facilitar el acceso a los servicios de la aplicación y mejorar la experiencia de uso. No se utilizarán para fines distintos ni se cederán a terceros, salvo obligación legal.
 
-5. Conservación
-Tus datos se conservarán sólo mientras seas usuario registrado o por requerimientos legales.
+4. Base legal  
+El tratamiento de tus datos se basa en tu consentimiento, otorgado al registrarte y utilizar la aplicación, así como en la correcta prestación del servicio.
 
-6. Derechos
-Puedes ejercitar tus derechos de acceso, rectificación, cancelación y oposición escribiendo a info@eventvsmerida.com
+5. Conservación de los datos  
+Los datos personales se conservarán mientras mantengas tu condición de usuario registrado y, posteriormente, durante los plazos legalmente exigidos.
 
-7. Seguridad
-Aplicamos medidas técnicas y organizativas para proteger tus datos de accesos no autorizados.
+6. Derechos del usuario  
+Puedes ejercer tus derechos de acceso, rectificación, supresión, limitación del tratamiento y oposición, así como retirar tu consentimiento en cualquier momento, escribiendo a info@eventvsmerida.com
 
-8. Cambios en la política
-Esta política puede actualizarse en el futuro. Te notificaremos si hay cambios relevantes.
+7. Seguridad de la información  
+Eventvs Mérida aplica las medidas técnicas y organizativas necesarias para garantizar la seguridad y confidencialidad de los datos personales y evitar su pérdida, acceso no autorizado o uso indebido.
 
-Última actualización: 06/03/2026
+8. Cambios en la política de privacidad  
+Esta política podrá ser actualizada en función de cambios legales o mejoras del servicio. En caso de modificaciones relevantes, se informará a los usuarios a través de la aplicación.
+
+Última actualización: mayo de 2026
 ''';
 
   // ===========================================================================
