@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ui';
 
+import 'package:eventvsmerida/core/router/app_routes.dart';
 import 'package:eventvsmerida/services/shared_preferences_service.dart';
 import 'package:eventvsmerida/utils/fecha_utils.dart';
 import 'package:eventvsmerida/widgets/componentes_compartidos.dart';
@@ -31,6 +32,7 @@ class _EventosState extends State<Eventos> {
   GlobalKey keyTarjetaEvento = GlobalKey();
   GlobalKey keyBtnBuscar = GlobalKey();
   GlobalKey keyBtnFiltro = GlobalKey();
+  GlobalKey keyPantalla = GlobalKey();
 
   String _textoBusqueda = '';
 
@@ -1148,7 +1150,9 @@ class _EventosState extends State<Eventos> {
     if (Tutorial.numPantalla != 1) return;
     if (Tutorial.tutorialInicializado) return;
     if (_eventosList.isEmpty) return;
-    if (!_targetEstaListo(keyTarjetaEvento) ||
+
+    if (!_targetEstaListo(keyPantalla) ||
+        !_targetEstaListo(keyTarjetaEvento) ||
         !_targetEstaListo(keyBtnBuscar) ||
         !_targetEstaListo(keyBtnFiltro)) {
       return;
@@ -1158,21 +1162,50 @@ class _EventosState extends State<Eventos> {
     _configurarTutorial();
   }
 
-  void _configurarTutorial() {
+  void _configurarTutorial({bool soloBienvenida = true}) {
     Tutorial.pasosTutorial.clear();
-    cargarPasosTutorial();
+
+    cargarPasosTutorial(soloBienvenida: soloBienvenida);
 
     Tutorial.tutorial = Tutorial.crearTutorial(
       context: context,
       pasosTutorial: Tutorial.pasosTutorial,
       color: Theme.of(context).colorScheme.primary,
+      pulseEnable: !soloBienvenida,
     );
 
     Tutorial.mostrarTutorial(context);
   }
 
-  void cargarPasosTutorial() {
+  void cargarPasosTutorial({required bool soloBienvenida}) {
     Tutorial.navPasoActivo.value = false;
+
+    if (soloBienvenida) {
+      Tutorial.pasosTutorial.add(
+        Tutorial.crearPaso(
+          alineamientoTarjeta: ContentAlign.top,
+          context: context,
+          key: keyPantalla,
+          titulo: '¡Bienvenido a Eventvs Mérida!',
+          descripcion: 'En este pequeño tutorial te mostraremos cómo navegar por la aplicación y sus funcionalidades. Puedes saltar el tutorial en cualquier momento pulsando el botón de arriba a la izquierda.',
+          icon: Icons.event,
+          siguiente: true,
+          forma: ShapeLightFocus.Circle,
+          paddingFocus: 0,
+          onNext: () {
+            Tutorial.tutorial.finish();
+
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (!mounted) return;
+
+              _configurarTutorial(soloBienvenida: false);
+            });
+          },
+        ),
+      );
+
+      return;
+    }
 
     Tutorial.pasosTutorial.add(
       Tutorial.crearPaso(
@@ -1207,7 +1240,7 @@ class _EventosState extends State<Eventos> {
         key: keyBtnFiltro,
         titulo: 'Filtrar eventos',
         descripcion:
-        'Desde aquí puedes filtrar los eventos por categoría para encontrar más rápido segun tus gustos.',
+        'Desde aquí puedes filtrar los eventos por categoría para encontrar más rápido según tus gustos.',
         icon: Icons.filter_alt,
         siguiente: true,
         onNext: () {
@@ -1236,7 +1269,7 @@ class _EventosState extends State<Eventos> {
           await Future.delayed(const Duration(milliseconds: 300));
           if (!mounted) return;
 
-          context.go('/mapa');
+          context.go(AppRoutes.mapa);
         },
       ),
     );
@@ -1248,32 +1281,49 @@ class _EventosState extends State<Eventos> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: CustomAppBar(
-        actions: [
-          Padding(
-            padding: const EdgeInsets.all(8),
-            child: Row(
-              children: [
-                _buildAppBarAction(
-                  icon: Icons.search,
-                  tooltip: 'Buscar',
-                  onPressed: _abrirModalBusqueda,
-                  widgetKey: keyBtnBuscar,
+    return Stack(
+      children: [
+        Scaffold(
+          appBar: CustomAppBar(
+            actions: [
+              Padding(
+                padding: const EdgeInsets.all(8),
+                child: Row(
+                  children: [
+                    _buildAppBarAction(
+                      icon: Icons.search,
+                      tooltip: 'Buscar',
+                      onPressed: _abrirModalBusqueda,
+                      widgetKey: keyBtnBuscar,
+                    ),
+                    _buildAppBarAction(
+                      icon: Icons.filter_alt_rounded,
+                      tooltip: 'Filtrar',
+                      onPressed: _abrirModalFiltros,
+                      badgeCount: _categoriasSeleccionadas.length,
+                      widgetKey: keyBtnFiltro,
+                    ),
+                  ],
                 ),
-                _buildAppBarAction(
-                  icon: Icons.filter_alt_rounded,
-                  tooltip: 'Filtrar',
-                  onPressed: _abrirModalFiltros,
-                  badgeCount: _categoriasSeleccionadas.length,
-                  widgetKey: keyBtnFiltro,
-                ),
-              ],
+              ),
+            ],
+          ),
+          body: _buildBody(),
+        ),
+
+        Positioned.fill(
+          child: IgnorePointer(
+            child: Align(
+              alignment: const Alignment(0, 0.5),
+              child: SizedBox(
+                key: keyPantalla,
+                width: 0.1,
+                height: 0.1,
+              ),
             ),
           ),
-        ],
-      ),
-      body: _buildBody(),
+        ),
+      ],
     );
   }
 }

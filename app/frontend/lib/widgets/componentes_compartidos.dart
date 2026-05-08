@@ -713,6 +713,7 @@ class Tutorial {
     required BuildContext context,
     required List<TargetFocus> pasosTutorial,
     required Color color,
+    bool pulseEnable = true,
   }) {
     return TutorialCoachMark(
       targets: pasosTutorial,
@@ -721,8 +722,10 @@ class Tutorial {
       paddingFocus: 15,
       opacityShadow: 0.5,
       imageFilter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+      pulseEnable: pulseEnable,
       onSkip: () {
         SharedPreferencesService.finalizarTurorial();
+        context.go(AppRoutes.eventos);
         return true;
       },
     );
@@ -745,11 +748,13 @@ class Tutorial {
     ShapeLightFocus? forma,
     ContentAlign alineamientoTarjeta = ContentAlign.bottom,
     required VoidCallback? onNext,
+    double paddingFocus = 10,
   }) {
     return TargetFocus(
       identify: '${titulo}_${key.hashCode}',
       keyTarget: key,
       alignSkip: Alignment.topLeft,
+      paddingFocus: paddingFocus,
       shape: forma ?? ShapeLightFocus.Circle,
       enableTargetTab: false,
       contents: [

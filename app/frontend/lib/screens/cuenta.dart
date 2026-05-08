@@ -771,7 +771,12 @@ class _CuentaState extends State<Cuenta> {
                             foregroundColor: _cs.onPrimary,
                             minimumSize: const Size.fromHeight(48),
                           ),
-                          child: const Text('Cambiar contraseña'),
+                          child: Text(
+                            'Cambiar contraseña',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(color: _cs.surface),
+                          ),
                         ),
                       ),
                     ],
