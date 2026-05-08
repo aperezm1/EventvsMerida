@@ -4,10 +4,10 @@ window.addEventListener("DOMContentLoaded", async () => {
   if (sesion === 401) {
     window.location.href = `${window.location.origin}/html/login.html`;
     return;
-  } else if (sesion === 200){
+  } else if (sesion === 200) {
     document.body.classList.remove("auth-pending");
   }
-  
+
   const URL_BASE = "https://eventvsmerida-x2t1.onrender.com/api/";
   cargarCategorias(URL_BASE);
 
@@ -48,10 +48,23 @@ window.addEventListener("DOMContentLoaded", async () => {
         };
         editarCategoria(URL_BASE, formEditar.dataset.id, categoria);
       }
-      form.classList.add("was-validated");
+      formEditar.classList.add("was-validated");
     },
     false,
   );
+
+  const modalCategoria = document.getElementById("modalCrearCategoria");
+
+  if (modalCategoria) {
+    modalCategoria.addEventListener("hidden.bs.modal", function () {
+      const form = document.getElementById("formAgregarCategoria");
+
+      if (form) {
+        form.classList.remove("was-validated");
+        form.reset();
+      }
+    });
+  }
 });
 
 async function cargarCategorias(URL_BASE) {
@@ -84,6 +97,9 @@ async function cargarCategorias(URL_BASE) {
       categoriasVacia.classList.remove("d-block");
       categoriasVacia.classList.add("d-none");
     }
+
+    tabla.innerHTML = "";
+    data.sort((a, b) => a.id - b.id);
 
     data.forEach((categoria) => {
       const tr = document.createElement("tr");
@@ -208,7 +224,8 @@ async function editarCategoria(URL_BASE, id, datosCategoria) {
 
 async function eliminarRol(URL_BASE, id, categoria) {
   Swal.fire({
-    title: "¿Estás seguro que deseas eliminar la categoría \"" + categoria +"\"?",
+    title:
+      '¿Estás seguro que deseas eliminar la categoría "' + categoria + '"?',
     text: "Esta acción no puede revertirse",
     icon: "warning",
     showCancelButton: true,
@@ -221,7 +238,7 @@ async function eliminarRol(URL_BASE, id, categoria) {
       try {
         const options = {
           method: "DELETE",
-          credentials: "include"
+          credentials: "include",
         };
         const resp = await fetch(URL_BASE + "categorias/delete/" + id, options);
         const respuesta = await resp.text();

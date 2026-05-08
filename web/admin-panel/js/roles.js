@@ -86,6 +86,7 @@ async function cargarRoles(URL_BASE) {
     }
 
     tabla.innerHTML = "";
+    data.sort((a, b) => a.id - b.id);
     data.forEach((rol) => {
       const tr = document.createElement("tr");
       const tdId = document.createElement("td");

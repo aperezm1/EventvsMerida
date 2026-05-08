@@ -128,10 +128,7 @@
         <main>
           <!-- Loader -->
           <div id="loader">
-            <img
-              src="../assets/img/logo-eventvs-merida-no-bg.png"
-              alt=""
-            />
+            <img src="../assets/img/logo-eventvs-merida-no-bg.png" alt="" />
           </div>
 
           <div class="container-fluid px-4">
@@ -142,19 +139,19 @@
               </li>
               <li class="breadcrumb-item active">Organizadores</li>
             </ol>
-             <div class="d-flex justify-content-end">
-                <button
-                  type="button"
-                  class="btn btn-primary"
-                  data-bs-toggle="modal"
-                  data-bs-target="#modalCrearOrganizador"
-                >
-                  Añadir organizador
-                </button>
-              </div>
-            <div class="row justify-content-center"></div>
+            <div class="d-flex justify-content-end">
+              <button
+                type="button"
+                class="btn btn-primary"
+                data-bs-toggle="modal"
+                data-bs-target="#modalCrearOrganizador"
+              >
+                Añadir organizador
+              </button>
+            </div>
 
             <!-- Modal -->
+            <!-- Modal Crear Organizador -->
             <div
               class="modal fade"
               id="modalCrearOrganizador"
@@ -165,9 +162,13 @@
               <div class="modal-dialog modal-lg">
                 <div class="modal-content bg-dark text-light">
                   <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="modalCrearOrganizadorLabel">
+                    <h1
+                      class="modal-title fs-5"
+                      id="modalCrearOrganizadorLabel"
+                    >
                       Añadir nuevo organizador
                     </h1>
+
                     <button
                       type="button"
                       class="btn-close custom-close"
@@ -175,127 +176,210 @@
                       aria-label="Close"
                     ></button>
                   </div>
-                  <div class="modal-body">
+
+                  <div class="modal-body" id="contenidoModalCrearOrganizador">
                     <form
-                      class="row g-3 needs-validation"
+                      class="needs-validation"
                       id="formAgregarOrganizador"
                       novalidate
                     >
-                      <div class="col-md-6">
-                        <label for="nombre" class="form-label">Nombre</label>
-                        <input
-                          type="text"
-                          class="form-control"
-                          id="nombre"
-                          name="nombre"
-                          required
-                          minlength="2"
-                          maxlength="50"
-                        />
-                        <div class="invalid-feedback">
-                          Ingresa un nombre válido
+                      <!-- Datos personales -->
+                      <div class="card bg-dark border-secondary mb-3">
+                        <div class="card-header text-light border-secondary">
+                          <i class="fas fa-id-card me-2"></i>
+                          Datos personales
+                        </div>
+
+                        <div class="card-body">
+                          <div class="row g-3">
+                            <div class="col-md-6">
+                              <label for="nombre" class="form-label">
+                                Nombre
+                                <span class="campo-obligatorio">*</span>
+                              </label>
+                              <input
+                                type="text"
+                                class="form-control"
+                                id="nombre"
+                                name="nombre"
+                                required
+                                minlength="2"
+                                maxlength="50"
+                              />
+                              <div class="invalid-feedback">
+                                Ingresa un nombre válido.
+                              </div>
+                            </div>
+
+                            <div class="col-md-6">
+                              <label for="apellidos" class="form-label">
+                                Apellidos
+                                <span class="campo-obligatorio">*</span>
+                              </label>
+                              <input
+                                type="text"
+                                class="form-control"
+                                id="apellidos"
+                                name="apellidos"
+                                required
+                                minlength="2"
+                                maxlength="50"
+                              />
+                              <div class="invalid-feedback">
+                                Ingresa unos apellidos válidos.
+                              </div>
+                            </div>
+
+                            <div class="col-md-6">
+                              <label for="fechaNacimiento" class="form-label">
+                                Fecha de nacimiento
+                                <span class="campo-obligatorio">*</span>
+                              </label>
+                              <input
+                                type="date"
+                                class="form-control"
+                                id="fechaNacimiento"
+                                name="fechaNacimiento"
+                                required
+                              />
+                              <div class="invalid-feedback">
+                                Ingresa una fecha válida.
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                      <div class="col-md-6">
-                        <label for="apellidos" class="form-label"
-                          >Apellidos</label
-                        >
-                        <input
-                          type="text"
-                          class="form-control"
-                          id="apellidos"
-                          name="apellidos"
-                          required
-                          minlength="2"
-                          maxlength="50"
-                        />
-                        <div class="invalid-feedback">
-                          Ingresa unos apellidos válidos
+
+                      <!-- Datos de contacto -->
+                      <div class="card bg-dark border-secondary mb-3">
+                        <div class="card-header text-light border-secondary">
+                          <i class="fas fa-address-book me-2"></i>
+                          Datos de contacto
+                        </div>
+
+                        <div class="card-body">
+                          <div class="row g-3">
+                            <div class="col-md-6">
+                              <label for="correo" class="form-label">
+                                Correo electrónico
+                                <span class="campo-obligatorio">*</span>
+                              </label>
+                              <input
+                                type="email"
+                                class="form-control"
+                                id="correo"
+                                name="correo"
+                                required
+                                maxlength="100"
+                              />
+                              <div class="invalid-feedback">
+                                Ingresa un correo electrónico válido.
+                              </div>
+                            </div>
+
+                            <div class="col-md-6">
+                              <label for="telefono" class="form-label">
+                                Teléfono
+                                <span class="campo-obligatorio">*</span>
+                              </label>
+                              <input
+                                type="tel"
+                                class="form-control"
+                                id="telefono"
+                                name="telefono"
+                                required
+                                pattern="[0-9]{9,15}"
+                                maxlength="15"
+                                title="Solo números y 9 dígitos"
+                              />
+                              <div class="invalid-feedback">
+                                Ingresa un teléfono válido.
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                      <div class="col-md-6">
-                        <label for="fechaNacimiento" class="form-label"
-                          >Fecha de nacimiento</label
-                        >
-                        <input
-                          type="date"
-                          class="form-control"
-                          id="fechaNacimiento"
-                          name="fechaNacimiento"
-                          required
-                          max="2026-04-14"
-                        />
-                        <div class="invalid-feedback">
-                          Ingresa una fecha válida.
+
+                      <!-- Seguridad -->
+                      <div class="card bg-dark border-secondary mb-3">
+                        <div class="card-header text-light border-secondary">
+                          <i class="fas fa-lock me-2"></i>
+                          Seguridad
+                        </div>
+
+                        <div class="card-body">
+                          <div class="row g-3">
+                            <div class="col-md-6">
+                              <label for="contrasena" class="form-label">
+                                Contraseña
+                                <span class="campo-obligatorio">*</span>
+                              </label>
+                              <input
+                                type="password"
+                                class="form-control"
+                                id="contrasena"
+                                name="contrasena"
+                                pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&amp;])[A-Za-z\d@$!%*?&amp;]{8,}$"
+                                required
+                              />
+                              <div class="invalid-feedback">
+                                La contraseña debe tener al menos 8 caracteres,
+                                una mayúscula, una minúscula, un número y un
+                                símbolo.
+                              </div>
+                            </div>
+
+                            <div class="col-md-6">
+                              <label
+                                for="confirmarContrasena"
+                                class="form-label"
+                              >
+                                Confirmar contraseña
+                                <span class="campo-obligatorio">*</span>
+                              </label>
+                              <input
+                                type="password"
+                                class="form-control"
+                                id="confirmarContrasena"
+                                name="confirmarContrasena"
+                                pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&amp;])[A-Za-z\d@$!%*?&amp;]{8,}$"
+                                required
+                              />
+                              <div class="invalid-feedback">
+                                La contraseña debe tener al menos 8 caracteres,
+                                una mayúscula, una minúscula, un número y un
+                                símbolo.
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                      <div class="col-md-6">
-                        <label for="correo" class="form-label"
-                          >Correo electrónico</label
-                        >
-                        <input
-                          type="email"
-                          class="form-control"
-                          id="correo"
-                          name="correo"
-                          required
-                          maxlength="100"
-                        />
-                        <div class="invalid-feedback">
-                          Ingresa un correo electrónico válido.
+
+                      <!-- Foto -->
+                      <div class="card bg-dark border-secondary">
+                        <div class="card-header text-light border-secondary">
+                          <i class="fas fa-image me-2"></i>
+                          Foto de perfil
                         </div>
-                      </div>
-                      <div class="col-md-6">
-                        <label for="telefono" class="form-label"
-                          >Teléfono</label
-                        >
-                        <input
-                          type="tel"
-                          class="form-control"
-                          id="telefono"
-                          name="telefono"
-                          required
-                          pattern="[0-9]{9,15}"
-                          maxlength="15"
-                          title="Solo números y 9 dígitos"
-                        />
-                        <div class="invalid-feedback">
-                          Ingresa un teléfono válido (solo números y 9 dígitos).
-                        </div>
-                      </div>
-                      <div class="col-md-6">
-                        <label for="contrasena" class="form-label"
-                          >Contraseña</label
-                        >
-                        <input
-                          type="password"
-                          class="form-control"
-                          id="contrasena"
-                          name="contrasena"
-                          pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
-                          required
-                        />
-                        <div class="invalid-feedback">
-                          La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un símbolo.                        </div>
-                      </div>
-                      <div class="col-md-6">
-                        <label for="confirmarContrasena" class="form-label"
-                          >Confirmar contraseña</label
-                        >
-                        <input
-                          type="password"
-                          class="form-control"
-                          id="confirmarContrasena"
-                          name="confirmarContrasena"
-                          pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
-                          required
-                        />
-                        <div class="invalid-feedback">
-                          La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un símbolo. 
+
+                        <div class="card-body">
+                          <label for="fotoOrganizador" class="form-label">
+                            Seleccionar foto
+                          </label>
+                          <input
+                            class="form-control"
+                            type="file"
+                            id="fotoOrganizador"
+                            accept="image/*"
+                          />
+                          <div class="invalid-feedback">
+                            Selecciona una imagen para el perfil.
+                          </div>
                         </div>
                       </div>
                     </form>
                   </div>
+
                   <div class="modal-footer">
                     <button
                       type="button"
@@ -304,6 +388,7 @@
                     >
                       Cancelar
                     </button>
+
                     <button
                       type="submit"
                       form="formAgregarOrganizador"
@@ -312,6 +397,31 @@
                       Agregar organizador
                     </button>
                   </div>
+                </div>
+              </div>
+            </div>
+            <!-- Modal Ver Organizador -->
+            <div
+              class="modal fade"
+              id="modalVerOrganizador"
+              tabindex="-1"
+              aria-labelledby="modalVerOrganizadorLabel"
+              aria-hidden="true"
+            >
+              <div class="modal-dialog modal-lg">
+                <div class="modal-content bg-dark text-light">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="modalVerOrganizadorLabel">
+                      Detalle del organizador
+                    </h5>
+                    <button
+                      type="button"
+                      class="btn-close btn-close-white"
+                      data-bs-dismiss="modal"
+                      aria-label="Cerrar"
+                    ></button>
+                  </div>
+                  <div class="modal-body" id="contenidoModalOrganizador"></div>
                 </div>
               </div>
             </div>
@@ -327,7 +437,10 @@
               <div class="modal-dialog modal-lg">
                 <div class="modal-content bg-dark text-light">
                   <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="modalEditarOrganizadorLabel">
+                    <h1
+                      class="modal-title fs-5"
+                      id="modalEditarOrganizadorLabel"
+                    >
                       Editar organizador
                     </h1>
                     <button
@@ -337,106 +450,181 @@
                       aria-label="Close"
                     ></button>
                   </div>
-                  <div class="modal-body">
+                  <div class="modal-body" id="contenidoModalEditarOrganizador">
                     <form
-                      class="row g-3 needs-validation"
+                      class="needs-validation"
                       id="formEditarOrganizador"
                       novalidate
                     >
-                      <div class="col-md-6">
-                        <label for="nombreEditar" class="form-label"
-                          >Nombre</label
-                        >
-                        <input
-                          type="text"
-                          class="form-control"
-                          id="nombreEditar"
-                          name="nombreEditar"
-                          required
-                          minlength="2"
-                          maxlength="50"
-                        />
-                        <div class="invalid-feedback">
-                          Ingresa un nombre válido
-                        </div>
-                      </div>
-                      <div class="col-md-6">
-                        <label for="apellidosEditar" class="form-label"
-                          >Apellidos</label
-                        >
-                        <input
-                          type="text"
-                          class="form-control"
-                          id="apellidosEditar"
-                          name="apellidosEditar"
-                          required
-                          minlength="2"
-                          maxlength="50"
-                        />
-                        <div class="invalid-feedback">
-                          Ingresa unos apellidos válidos
-                        </div>
-                      </div>
-                      <div class="col-md-6">
-                        <label for="fechaNacimientoEditar" class="form-label"
-                          >Fecha de nacimiento</label
-                        >
-                        <input
-                          type="date"
-                          class="form-control"
-                          id="fechaNacimientoEditar"
-                          name="fechaNacimientoEditar"
-                          required
-                          max="2026-04-14"
-                        />
-                        <div class="invalid-feedback">
-                          Ingresa una fecha válida.
-                        </div>
-                      </div>
-                      <div class="col-md-6">
-                        <label for="correoEditar" class="form-label"
-                          >Correo electrónico</label
-                        >
-                        <input
-                          type="email"
-                          class="form-control"
-                          id="correoEditar"
-                          name="correoEditar"
-                          required
-                          maxlength="100"
-                        />
-                        <div class="invalid-feedback">
-                          Ingresa un correo electrónico válido.
-                        </div>
-                      </div>
-                      <div class="col-md-6">
-                        <label for="telefonoEditar" class="form-label"
-                          >Teléfono</label
-                        >
-                        <input
-                          type="tel"
-                          class="form-control"
-                          id="telefonoEditar"
-                          name="telefonoEditar"
-                          required
-                          pattern="[0-9]{9,15}"
-                          maxlength="15"
-                          title="Solo números y 9 dígitos"
-                        />
-                        <div class="invalid-feedback">
-                          Ingresa un teléfono válido (solo números y 9 dígitos).
-                        </div>
-                      </div>
-                        <div class="col-md-6 d-flex align-items-end">
-                          <button
-                            type="button"
-                            class="btn btn-primary w-100"
-                            data-bs-target="#modalEditarContrasenia"
-                            data-bs-toggle="modal"
+                      <!-- Imagen del usuario -->
+                      <div class="text-center mb-4">
+                        <div class="avatar-wrapper mx-auto mb-2">
+                          <img
+                            class="avatar-usuario-modal"
+                            id="fotoOrganizadorEditar"
+                            style="display: none"
+                            alt="Foto de perfil"
+                          />
+
+                          <div
+                            id="sinFotoOrganizador"
+                            class="avatar-placeholder"
+                            style="display: none"
                           >
-                            Editar contraseña
-                          </button>
+                            <i class="fas fa-user"></i>
+                          </div>
                         </div>
+
+                        <small class="text-muted"
+                          >Foto actual del usuario</small
+                        >
+                      </div>
+
+                      <!-- Datos personales -->
+                      <div class="card bg-dark border-secondary mb-3">
+                        <div class="card-header text-light border-secondary">
+                          <i class="fas fa-id-card me-2"></i>
+                          Datos personales
+                        </div>
+
+                        <div class="card-body">
+                          <div class="row g-3">
+                            <div class="col-md-6">
+                              <label for="nombreEditar" class="form-label"
+                                >Nombre</label
+                              >
+                              <input
+                                type="text"
+                                class="form-control"
+                                id="nombreEditar"
+                                name="nombreEditar"
+                                minlength="2"
+                                maxlength="50"
+                              />
+                              <div class="invalid-feedback">
+                                Ingresa un nombre válido.
+                              </div>
+                            </div>
+
+                            <div class="col-md-6">
+                              <label for="apellidosEditar" class="form-label">
+                                Apellidos
+                              </label>
+                              <input
+                                type="text"
+                                class="form-control"
+                                id="apellidosEditar"
+                                name="apellidosEditar"
+                                minlength="2"
+                                maxlength="50"
+                              />
+                              <div class="invalid-feedback">
+                                Ingresa unos apellidos válidos.
+                              </div>
+                            </div>
+
+                            <div class="col-md-6">
+                              <label
+                                for="fechaNacimientoEditar"
+                                class="form-label"
+                              >
+                                Fecha de nacimiento
+                              </label>
+                              <input
+                                type="date"
+                                class="form-control"
+                                id="fechaNacimientoEditar"
+                                name="fechaNacimientoEditar"
+                              />
+                              <div class="invalid-feedback">
+                                Ingresa una fecha válida.
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Datos de contacto -->
+                      <div class="card bg-dark border-secondary mb-3">
+                        <div class="card-header text-light border-secondary">
+                          <i class="fas fa-address-book me-2"></i>
+                          Datos de contacto
+                        </div>
+
+                        <div class="card-body">
+                          <div class="row g-3">
+                            <div class="col-md-6">
+                              <label for="correoEditar" class="form-label">
+                                Correo electrónico
+                              </label>
+                              <input
+                                type="email"
+                                class="form-control"
+                                id="correoEditar"
+                                name="correoEditar"
+                                maxlength="100"
+                              />
+                              <div class="invalid-feedback">
+                                Ingresa un correo electrónico válido.
+                              </div>
+                            </div>
+
+                            <div class="col-md-6">
+                              <label for="telefonoEditar" class="form-label">
+                                Teléfono
+                              </label>
+                              <input
+                                type="tel"
+                                class="form-control"
+                                id="telefonoEditar"
+                                name="telefonoEditar"
+                                pattern="[0-9]{9,15}"
+                                maxlength="15"
+                                title="Solo números y 9 dígitos"
+                              />
+                              <div class="invalid-feedback">
+                                Ingresa un teléfono válido.
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Opciones adicionales -->
+                      <div class="card bg-dark border-secondary">
+                        <div class="card-header text-light border-secondary">
+                          <i class="fas fa-cog me-2"></i>
+                          Opciones adicionales
+                        </div>
+
+                        <div class="card-body">
+                          <div class="row g-3 align-items-end">
+                            <div class="col-md-6">
+                              <label for="formFileEditar" class="form-label">
+                                Cambiar foto
+                              </label>
+                              <input
+                                class="form-control"
+                                type="file"
+                                id="formFileEditar"
+                                accept="image/*"
+                              />
+                            </div>
+
+                            <div class="col-md-6">
+                              <button
+                                type="button"
+                                class="btn btn-primary w-100"
+                                data-bs-target="#modalEditarContrasenia"
+                                data-bs-toggle="modal"
+                              >
+                                <i class="fas fa-key me-2"></i>
+                                Editar contraseña
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </form>
                   </div>
                   <div class="modal-footer">
@@ -459,7 +647,7 @@
               </div>
             </div>
 
-             <!-- Modal -->
+            <!-- Modal -->
             <div
               class="modal fade"
               id="modalEditarContrasenia"
@@ -470,8 +658,12 @@
               <div class="modal-dialog modal-lg">
                 <div class="modal-content bg-dark text-light">
                   <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="modalEditarContraseniaLabel">
-                      Editar contraseña del organizador <span id="nombreUsuario"></span>
+                    <h1
+                      class="modal-title fs-5"
+                      id="modalEditarContraseniaLabel"
+                    >
+                      Editar contraseña del organizador
+                      <span id="nombreUsuario"></span>
                     </h1>
                     <button
                       type="button"
@@ -499,11 +691,14 @@
                           required
                         />
                         <div class="invalid-feedback">
-                          La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un símbolo. 
+                          La contraseña debe tener al menos 8 caracteres, una
+                          mayúscula, una minúscula, un número y un símbolo.
                         </div>
                       </div>
                       <div class="col-md-6">
-                        <label for="confirmarContraseniaEditar" class="form-label"
+                        <label
+                          for="confirmarContraseniaEditar"
+                          class="form-label"
                           >Confirmar contraseña</label
                         >
                         <input
@@ -515,7 +710,8 @@
                           required
                         />
                         <div class="invalid-feedback">
-                          La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un símbolo. 
+                          La contraseña debe tener al menos 8 caracteres, una
+                          mayúscula, una minúscula, un número y un símbolo.
                         </div>
                       </div>
                     </form>
@@ -540,8 +736,6 @@
               </div>
             </div>
 
-
-
             <table class="table text-light table-custom mt-4">
               <thead>
                 <tr>
@@ -557,13 +751,16 @@
               <tbody id="listadoOrganizadores" class="table-bordered"></tbody>
             </table>
 
-            <h3 id="organizadores-vacio" class="text-light mt-5 text-center d-none">
+            <h3
+              id="organizadores-vacio"
+              class="text-light mt-5 text-center d-none"
+            >
               En estos momentos, no hay organizadores
             </h3>
           </div>
         </main>
 
-       <footer class="pb-3 bg-dark mt-auto">
+        <footer class="pb-3 bg-dark mt-auto">
           <hr class="text-light" />
           <div class="container-fluid px-4">
             <div
@@ -582,6 +779,5 @@
     ></script>
     <script src="../js/scripts.js"></script>
     <script src="../js/organizadores.js"></script>
-    <!-- <script src="../js/datatables-simple-demo.js"></script> -->
   </body>
 </html>

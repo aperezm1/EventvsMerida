@@ -23,13 +23,15 @@ window.addEventListener("DOMContentLoaded", async () => {
           "confirmarContrasena",
         ).value;
 
+        validarEdad(document.getElementById("fechaNacimiento"), 14, 100, true);
+
         if (!form.checkValidity()) {
           event.stopPropagation();
         } else if (contrasenia !== confirmarContrasenia) {
           event.stopPropagation();
           mostrarAlerta("error", "Las contraseñas tienen que ser iguales");
         } else {
-          const usuario = {
+          const organizador = {
             nombre: document.getElementById("nombre").value,
             apellidos: document.getElementById("apellidos").value,
             fechaNacimiento: formatearFecha(
@@ -40,7 +42,13 @@ window.addEventListener("DOMContentLoaded", async () => {
             password: contrasenia,
             idRol: 2,
           };
-          crearOrganizador(URL_BASE, usuario);
+          const formData = new FormData();
+          formData.append("usuario", JSON.stringify(organizador));
+          const fotoFile = document.getElementById("fotoOrganizador").files[0];
+          if (fotoFile) {
+            formData.append("foto", fotoFile);
+          }
+          crearOrganizador(URL_BASE, formData);
         }
 
         form.classList.add("was-validated");
@@ -56,6 +64,8 @@ window.addEventListener("DOMContentLoaded", async () => {
     "submit",
     function (event) {
       event.preventDefault();
+
+      validarEdad(document.getElementById("fechaNacimiento"), 14, 100, false);
       if (!formEditar.checkValidity()) {
         event.preventDefault();
         event.stopPropagation();
@@ -135,9 +145,9 @@ window.addEventListener("DOMContentLoaded", async () => {
     },
     false,
   );
-  
+
   // Limpia validaciones y campos al cerrar el modal de usuario
-  const modalOrganizador = document.getElementById("modalAgregarOrganizador");
+  const modalOrganizador = document.getElementById("modalCrearOrganizador");
   if (modalOrganizador) {
     modalOrganizador.addEventListener("hidden.bs.modal", function () {
       const form = document.getElementById("formAgregarOrganizador");
@@ -202,6 +212,7 @@ async function cargarOrganizadores(URL_BASE) {
     }
 
     tabla.innerHTML = "";
+    data.sort((a, b) => a.id - b.id);
 
     data.forEach((organizador) => {
       const tr = document.createElement("tr");
@@ -240,6 +251,19 @@ async function cargarOrganizadores(URL_BASE) {
       divGrupo.className = "btn-group";
       divGrupo.setAttribute("role", "group");
 
+      // Botón ver
+      const btnVer = document.createElement("button");
+      btnVer.className = "btn btn-sm btn-primary";
+      btnVer.innerHTML = '<i class="fa-solid fa-eye"></i>';
+      btnVer.setAttribute("data-bs-toggle", "modal");
+      btnVer.setAttribute("data-bs-target", "#modalVerOrganizador");
+      btnVer.addEventListener("click", async function () {
+        const detalle = await obtenerOrganizadorPorId(URL_BASE, organizador.id);
+        if (detalle) {
+          verOrganizador(detalle);
+        }
+      });
+
       // Botón editar
       const btnEditar = document.createElement("button");
       btnEditar.className = "btn btn-sm btn-warning";
@@ -247,16 +271,31 @@ async function cargarOrganizadores(URL_BASE) {
       btnEditar.setAttribute("data-id", organizador.id);
       btnEditar.setAttribute("data-bs-toggle", "modal");
       btnEditar.setAttribute("data-bs-target", "#modalEditarOrganizador");
-      btnEditar.addEventListener("click", function () {
-        document.getElementById("formEditarOrganizador").dataset.id =
-          organizador.id;
-        document.getElementById("nombreEditar").value = organizador.nombre;
-        document.getElementById("apellidosEditar").value =
-          organizador.apellidos;
+      btnEditar.addEventListener("click", async function () {
+        const detalle = await obtenerOrganizadorPorId(URL_BASE, organizador.id);
+        const data = detalle || organizador;
+
+        document.getElementById("formEditarOrganizador").dataset.id = data.id;
+        document.getElementById("nombreEditar").value = data.nombre || "";
+        document.getElementById("apellidosEditar").value = data.apellidos || "";
         document.getElementById("fechaNacimientoEditar").value =
-          organizador.fechaNacimiento;
-        document.getElementById("correoEditar").value = organizador.email;
-        document.getElementById("telefonoEditar").value = organizador.telefono;
+          data.fechaNacimiento || "";
+        document.getElementById("correoEditar").value = data.email || "";
+        document.getElementById("telefonoEditar").value = data.telefono || "";
+
+        const imagenOrganizador = document.getElementById("fotoOrganizadorEditar");
+        const sinFotoOrganizador =
+          document.getElementById("sinFotoOrganizador");
+
+        if (data.fotoUrl) {
+          imagenOrganizador.src = data.fotoUrl;
+          imagenOrganizador.style.display = "block";
+          sinFotoOrganizador.style.display = "none";
+        } else {
+          imagenOrganizador.removeAttribute("src");
+          imagenOrganizador.style.display = "none";
+          sinFotoOrganizador.style.display = "flex";
+        }
       });
 
       // Botón eliminar
@@ -269,6 +308,7 @@ async function cargarOrganizadores(URL_BASE) {
         eliminarOrganizador(URL_BASE, this.dataset.id, this.dataset.nombre);
       });
 
+      divGrupo.appendChild(btnVer);
       divGrupo.appendChild(btnEditar);
       divGrupo.appendChild(btnEliminar);
 
@@ -291,11 +331,8 @@ async function crearOrganizador(URL_BASE, datosFormulario) {
   try {
     const options = {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
       credentials: "include",
-      body: JSON.stringify(datosFormulario),
+      body: datosFormulario,
     };
     const resp = await fetch(URL_BASE + "usuarios/add", options);
     const respuesta = await resp.json();
@@ -380,10 +417,119 @@ async function eliminarOrganizador(URL_BASE, id, nombre) {
   });
 }
 
-function formatearFecha(fechaISO) {
-  const fecha = new Date(fechaISO);
-  const dia = fecha.getDate().toString().padStart(2, "0");
-  const mes = (fecha.getMonth() + 1).toString().padStart(2, "0");
-  const anio = fecha.getFullYear();
-  return `${dia}/${mes}/${anio}`;
+async function obtenerOrganizadorPorId(URL_BASE, id) {
+  try {
+    const resp = await fetch(URL_BASE + "usuarios/" + id, {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!resp.ok) {
+      throw new Error("No se pudo obtener el organizador");
+    }
+
+    return await resp.json();
+  } catch (error) {
+    console.error("Error al obtener el organizador:", error);
+    mostrarAlerta("error", "No se pudo cargar el organizador");
+    return null;
+  }
+}
+
+function verOrganizador(organizador) {
+  const tieneFoto =
+    organizador.fotoUrl &&
+    organizador.fotoUrl.trim() !== "" &&
+    organizador.fotoUrl !== "null" &&
+    organizador.fotoUrl !== "undefined";
+
+  let contenido = `
+    <div id="contenidoModalOrganizador">
+      <div class="text-center mb-4">
+        <div class="avatar-wrapper mx-auto mb-2">
+          ${
+            tieneFoto
+              ? `<img
+                  src="${organizador.fotoUrl}"
+                  alt="Foto de ${organizador.nombre}"
+                  class="avatar-usuario-modal"
+                />`
+              : `<div class="avatar-placeholder d-flex">
+                  <i class="fas fa-user"></i>
+                </div>`
+          }
+        </div>
+
+        <h4 class="text-light mb-0">
+          ${organizador.nombre || "-"} ${organizador.apellidos || ""}
+        </h4>
+
+        <small class="text-muted">
+          Información del organizador
+        </small>
+      </div>
+
+      <div class="card bg-dark border-secondary mb-3">
+        <div class="card-header text-light border-secondary">
+          <i class="fas fa-id-card me-2"></i>
+          Datos personales
+        </div>
+
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <p class="mb-1 text-muted">Nombre</p>
+              <p class="mb-0 text-light fw-semibold">
+                ${organizador.nombre || "-"}
+              </p>
+            </div>
+
+            <div class="col-md-6">
+              <p class="mb-1 text-muted">Apellidos</p>
+              <p class="mb-0 text-light fw-semibold">
+                ${organizador.apellidos || "-"}
+              </p>
+            </div>
+
+            <div class="col-md-6">
+              <p class="mb-1 text-muted">Fecha de nacimiento</p>
+              <p class="mb-0 text-light fw-semibold">
+                ${formatearFecha(organizador.fechaNacimiento) || "-"}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card bg-dark border-secondary">
+        <div class="card-header text-light border-secondary">
+          <i class="fas fa-address-book me-2"></i>
+          Datos de contacto
+        </div>
+
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <p class="mb-1 text-muted">Email</p>
+              <p class="mb-0 text-light fw-semibold">
+                ${organizador.email || "-"}
+              </p>
+            </div>
+
+            <div class="col-md-6">
+              <p class="mb-1 text-muted">Teléfono</p>
+              <p class="mb-0 text-light fw-semibold">
+                ${organizador.telefono || "-"}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById("contenidoModalOrganizador").innerHTML = contenido;
 }

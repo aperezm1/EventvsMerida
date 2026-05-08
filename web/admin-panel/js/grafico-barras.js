@@ -1,19 +1,24 @@
 Chart.defaults.global.defaultFontFamily =
   '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
 
-Chart.defaults.global.defaultFontColor = '#292b2c';
+Chart.defaults.global.defaultFontColor = "#292b2c";
 
-let myBarChart;
+let graficoBarras;
 
 document.addEventListener("DOMContentLoaded", () => {
-  crearGraficoVacio();
-  cargarEventosYGraficar();
+  crearGraficoBarrasVacio();
+  cargarGraficoBarras();
 });
 
-function crearGraficoVacio() {
+function crearGraficoBarrasVacio() {
   const ctx = document.getElementById("graficoEventoMes");
-  
-  myBarChart = new Chart(ctx, {
+
+  if (!ctx) {
+    console.warn("No existe el canvas #graficoEventoMes");
+    return;
+  }
+
+  graficoBarras = new Chart(ctx, {
     type: "bar",
     data: {
       labels: [
@@ -56,24 +61,9 @@ function crearGraficoVacio() {
   });
 }
 
-function mostrarLoader() {
-  const loader = document.getElementById("loader");
-  if (loader) {
-    loader.style.display = "flex";
-  }
-}
+async function cargarGraficoBarras() {
+  const URL = "http://localhost:8080/api/eventos/eventos-por-mes";
 
-function ocultarLoader() {
-  const loader = document.getElementById("loader");
-  if (loader) {
-    loader.style.display = "none";
-  }
-}
-
-async function cargarEventosYGraficar() {
-  const URL = "https://eventvsmerida-x2t1.onrender.com/api/eventos/all";
-
-  mostrarLoader();
   try {
     const respuesta = await fetch(URL, {
       method: "GET",
@@ -86,42 +76,38 @@ async function cargarEventosYGraficar() {
 
     const eventos = await respuesta.json();
 
-    const eventosPorMes = agruparEventosPorMes(eventos);
+    console.log("Eventos por mes:", eventos);
 
-    actualizarGrafico(eventosPorMes);
+    const eventosPorMes = convertirEventosAMeses(eventos);
+
+    actualizarGraficoBarras(eventosPorMes);
 
   } catch (error) {
-    console.error("Error al cargar eventos:", error);
-  } finally {
-    ocultarLoader();
+    console.error("Error al cargar eventos por mes:", error);
   }
 }
 
-function agruparEventosPorMes(eventos) {
+function convertirEventosAMeses(eventos) {
   const contadorMeses = Array(12).fill(0);
 
   eventos.forEach(evento => {
-    const fecha = evento.fechaInicio;
+    const indiceMes = Number(evento.numMes) - 1;
+    const cantidad = Number(evento.cantidadEventos);
 
-
-    if (!fecha) {
-      console.warn("El evento no tiene fecha:", evento);
-      return;
+    if (indiceMes >= 0 && indiceMes <= 11) {
+      contadorMeses[indiceMes] = cantidad;
     }
-
-    const mes = Number(fecha.substring(5, 7)) - 1;
-    if (isNaN(mes) || mes < 0 || mes > 11) {
-      console.warn("Fecha no válida:", fecha);
-      return;
-    }
-
-    contadorMeses[mes]++;
   });
 
   return contadorMeses;
 }
 
-function actualizarGrafico(eventosPorMes) {
-  myBarChart.data.datasets[0].data = eventosPorMes;
-  myBarChart.update();
+function actualizarGraficoBarras(eventosPorMes) {
+  if (!graficoBarras) {
+    console.warn("El gráfico de barras todavía no está creado");
+    return;
+  }
+
+  graficoBarras.data.datasets[0].data = eventosPorMes;
+  graficoBarras.update();
 }

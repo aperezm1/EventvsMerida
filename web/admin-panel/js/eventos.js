@@ -189,6 +189,7 @@ function mostrarEventos(data, numeroPaginas = 0) {
   }
 
   tabla.innerHTML = "";
+  data.sort((a, b) => a.id - b.id);
   data.forEach((evento) => {
     const tr = document.createElement("tr");
     const tdId = document.createElement("td");
