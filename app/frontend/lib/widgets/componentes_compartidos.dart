@@ -86,7 +86,9 @@ class _ModalEventoState extends State<ModalEvento> {
   late final PageController _pageController;
   int _indiceActual = 0;
   late List<Evento> _eventosGuardados;
+
   ColorScheme get _cs => Theme.of(context).colorScheme;
+
   TextTheme get _tt => Theme.of(context).textTheme;
   FechaUtils fu = FechaUtils();
 
@@ -128,7 +130,8 @@ class _ModalEventoState extends State<ModalEvento> {
     final inicioHora = fu.formatearHora(evento.fechaInicio);
     final finHora = fu.formatearHora(evento.fechaFin);
     final horasIguales = inicioHora == finHora;
-    final ambasHorasCero = fu.esHoraCero(evento.fechaInicio) && fu.esHoraCero(evento.fechaFin);
+    final ambasHorasCero =
+        fu.esHoraCero(evento.fechaInicio) && fu.esHoraCero(evento.fechaFin);
 
     if (esMismoDia) {
       if (horasIguales && ambasHorasCero) return 'Fecha: $inicioFecha';
@@ -136,7 +139,8 @@ class _ModalEventoState extends State<ModalEvento> {
       return 'Fecha: $inicioFecha\nHora: $inicioHora - $finHora';
     }
 
-    if (horasIguales && ambasHorasCero) return 'Desde: $inicioFecha\nHasta: $finFecha';
+    if (horasIguales && ambasHorasCero)
+      return 'Desde: $inicioFecha\nHasta: $finFecha';
     return 'Desde: $inicioFecha $inicioHora\nHasta: $finFecha $finHora';
   }
 
@@ -160,41 +164,55 @@ class _ModalEventoState extends State<ModalEvento> {
 
   Future<void> _abrirEnGoogleMaps(String direccion) async {
     final limpia = direccion.trim();
+
+    if (limpia.isEmpty) return;
+
     final query = Uri.encodeComponent(limpia);
     final uri = Uri.parse(
       'https://www.google.com/maps/search/?api=1&query=$query',
     );
 
-    try {
-      final ok = await launchUrl(uri, mode: LaunchMode.platformDefault);
-
-      if (!ok && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No se pudo abrir Google Maps')),
-        );
-      }
-    } catch (_) {
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No se pudo abrir Google Maps')),
-      );
-    }
+    await SalidaApp.abrirUrlExternaConConfirmacion(
+      context: context,
+      uri: uri,
+      destino: 'Google Maps',
+      icono: Icons.map_outlined,
+      launchMode: LaunchMode.externalApplication,
+    );
   }
 
   Future<void> _compartirEvento(Evento evento) async {
-    final texto =
-        '''
-    ${evento.titulo}
-    
-    ${evento.localizacion}
-    
-    Fecha: ${_textoFechaHoraDetalle(evento)}
-    
-    ${evento.descripcion}
-    ''';
+    final descripcionLimpia = evento.descripcion.trim().replaceAll(RegExp(r'\n{3,}'), '\n\n');
 
-    await Share.share(texto, subject: evento.titulo);
+    const enlaceDescarga = 'https://github.com/Null-Pointers-Albarregas/EventvsMerida/releases/download/Alpha/eventvs-merida.apk';
+
+    final texto =
+    '''
+🎟️ ${evento.titulo}
+
+📍 Ubicación:
+${evento.localizacion}
+
+🗓️ ${_textoFechaHoraDetalle(evento)}
+
+🏷️ Categoría:
+${evento.nombreCategoria}
+
+📝 Descripción:
+$descripcionLimpia
+
+━━━━━━━━━━━━━━
+Compartido desde Eventvs Mérida
+Descubre más eventos, planes y actividades de Mérida como este.
+
+📲 Descargar aquí:
+$enlaceDescarga
+''';
+
+    await Share.share(
+      texto.trim(),
+      subject: 'Evento en Mérida: ${evento.titulo}',
+    );
   }
 
   Future<void> _gestionarGuardado() async {
@@ -240,7 +258,12 @@ class _ModalEventoState extends State<ModalEvento> {
       widget.onEventosGuardadosActualizados(_eventosGuardados);
     }
 
-    Mensaje.mostrarSnackBar(context: context, mensaje: respuesta.mensaje, icon: icon, color: color);
+    Mensaje.mostrarSnackBar(
+      context: context,
+      mensaje: respuesta.mensaje,
+      icon: icon,
+      color: color,
+    );
   }
 
   Future<void> _abrirUrl(String urlTexto) async {
@@ -258,27 +281,22 @@ class _ModalEventoState extends State<ModalEvento> {
     if (uri == null) {
       if (!mounted) return;
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('El enlace no es válido')));
+      Mensaje.mostrarSnackBar(
+        context: context,
+        mensaje: 'El enlace no es válido',
+        icon: Icons.close,
+        color: _cs.error,
+      );
       return;
     }
 
-    try {
-      final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
-
-      if (!ok && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No se pudo abrir el enlace')),
-        );
-      }
-    } catch (_) {
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No se pudo abrir el enlace')),
-      );
-    }
+    await SalidaApp.abrirUrlExternaConConfirmacion(
+      context: context,
+      uri: uri,
+      destino: 'un enlace externo',
+      icono: Icons.link,
+      launchMode: LaunchMode.externalApplication,
+    );
   }
 
   // ===========================================================================
@@ -288,55 +306,68 @@ class _ModalEventoState extends State<ModalEvento> {
   void _mostrarModalNoLogeado() {
     showDialog<void>(
       context: context,
+      useRootNavigator: true,
       barrierDismissible: true,
       barrierColor: Colors.black.withValues(alpha: 0.3),
-      builder: (ctx) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          insetPadding: const EdgeInsets.symmetric(vertical: 24),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(16),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+      builder: (dialogContext) {
+        return Stack(
+          children: [
+            Positioned.fill(
+              child: IgnorePointer(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                  child: Container(color: Colors.black.withValues(alpha: 0.08)),
+                ),
+              ),
+            ),
+
+            Center(
               child: AlertDialog(
                 backgroundColor: _cs.surface.withValues(alpha: 0.98),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
-                contentPadding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+                titlePadding: const EdgeInsets.fromLTRB(20, 20, 12, 0),
+                contentPadding: const EdgeInsets.fromLTRB(20, 12, 20, 10),
                 actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                content: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
+
+                title: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(Icons.info_outline, color: _cs.primary),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            'Inicia sesión o regístrate',
-                            style: _tt.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                    Icon(Icons.info_outline, color: _cs.primary, size: 24),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Inicia sesión o regístrate',
+                        style: _tt.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: _cs.onSurface,
                         ),
-                        IconButton(
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(),
-                          icon: const Icon(Icons.close),
-                          onPressed: () => Navigator.of(ctx).pop(),
-                        ),
-                      ],
+                      ),
                     ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Para poder guardar un evento, tienes que iniciar sesión o registrarte.',
-                      style: _tt.bodyMedium,
+                    IconButton(
+                      visualDensity: VisualDensity.compact,
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(
+                        minWidth: 32,
+                        minHeight: 32,
+                      ),
+                      icon: Icon(Icons.close, color: _cs.onSurface, size: 22),
+                      onPressed: () {
+                        Navigator.of(dialogContext, rootNavigator: true).pop();
+                      },
                     ),
                   ],
                 ),
+
+                content: Text(
+                  'Para poder guardar un evento, tienes que iniciar sesión o registrarte.',
+                  style: _tt.bodyMedium?.copyWith(
+                    color: _cs.onSurface,
+                    height: 1.35,
+                  ),
+                ),
+
                 actions: [
                   Row(
                     children: [
@@ -345,7 +376,11 @@ class _ModalEventoState extends State<ModalEvento> {
                           onPressed: () {
                             final router = GoRouter.of(context);
 
-                            Navigator.of(ctx).pop();
+                            Navigator.of(
+                              dialogContext,
+                              rootNavigator: true,
+                            ).pop();
+
                             Navigator.of(context).pop();
 
                             router.push(AppRoutes.registro);
@@ -362,7 +397,11 @@ class _ModalEventoState extends State<ModalEvento> {
                           onPressed: () {
                             final router = GoRouter.of(context);
 
-                            Navigator.of(ctx).pop();
+                            Navigator.of(
+                              dialogContext,
+                              rootNavigator: true,
+                            ).pop();
+
                             Navigator.of(context).pop();
 
                             router.push(AppRoutes.login);
@@ -379,7 +418,7 @@ class _ModalEventoState extends State<ModalEvento> {
                 ],
               ),
             ),
-          ),
+          ],
         );
       },
     );
@@ -657,18 +696,19 @@ class _ModalEventoState extends State<ModalEvento> {
 // ===========================================================================
 
 class Mensaje {
-  static void mostrarSnackBar({required BuildContext context, required String mensaje, required IconData icon, required Color color}) {
+  static void mostrarSnackBar({
+    required BuildContext context,
+    required String mensaje,
+    required IconData icon,
+    required Color color,
+  }) {
     ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              icon,
-              size: 20,
-              color: Colors.white,
-            ),
+            Icon(icon, size: 20, color: Colors.white),
             const SizedBox(width: 8),
             Flexible(
               child: Text(mensaje, style: const TextStyle(color: Colors.white)),
@@ -685,7 +725,233 @@ class Mensaje {
 }
 
 // ===========================================================================
-// 4. TUTORIAL
+// 4. MODAL DE SALIDA DE LA APLICACIÓN
+// ===========================================================================
+
+class SalidaApp {
+  static Future<void> abrirUrlExternaConConfirmacion({
+    required BuildContext context,
+    required Uri uri,
+    String destino = 'enlace externo',
+    IconData icono = Icons.open_in_new,
+    LaunchMode launchMode = LaunchMode.externalApplication,
+  }) async {
+    final confirmado = await _mostrarModalConfirmacionSalida(
+      context: context,
+      destino: destino,
+      icono: icono,
+    );
+
+    if (!confirmado) return;
+
+    try {
+      final ok = await launchUrl(uri, mode: launchMode);
+
+      if (!ok && context.mounted) {
+        Mensaje.mostrarSnackBar(
+          context: context,
+          mensaje: 'No se pudo abrir el enlace',
+          icon: Icons.close,
+          color: Theme.of(context).colorScheme.error,
+        );
+      }
+    } catch (_) {
+      if (!context.mounted) return;
+
+      Mensaje.mostrarSnackBar(
+        context: context,
+        mensaje: 'No se pudo abrir el enlace',
+        icon: Icons.close,
+        color: Theme.of(context).colorScheme.error,
+      );
+    }
+  }
+
+  static Future<bool> _mostrarModalConfirmacionSalida({
+    required BuildContext context,
+    required String destino,
+    required IconData icono,
+  }) async {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
+    final resultado = await showDialog<bool>(
+      context: context,
+      useRootNavigator: true,
+      barrierDismissible: true,
+      barrierColor: Colors.black.withValues(alpha: 0.25),
+      builder: (dialogContext) {
+        return Stack(
+          children: [
+            Positioned.fill(
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  Navigator.of(dialogContext, rootNavigator: true).pop(false);
+                },
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                  child: Container(color: Colors.black.withValues(alpha: 0.08)),
+                ),
+              ),
+            ),
+
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: cs.surface,
+                    borderRadius: BorderRadius.circular(18),
+                    boxShadow: [
+                      BoxShadow(
+                        color: cs.onSurface.withValues(alpha: 0.22),
+                        blurRadius: 16,
+                        spreadRadius: 1.5,
+                        offset: const Offset(0, 7),
+                      ),
+                    ],
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    borderRadius: BorderRadius.circular(18),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 420),
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  width: 42,
+                                  height: 42,
+                                  decoration: BoxDecoration(
+                                    color: cs.primary.withValues(alpha: 0.14),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    icono,
+                                    color: cs.primary,
+                                    size: 24,
+                                  ),
+                                ),
+
+                                const SizedBox(width: 12),
+
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Salir de la aplicación',
+                                        style: tt.titleMedium?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: cs.onSurface,
+                                        ),
+                                      ),
+
+                                      const SizedBox(height: 8),
+
+                                      Text(
+                                        'Estás a punto de abrir $destino fuera de Eventvs Mérida.',
+                                        style: tt.bodyMedium?.copyWith(
+                                          color: cs.onSurface,
+                                          height: 1.35,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+
+                                IconButton(
+                                  padding: EdgeInsets.zero,
+                                  constraints: const BoxConstraints(),
+                                  icon: Icon(Icons.close, color: cs.onSurface),
+                                  onPressed: () {
+                                    Navigator.of(
+                                      dialogContext,
+                                      rootNavigator: true,
+                                    ).pop(false);
+                                  },
+                                ),
+                              ],
+                            ),
+
+                            const SizedBox(height: 20),
+
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: OutlinedButton(
+                                    onPressed: () {
+                                      Navigator.of(
+                                        dialogContext,
+                                        rootNavigator: true,
+                                      ).pop(false);
+                                    },
+                                    style: OutlinedButton.styleFrom(
+                                      foregroundColor: cs.primary,
+                                      side: BorderSide(color: cs.primary),
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 12,
+                                      ),
+                                    ),
+                                    child: const Text('Cancelar'),
+                                  ),
+                                ),
+
+                                const SizedBox(width: 10),
+
+                                Expanded(
+                                  child: FilledButton.icon(
+                                    onPressed: () {
+                                      Navigator.of(
+                                        dialogContext,
+                                        rootNavigator: true,
+                                      ).pop(true);
+                                    },
+                                    icon: Icon(
+                                      Icons.open_in_new,
+                                      size: 18,
+                                      color: cs.surface,
+                                    ),
+                                    label: Text(
+                                      'Continuar',
+                                      style: TextStyle(color: cs.surface),
+                                    ),
+                                    style: FilledButton.styleFrom(
+                                      backgroundColor: cs.primary,
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 12,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    return resultado ?? false;
+  }
+}
+
+// ===========================================================================
+// 5. TUTORIAL
 // ===========================================================================
 
 class Tutorial {
@@ -713,6 +979,7 @@ class Tutorial {
     required BuildContext context,
     required List<TargetFocus> pasosTutorial,
     required Color color,
+    bool pulseEnable = true,
   }) {
     return TutorialCoachMark(
       targets: pasosTutorial,
@@ -721,8 +988,10 @@ class Tutorial {
       paddingFocus: 15,
       opacityShadow: 0.5,
       imageFilter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+      pulseEnable: pulseEnable,
       onSkip: () {
         SharedPreferencesService.finalizarTurorial();
+        context.go(AppRoutes.eventos);
         return true;
       },
     );
@@ -745,11 +1014,13 @@ class Tutorial {
     ShapeLightFocus? forma,
     ContentAlign alineamientoTarjeta = ContentAlign.bottom,
     required VoidCallback? onNext,
+    double paddingFocus = 10,
   }) {
     return TargetFocus(
       identify: '${titulo}_${key.hashCode}',
       keyTarget: key,
       alignSkip: Alignment.topLeft,
+      paddingFocus: paddingFocus,
       shape: forma ?? ShapeLightFocus.Circle,
       enableTargetTab: false,
       contents: [
@@ -876,21 +1147,11 @@ Future<XFile?> elegirImagen(BuildContext context) async {
   }
 }
 
-typedef CampoTextoBuilder =
-    Widget Function(
-      String label, {
-      required TextEditingController controller,
-      TextInputType? keyboardType,
-      bool isPassword,
-      bool obscureText,
-      VoidCallback? onToggle,
-      bool readOnly,
-      bool isDropdown,
-      int? maxLength,
-      List<TextInputFormatter>? inputFormatters,
-    });
-
 typedef ValidadorCampo = String? Function(String label, String? value);
+
+// ===========================================================================
+// 6. CAMPOS DE FORMULARIO
+// ===========================================================================
 
 class CampoTexto {
   static Widget buildCampoTexto(

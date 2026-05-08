@@ -282,7 +282,7 @@ class _PerfilState extends State<Perfil> {
             onTap: () async {
               await SharedPreferencesService.resetearTutorial();
               Tutorial.resetearTutorial();
-              context.go('/eventos');
+              context.go(AppRoutes.eventos);
             },
           ),
       ],
@@ -332,7 +332,7 @@ class _PerfilState extends State<Perfil> {
     await SharedPreferencesService.finalizarTurorial();
 
     if (!mounted) return;
-    context.go('/eventos');
+    context.go(AppRoutes.eventos);
     Mensaje.mostrarSnackBar(context: context, mensaje: "¡Has completado el tutorial!", icon: Icons.help_outline, color: Colors.green);
   }
 
@@ -343,21 +343,20 @@ class _PerfilState extends State<Perfil> {
           context: context,
           key: keyCabecera,
           titulo: 'Registrarse o iniciar sesión',
-          descripcion:
-              'En esta sección puedes registrarte para crear una cuenta o iniciar sesión si ya tienes una. Al hacerlo, podrás acceder a funciones personalizadas como guardar eventos favoritos.',
+          descripcion: 'En esta sección puedes registrarte para crear una cuenta o iniciar sesión si ya tienes una. Al hacerlo, podrás acceder a funciones personalizadas como guardar eventos favoritos.',
           icon: Icons.calendar_month,
           siguiente: true,
           onNext: () => Tutorial.tutorial.next(),
           forma: ShapeLightFocus.RRect,
         ),
       );
+
       Tutorial.pasosTutorial.add(
         Tutorial.crearPaso(
           context: context,
           key: keySecciones,
           titulo: 'Preferencias e información legal',
-          descripcion:
-              'Aquí puedes configurar tus preferencias, eventos guardados, o la política de privacidad entre otros.',
+          descripcion: 'Aquí puedes configurar tus preferencias, eventos guardados, o la política de privacidad entre otros.',
           icon: Icons.list_alt,
           siguiente: false,
           onNext: () => finalizarTutorial(),
@@ -370,21 +369,21 @@ class _PerfilState extends State<Perfil> {
           context: context,
           key: keyPreferencias,
           titulo: 'Preferencias',
-          descripcion:
-              'En esta sección puedes configurar tus preferencias, como tus datos personales o los eventos guardados.',
+          descripcion: 'En esta sección puedes configurar tus preferencias, como tus datos personales o los eventos guardados.',
           icon: Icons.calendar_month,
           siguiente: true,
           onNext: () => Tutorial.tutorial.next(),
           forma: ShapeLightFocus.RRect,
         ),
       );
+
       Tutorial.pasosTutorial.add(
         Tutorial.crearPaso(
+          alineamientoTarjeta: ContentAlign.top,
           context: context,
           key: keyinfoLegal,
           titulo: 'Información legal',
-          descripcion:
-              'Aquí puedes consultar los términos y condiciones así como la política de privacidad.',
+          descripcion: 'Aquí puedes consultar los términos y condiciones así como la política de privacidad.',
           icon: Icons.calendar_month,
           siguiente: false,
           onNext: () => finalizarTutorial(),

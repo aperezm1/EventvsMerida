@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ui';
 
+import 'package:eventvsmerida/core/router/app_routes.dart';
 import 'package:eventvsmerida/services/shared_preferences_service.dart';
 import 'package:eventvsmerida/utils/fecha_utils.dart';
 import 'package:eventvsmerida/widgets/componentes_compartidos.dart';
@@ -31,6 +32,7 @@ class _EventosState extends State<Eventos> {
   GlobalKey keyTarjetaEvento = GlobalKey();
   GlobalKey keyBtnBuscar = GlobalKey();
   GlobalKey keyBtnFiltro = GlobalKey();
+  GlobalKey keyPantalla = GlobalKey();
 
   String _textoBusqueda = '';
 
@@ -58,8 +60,12 @@ class _EventosState extends State<Eventos> {
   bool _hasMoreEventos = true;
   bool _usandoFiltros = false;
 
+  String? _mensajeErrorEventos;
+  bool _snackbarErrorEventosMostrado = false;
+
   final ScrollController _scrollController = ScrollController();
   final ScrollController _categoriasScrollController = ScrollController();
+  final ScrollController _busquedaScrollController = ScrollController();
 
   ColorScheme get _cs => Theme.of(context).colorScheme;
 
@@ -89,6 +95,7 @@ class _EventosState extends State<Eventos> {
     _scrollController.dispose();
 
     _categoriasScrollController.dispose();
+    _busquedaScrollController.dispose();
 
     super.dispose();
   }
@@ -136,9 +143,26 @@ class _EventosState extends State<Eventos> {
       if (!mounted) return;
 
       if (mapaResp == null) {
+        const mensaje = 'No hay conexión. Intenta de nuevo más tarde.';
+
         setState(() {
+          _mensajeErrorEventos = mensaje;
           _hasMoreEventos = false;
         });
+
+        _mostrarSnackBarErrorEventos(mensaje);
+        return;
+      }
+
+      final error = mapaResp['error'] as String?;
+
+      if (error != null && error.trim().isNotEmpty) {
+        setState(() {
+          _mensajeErrorEventos = error;
+          _hasMoreEventos = false;
+        });
+
+        _mostrarSnackBarErrorEventos(error);
         return;
       }
 
@@ -147,6 +171,8 @@ class _EventosState extends State<Eventos> {
       final esPrimeraPagina = _page == 0;
 
       setState(() {
+        _mensajeErrorEventos = null;
+        _snackbarErrorEventosMostrado = false;
         _eventosList.addAll(items);
         _page++;
         _hasMoreEventos = !last;
@@ -158,9 +184,14 @@ class _EventosState extends State<Eventos> {
     } catch (_) {
       if (!mounted) return;
 
+      const mensaje = 'No hay conexión. Intenta de nuevo más tarde.';
+
       setState(() {
+        _mensajeErrorEventos = mensaje;
         _hasMoreEventos = false;
       });
+
+      _mostrarSnackBarErrorEventos(mensaje);
     } finally {
       if (!mounted) return;
 
@@ -246,10 +277,15 @@ class _EventosState extends State<Eventos> {
   }
 
   void _resetAndFetchEventos() {
-    _eventosList.clear();
-    _page = 0;
-    _hasMoreEventos = true;
-    _isLoadingEventos = false;
+    setState(() {
+      _eventosList.clear();
+      _page = 0;
+      _hasMoreEventos = true;
+      _isLoadingEventos = false;
+      _mensajeErrorEventos = null;
+      _snackbarErrorEventosMostrado = false;
+    });
+
     _fetchEventosPage();
   }
 
@@ -339,6 +375,27 @@ class _EventosState extends State<Eventos> {
   }
 
   // ===========================================================================
+  // MENSAJES
+  // ===========================================================================
+
+  void _mostrarSnackBarErrorEventos(String mensaje) {
+    if (_snackbarErrorEventosMostrado) return;
+
+    _snackbarErrorEventosMostrado = true;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
+      Mensaje.mostrarSnackBar(
+        context: context,
+        mensaje: mensaje,
+        icon: Icons.wifi_off,
+        color: _cs.error,
+      );
+    });
+  }
+
+  // ===========================================================================
   // MODALES
   // ===========================================================================
 
@@ -392,53 +449,90 @@ class _EventosState extends State<Eventos> {
   }
 
   Widget _buildModalBusqueda(void Function(void Function()) setStateModal) {
+    final mediaQuery = MediaQuery.of(context);
+    final busquedaVacia = _inputBusquedaController.text.trim().isEmpty;
+
+    final altoDisponible = mediaQuery.size.height -
+        mediaQuery.viewInsets.bottom -
+        96;
+
     return Dialog(
       backgroundColor: Colors.transparent,
       alignment: Alignment.topCenter,
       insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 48),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: _cs.surface,
-          borderRadius: BorderRadius.circular(12),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: altoDisponible.clamp(220.0, 520.0),
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: _inputBusquedaController,
-              decoration: InputDecoration(
-                hintText: 'Buscar eventos...',
-                prefixIcon: IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () {
-                    _modalBusquedaAbierto = false;
-                    _debounce?.cancel();
-                    Navigator.of(context, rootNavigator: true).maybePop();
-                  },
-                ),
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.clear),
-                  onPressed: () {
-                    if (!_modalBusquedaAbierto) return;
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: _cs.surface,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _inputBusquedaController,
+                decoration: InputDecoration(
+                  hintText: 'Buscar eventos...',
+                  prefixIcon: IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: () {
+                      _modalBusquedaAbierto = false;
+                      _debounce?.cancel();
+                      Navigator.of(context, rootNavigator: true).maybePop();
+                    },
+                  ),
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.clear),
+                    onPressed: () {
+                      if (!_modalBusquedaAbierto) return;
 
-                    _inputBusquedaController.clear();
+                      _inputBusquedaController.clear();
+                      _debounce?.cancel();
+                      _actualizarResultadosBusqueda('');
+                      setStateModal(() {});
+                    },
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                onChanged: (text) {
+                  if (text.trim().isEmpty) {
+                    _debounce?.cancel();
                     _actualizarResultadosBusqueda('');
                     setStateModal(() {});
-                  },
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
+                    return;
+                  }
+
+                  setStateModal(() {});
+                  _buscarEventos(text, setStateModal);
+                },
               ),
-              onChanged: (text) => _buscarEventos(text, setStateModal),
-            ),
-            const SizedBox(height: 12),
-            _buildEventosFiltradosBusquedaBody(
-              _eventosEncontrados,
-              'busqueda',
-            ),
-          ],
+
+              const SizedBox(height: 12),
+
+              if (busquedaVacia)
+                SizedBox(
+                  height: 125,
+                  child: _buildEstadoCentro(
+                    icono: Icons.search,
+                    mensaje:
+                    'Ingresa un término de búsqueda para encontrar eventos',
+                  ),
+                )
+              else
+                Flexible(
+                  child: _buildEventosFiltradosBusquedaBody(
+                    _eventosEncontrados,
+                    'busqueda',
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -1028,6 +1122,22 @@ class _EventosState extends State<Eventos> {
       return const Center(child: CircularProgressIndicator());
     }
 
+    if (_eventosList.isEmpty && _mensajeErrorEventos != null) {
+      return _buildEstadoCentro(
+        icono: Icons.wifi_off,
+        mensaje: _mensajeErrorEventos!,
+        accion: ElevatedButton.icon(
+          onPressed: _resetAndFetchEventos,
+          icon: const Icon(Icons.refresh),
+          label: const Text('Reintentar'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: _cs.primary,
+            foregroundColor: _cs.surface,
+          ),
+        ),
+      );
+    }
+
     if (_eventosList.isEmpty) {
       return _buildEstadoCentro(
         icono: Icons.event_busy,
@@ -1053,7 +1163,10 @@ class _EventosState extends State<Eventos> {
     );
   }
 
-  Widget _buildEventosFiltradosBusquedaBody(Future<ApiResponse<List<Evento>>> listadoEventos, String tipo) {
+  Widget _buildEventosFiltradosBusquedaBody(
+      Future<ApiResponse<List<Evento>>> listadoEventos,
+      String tipo,
+      ) {
     return FutureBuilder<ApiResponse<List<Evento>>>(
       future: listadoEventos,
       builder: (context, snapshot) {
@@ -1071,28 +1184,45 @@ class _EventosState extends State<Eventos> {
         final respuesta = snapshot.data;
 
         if (respuesta == null || !respuesta.exito) {
+          final mensaje =
+              respuesta?.mensaje ?? 'No se han podido cargar los eventos';
+
+          final esErrorConexion = mensaje.toLowerCase().contains('conexión') ||
+              mensaje.toLowerCase().contains('conexion') ||
+              mensaje.toLowerCase().contains('internet');
+
           return _buildEstadoCentro(
-            icono: Icons.error_outline,
-            mensaje:
-            respuesta?.mensaje ?? 'No se han podido cargar los eventos',
+            icono: esErrorConexion ? Icons.wifi_off : Icons.error_outline,
+            mensaje: mensaje,
           );
         }
 
         final eventos = _obtenerEventosBusqueda(respuesta, tipo);
 
         if (tipo == 'busqueda' && _textoBusqueda.isEmpty) {
-          return _buildEstadoCentro(
-            icono: Icons.search,
-            mensaje: 'Ingresa un término de búsqueda para encontrar eventos',
+          return SizedBox(
+            height: 125,
+            child: _buildEstadoCentro(
+              icono: Icons.search,
+              mensaje: 'Ingresa un término de búsqueda para encontrar eventos',
+            ),
           );
         }
 
         if (eventos.isEmpty) {
+          if (tipo == 'busqueda') {
+            return SizedBox(
+              height: 125,
+              child: _buildEstadoCentro(
+                icono: Icons.search_off,
+                mensaje: 'No se han encontrado eventos para "$_textoBusqueda"',
+              ),
+            );
+          }
+
           return _buildEstadoCentro(
-            icono: tipo == 'busqueda' ? Icons.search_off : Icons.event_busy,
-            mensaje: tipo == 'busqueda'
-                ? 'No se han encontrado eventos para "$_textoBusqueda"'
-                : 'No hay eventos disponibles',
+            icono: Icons.event_busy,
+            mensaje: 'No hay eventos disponibles',
           );
         }
 
@@ -1111,19 +1241,43 @@ class _EventosState extends State<Eventos> {
   }
 
   Widget _buildResultadosBusqueda(List<Evento> eventos) {
-    const double itemHeight = 110;
+    const double itemHeight = 130;
     final visibleCount = eventos.length < 3 ? eventos.length : 3;
-    final maxHeight = itemHeight * visibleCount;
+    final alturaDeseada = (itemHeight * visibleCount) + 8;
+    final mostrarScroll = eventos.length > 3;
 
-    return ConstrainedBox(
-      constraints: BoxConstraints(maxHeight: maxHeight),
-      child: ListView.builder(
-        shrinkWrap: true,
-        itemCount: eventos.length,
-        itemBuilder: (context, index) {
-          return _buildEventoBusquedaCard(eventos[index]);
-        },
-      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final alturaMaximaDisponible = constraints.maxHeight.isFinite
+            ? constraints.maxHeight
+            : alturaDeseada;
+
+        final alturaFinal = alturaDeseada > alturaMaximaDisponible
+            ? alturaMaximaDisponible
+            : alturaDeseada;
+
+        return ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: alturaFinal),
+          child: RawScrollbar(
+            controller: _busquedaScrollController,
+            thumbVisibility: mostrarScroll,
+            trackVisibility: false,
+            interactive: true,
+            thickness: 5,
+            radius: const Radius.circular(20),
+            thumbColor: _cs.primary,
+            child: ListView.builder(
+              controller: _busquedaScrollController,
+              shrinkWrap: true,
+              padding: const EdgeInsets.only(bottom: 8, right: 8),
+              itemCount: eventos.length,
+              itemBuilder: (context, index) {
+                return _buildEventoBusquedaCard(eventos[index]);
+              },
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -1148,7 +1302,9 @@ class _EventosState extends State<Eventos> {
     if (Tutorial.numPantalla != 1) return;
     if (Tutorial.tutorialInicializado) return;
     if (_eventosList.isEmpty) return;
-    if (!_targetEstaListo(keyTarjetaEvento) ||
+
+    if (!_targetEstaListo(keyPantalla) ||
+        !_targetEstaListo(keyTarjetaEvento) ||
         !_targetEstaListo(keyBtnBuscar) ||
         !_targetEstaListo(keyBtnFiltro)) {
       return;
@@ -1158,21 +1314,50 @@ class _EventosState extends State<Eventos> {
     _configurarTutorial();
   }
 
-  void _configurarTutorial() {
+  void _configurarTutorial({bool soloBienvenida = true}) {
     Tutorial.pasosTutorial.clear();
-    cargarPasosTutorial();
+
+    cargarPasosTutorial(soloBienvenida: soloBienvenida);
 
     Tutorial.tutorial = Tutorial.crearTutorial(
       context: context,
       pasosTutorial: Tutorial.pasosTutorial,
       color: Theme.of(context).colorScheme.primary,
+      pulseEnable: !soloBienvenida,
     );
 
     Tutorial.mostrarTutorial(context);
   }
 
-  void cargarPasosTutorial() {
+  void cargarPasosTutorial({required bool soloBienvenida}) {
     Tutorial.navPasoActivo.value = false;
+
+    if (soloBienvenida) {
+      Tutorial.pasosTutorial.add(
+        Tutorial.crearPaso(
+          alineamientoTarjeta: ContentAlign.top,
+          context: context,
+          key: keyPantalla,
+          titulo: '¡Bienvenido a Eventvs Mérida!',
+          descripcion: 'En este pequeño tutorial te mostraremos cómo navegar por la aplicación y sus funcionalidades. Puedes saltar el tutorial en cualquier momento pulsando el botón de arriba a la izquierda.',
+          icon: Icons.event,
+          siguiente: true,
+          forma: ShapeLightFocus.Circle,
+          paddingFocus: 0,
+          onNext: () {
+            Tutorial.tutorial.finish();
+
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (!mounted) return;
+
+              _configurarTutorial(soloBienvenida: false);
+            });
+          },
+        ),
+      );
+
+      return;
+    }
 
     Tutorial.pasosTutorial.add(
       Tutorial.crearPaso(
@@ -1207,7 +1392,7 @@ class _EventosState extends State<Eventos> {
         key: keyBtnFiltro,
         titulo: 'Filtrar eventos',
         descripcion:
-        'Desde aquí puedes filtrar los eventos por categoría para encontrar más rápido segun tus gustos.',
+        'Desde aquí puedes filtrar los eventos por categoría para encontrar más rápido según tus gustos.',
         icon: Icons.filter_alt,
         siguiente: true,
         onNext: () {
@@ -1236,7 +1421,7 @@ class _EventosState extends State<Eventos> {
           await Future.delayed(const Duration(milliseconds: 300));
           if (!mounted) return;
 
-          context.go('/mapa');
+          context.go(AppRoutes.mapa);
         },
       ),
     );
@@ -1248,32 +1433,49 @@ class _EventosState extends State<Eventos> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: CustomAppBar(
-        actions: [
-          Padding(
-            padding: const EdgeInsets.all(8),
-            child: Row(
-              children: [
-                _buildAppBarAction(
-                  icon: Icons.search,
-                  tooltip: 'Buscar',
-                  onPressed: _abrirModalBusqueda,
-                  widgetKey: keyBtnBuscar,
+    return Stack(
+      children: [
+        Scaffold(
+          appBar: CustomAppBar(
+            actions: [
+              Padding(
+                padding: const EdgeInsets.all(8),
+                child: Row(
+                  children: [
+                    _buildAppBarAction(
+                      icon: Icons.search,
+                      tooltip: 'Buscar',
+                      onPressed: _abrirModalBusqueda,
+                      widgetKey: keyBtnBuscar,
+                    ),
+                    _buildAppBarAction(
+                      icon: Icons.filter_alt_rounded,
+                      tooltip: 'Filtrar',
+                      onPressed: _abrirModalFiltros,
+                      badgeCount: _categoriasSeleccionadas.length,
+                      widgetKey: keyBtnFiltro,
+                    ),
+                  ],
                 ),
-                _buildAppBarAction(
-                  icon: Icons.filter_alt_rounded,
-                  tooltip: 'Filtrar',
-                  onPressed: _abrirModalFiltros,
-                  badgeCount: _categoriasSeleccionadas.length,
-                  widgetKey: keyBtnFiltro,
-                ),
-              ],
+              ),
+            ],
+          ),
+          body: _buildBody(),
+        ),
+
+        Positioned.fill(
+          child: IgnorePointer(
+            child: Align(
+              alignment: const Alignment(0, 0.5),
+              child: SizedBox(
+                key: keyPantalla,
+                width: 0.1,
+                height: 0.1,
+              ),
             ),
           ),
-        ],
-      ),
-      body: _buildBody(),
+        ),
+      ],
     );
   }
 }

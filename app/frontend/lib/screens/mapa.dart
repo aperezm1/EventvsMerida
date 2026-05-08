@@ -1,3 +1,4 @@
+import 'package:eventvsmerida/core/router/app_routes.dart';
 import 'package:eventvsmerida/services/shared_preferences_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -91,7 +92,7 @@ class _MapaState extends State<Mapa> {
         _mensajeError = respuesta.mensaje;
       });
 
-      Mensaje.mostrarSnackBar(context: context, mensaje: respuesta.mensaje, icon: const IconData(0xe6e7, fontFamily: 'MaterialIcons'), color: Colors.red);
+      Mensaje.mostrarSnackBar(context: context, mensaje: respuesta.mensaje, icon: Icons.wifi_off, color: Colors.red);
       return;
     }
 
@@ -245,7 +246,7 @@ class _MapaState extends State<Mapa> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
-                  Icons.error_outline,
+                  Icons.wifi_off,
                   size: 42,
                   color: _cs.primary,
                 ),
@@ -327,7 +328,7 @@ class _MapaState extends State<Mapa> {
 
           await Future.delayed(const Duration(milliseconds: 300));
           if (!mounted) return;
-          context.go('/calendario');
+          context.go(AppRoutes.calendario);
         },
         alineamientoTarjeta: ContentAlign.top,
       ),
