@@ -1,3 +1,4 @@
+import 'package:eventvsmerida/core/router/app_routes.dart';
 import 'package:eventvsmerida/services/shared_preferences_service.dart';
 import 'package:eventvsmerida/utils/fecha_utils.dart';
 import 'package:eventvsmerida/widgets/componentes_compartidos.dart';
@@ -134,7 +135,7 @@ class _CalendarioState extends State<Calendario> {
         _mensajeError = respuesta.mensaje;
       });
 
-      Mensaje.mostrarSnackBar(context: context, mensaje: respuesta.mensaje, icon: const IconData(0xe6e7, fontFamily: 'MaterialIcons'), color: Colors.red);
+      Mensaje.mostrarSnackBar(context: context, mensaje: respuesta.mensaje, icon: Icons.wifi_off, color: Colors.red);
       return;
     }
 
@@ -665,7 +666,7 @@ class _CalendarioState extends State<Calendario> {
 
     if (_mensajeError != null) {
       return _buildEstadoCentro(
-        icono: Icons.error_outline,
+        icono: Icons.wifi_off,
         mensaje: _mensajeError!,
         accion: TextButton(
           onPressed: _cargarEventos,
@@ -790,7 +791,7 @@ class _CalendarioState extends State<Calendario> {
         context: context,
         key: Tutorial.keyNavPerfil,
         titulo: 'Perfil',
-        descripcion: 'Vamos a por el perfil!',
+        descripcion: 'Por último vamos a la sección de perfil.',
         icon: Icons.person,
         siguiente: true,
         onNext: () async {
@@ -801,7 +802,7 @@ class _CalendarioState extends State<Calendario> {
 
           await Future.delayed(const Duration(milliseconds: 300));
           if (!mounted) return;
-          context.go('/perfil');
+          context.go(AppRoutes.perfil);
         },
         alineamientoTarjeta: ContentAlign.top,
       ),

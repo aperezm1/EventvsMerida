@@ -16,27 +16,27 @@ class _TerminosState extends State<Terminos> {
   static const String _textoTerminos = '''
 Términos y Condiciones de Uso
 
-Bienvenido a Eventvs Mérida. Al utilizar nuestra aplicación, aceptas los siguientes términos:
+Bienvenido a Eventvs Mérida. El acceso y uso de esta aplicación implica la aceptación de los presentes Términos y Condiciones.
 
-1. Objeto
-Eventvs Mérida es una plataforma para la consulta y gestión de eventos culturales en Mérida.
+1. Finalidad de la aplicación  
+Eventvs Mérida es una plataforma informativa destinada a la consulta, difusión y gestión de eventos culturales, sociales y de ocio que tienen lugar en la ciudad de Mérida.
 
-2. Uso de la aplicación
-Los usuarios se comprometen a hacer un uso adecuado de los servicios, sin vulnerar derechos de terceros ni la legislación vigente. Está prohibido el uso para fines ilícitos o fraudulentos.
+2. Uso del servicio  
+El usuario se compromete a utilizar la aplicación de forma responsable, conforme a la ley, la buena fe y el orden público. Queda prohibido cualquier uso que pueda dañar, sobrecargar o perjudicar el correcto funcionamiento de la aplicación o los derechos de terceros.
 
-3. Propiedad intelectual
-Todos los derechos sobre los contenidos, imágenes, logotipos y marcas son propiedad de Eventvs Mérida, salvo que se indique lo contrario.
+3. Propiedad intelectual  
+Los contenidos, diseños, textos, logotipos e imágenes disponibles en la aplicación son titularidad de Eventvs Mérida o de terceros que han autorizado su uso, y se encuentran protegidos por la normativa vigente en materia de propiedad intelectual.
 
-4. Responsabilidad
-Eventvs Mérida no se responsabiliza por la exactitud de los datos de los eventos ni por daños derivados del uso de la app.
+4. Contenidos y responsabilidad  
+Eventvs Mérida realiza sus mejores esfuerzos para mantener la información actualizada y veraz, pero no garantiza la absoluta exactitud o disponibilidad permanente de los datos publicados. La aplicación no se hace responsable de posibles cambios, cancelaciones o incidencias relacionadas con los eventos.
 
-5. Modificaciones
-Los presentes términos podrán ser modificados para adaptarlos a nuevas normativas o mejorar el servicio.
+5. Modificaciones  
+Eventvs Mérida se reserva el derecho a modificar estos términos en cualquier momento, así como a actualizar o mejorar las funcionalidades de la aplicación.
 
-6. Legislación y jurisdicción
-La relación se regirá por la legislación española. Para cualquier controversia, las partes se someten a los juzgados de Mérida (España).
+6. Legislación aplicable  
+Estos términos se rigen por la legislación española. Para la resolución de cualquier conflicto, las partes se someten a los juzgados y tribunales de Mérida (España).
 
-Última actualización: 06/03/2026
+Última actualización: mayo de 2026
 ''';
 
   // ===========================================================================
