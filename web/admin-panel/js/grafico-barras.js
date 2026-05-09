@@ -62,7 +62,7 @@ function crearGraficoBarrasVacio() {
 }
 
 async function cargarGraficoBarras() {
-  const URL = "http://localhost:8080/api/eventos/eventos-por-mes";
+  const URL = "https://eventvsmerida-x2t1.onrender.com/api/eventos/eventos-por-mes";
 
   try {
     const respuesta = await fetch(URL, {

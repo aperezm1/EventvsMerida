@@ -169,7 +169,44 @@ window.addEventListener("DOMContentLoaded", async () => {
       }
     });
   }
+
+  if (modalEditarOrganizador) {
+    modalEditarOrganizador.addEventListener("hidden.bs.modal", function () {
+      const inputImagen = document.getElementById("formFileEditar");
+      if (inputImagen) inputImagen.value = "";
+      formEditar.classList.remove("was-validated");
+    });
+  }
+
+  document.getElementById("fotoOrganizador").addEventListener("change", function () {
+    if(!validarImagen(this.files[0])){
+      this.value = "";
+    }
+  });
+
+  document.getElementById("formFileEditar").addEventListener("change", function () {
+    if(!validarImagen(this.files[0])){
+      this.value = "";
+    }
+  });
 });
+
+function validarImagen(file) {
+  const formatosPermitidos = ["image/jpeg", "image/jpg", "image/png"];
+  const maxSize = 1.5 * 1024 * 1024; // 1.5MB en bytes
+  if (!file) return true;
+
+  if (!formatosPermitidos.includes(file.type)) {
+    mostrarAlerta("error", "Solo se permiten imágenes en formato JPG, JPEG o PNG");
+    return false;
+  }
+  if (file.size > maxSize) {
+    mostrarAlerta("error", "La imagen no puede superar los 1.5MB");
+    return false;
+  }
+  return true;
+}
+
 
 async function cargarOrganizadores(URL_BASE) {
   const tabla = document.getElementById("listadoOrganizadores");
@@ -304,8 +341,9 @@ async function cargarOrganizadores(URL_BASE) {
       btnEliminar.innerHTML = '<i class="fa-solid fa-trash"></i>';
       btnEliminar.setAttribute("data-id", organizador.id);
       btnEliminar.setAttribute("data-nombre", organizador.nombre);
+      btnEliminar.setAttribute("data-apellidos", organizador.apellidos);
       btnEliminar.addEventListener("click", function () {
-        eliminarOrganizador(URL_BASE, this.dataset.id, this.dataset.nombre);
+        eliminarOrganizador(URL_BASE, this.dataset.id, this.dataset.nombre, this.dataset.apellidos);
       });
 
       divGrupo.appendChild(btnVer);
@@ -382,10 +420,10 @@ async function editarOrganizador(URL_BASE, id, datosFormulario) {
   }
 }
 
-async function eliminarOrganizador(URL_BASE, id, nombre) {
+async function eliminarOrganizador(URL_BASE, id, nombre, apellidos) {
   Swal.fire({
     title:
-      `¿Estás seguro que deseas eliminar el organizador \"` + nombre + `\"?`,
+      `¿Estás seguro que deseas eliminar el organizador \"` + nombre  + " " + apellidos + `\"?`,
     text: "Esta acción no puede revertirse",
     icon: "warning",
     showCancelButton: true,

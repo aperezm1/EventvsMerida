@@ -190,7 +190,42 @@ window.addEventListener("DOMContentLoaded", async () => {
       }
     });
   }
+
+  if (modalEditarUsuario) {
+    modalEditarUsuario.addEventListener("hidden.bs.modal", function () {
+      const inputImagen = document.getElementById("formFileEditar");
+      if (inputImagen) inputImagen.value = "";
+      formEditar.classList.remove("was-validated");
+    });
+  }
+  document.getElementById("fotoUsuario").addEventListener("change", function () {
+    if(!validarImagen(this.files[0])){
+      this.value = "";
+    }
+  });
+
+  document.getElementById("formFileEditar").addEventListener("change", function () {
+    if(!validarImagen(this.files[0])){
+      this.value = "";
+    }
+  });
 });
+
+function validarImagen(imagen) {
+  const formatosPermitidos = ["image/jpeg", "image/jpg", "image/png"];
+  const maxSize = 1.5 * 1024 * 1024; // 1.5MB en bytes
+  if (!imagen) return true;
+
+  if (!formatosPermitidos.includes(imagen.type)) {
+    mostrarAlerta("error", "Solo se permiten imágenes en formato JPG, JPEG o PNG");
+    return false;
+  }
+  if (imagen.size > maxSize) {
+    mostrarAlerta("error", "La imagen no puede superar los 1.5MB");
+    return false;
+  }
+  return true;
+}
 
 async function cargarUsuarios(URL_BASE) {
   const tabla =
@@ -327,8 +362,9 @@ async function cargarUsuarios(URL_BASE) {
       btnEliminar.innerHTML = '<i class="fa-solid fa-trash"></i>';
       btnEliminar.setAttribute("data-id", usuario.id);
       btnEliminar.setAttribute("data-nombre", usuario.nombre);
+      btnEliminar.setAttribute("data-apellidos", usuario.apellidos);
       btnEliminar.addEventListener("click", function () {
-        eliminarUsuario(URL_BASE, this.dataset.id, this.dataset.nombre);
+        eliminarUsuario(URL_BASE, this.dataset.id, this.dataset.nombre, this.dataset.apellidos);
       });
 
       divGrupo.appendChild(btnVer);
@@ -402,9 +438,9 @@ async function editarUsuario(URL_BASE, id, datosFormulario) {
   }
 }
 
-async function eliminarUsuario(URL_BASE, id, nombre) {
+async function eliminarUsuario(URL_BASE, id, nombre, apellidos) {
   Swal.fire({
-    title: `¿Estás seguro que deseas eliminar el usuario \"` + nombre + `\"?`,
+    title: `¿Estás seguro que deseas eliminar el usuario \"` + nombre + " " + apellidos + `\"?`,
     text: "Esta acción no puede revertirse",
     icon: "warning",
     showCancelButton: true,

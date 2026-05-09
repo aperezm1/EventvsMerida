@@ -202,44 +202,55 @@
           </div>
           <div class="modal-body">
             <form
-              class="row g-3 needs-validation"
+              class="needs-validation"
               id="formAgregarCategoria"
               novalidate
             >
-              <div class="col-md-6">
-                <label for="nombreCategoria" class="form-label"
-                  >Nombre de la categoría</label
-                >
-                <input
-                  type="text"
-                  class="form-control"
-                  id="nombreCategoria"
-                  name="nombreCategoria"
-                  required
-                  minlength="2"
-                  maxlength="50"
-                />
-                <div class="invalid-feedback">
-                  Introduce un nombre de categoría
+              <!-- Información de la categoría -->
+              <div class="card bg-dark border-secondary mb-3">
+                <div class="card-header text-light border-secondary">
+                  <i class="fas fa-tags me-2"></i>
+                  Información de la categoría
+                </div>
+                <div class="card-body">
+                  <div class="row g-3">
+                    <div class="col-md-6">
+                      <label for="nombreCategoria" class="form-label">
+                        Nombre de la categoría <span class="campo-obligatorio">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="nombreCategoria"
+                        name="nombreCategoria"
+                        required
+                        minlength="2"
+                        maxlength="50"
+                      />
+                      <div class="invalid-feedback">
+                        Introduce un nombre de categoría
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div class="modal-footer">
-                <button
-                  type="button"
-                  class="btn btn-secondary bg-danger"
-                  data-bs-dismiss="modal"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  form="formAgregarCategoria"
-                  class="btn btn-primary"
-                >
-                  Agregar categoría
-                </button>
-              </div>
             </form>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary bg-danger"
+              data-bs-dismiss="modal"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              form="formAgregarCategoria"
+              class="btn btn-primary"
+            >
+              Agregar categoría
+            </button>
           </div>
         </div>
       </div>
@@ -268,44 +279,55 @@
           </div>
           <div class="modal-body">
             <form
-              class="row g-3 needs-validation"
+              class="needs-validation"
               id="formEditarCategoria"
               novalidate
             >
-              <div class="col-md-6">
-                <label for="nombreCategoriaEditar" class="form-label"
-                  >Nombre de la categoría</label
-                >
-                <input
-                  type="text"
-                  class="form-control"
-                  id="nombreCategoriaEditar"
-                  name="nombreCategoriaEditar"
-                  required
-                  minlength="2"
-                  maxlength="50"
-                />
-                <div class="invalid-feedback">
-                  Introduce un nombre de categoría
+              <!-- Información de la categoría -->
+              <div class="card bg-dark border-secondary mb-3">
+                <div class="card-header text-light border-secondary bg-primary">
+                  <i class="fas fa-tags me-2"></i>
+                  Información de la categoría
+                </div>
+                <div class="card-body">
+                  <div class="row g-3">
+                    <div class="col-md-6">
+                      <label for="nombreCategoriaEditar" class="form-label">
+                        Nombre de la categoría <span class="campo-obligatorio">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="nombreCategoriaEditar"
+                        name="nombreCategoriaEditar"
+                        required
+                        minlength="2"
+                        maxlength="50"
+                      />
+                      <div class="invalid-feedback">
+                        Introduce un nombre de categoría
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div class="modal-footer">
-                <button
-                  type="button"
-                  class="btn btn-secondary bg-danger"
-                  data-bs-dismiss="modal"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  form="formEditarCategoria"
-                  class="btn btn-primary"
-                >
-                  Guardar cambios
-                </button>
-              </div>
             </form>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary bg-danger"
+              data-bs-dismiss="modal"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              form="formEditarCategoria"
+              class="btn btn-primary"
+            >
+              Guardar cambios
+            </button>
           </div>
         </div>
       </div>

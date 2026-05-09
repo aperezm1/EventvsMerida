@@ -101,11 +101,41 @@ window.addEventListener("DOMContentLoaded", async () => {
     formData.append("evento", JSON.stringify(evento));
     const file = document.getElementById("formFile")?.files?.[0];
     if (file) formData.append("imagen", file);
+    if (!validarImagen(fotoCrear)) return;
+        formData.append("imagen", fotoCrear);
 
     editarEvento(formEditar.dataset.id, formData);
     formEditar.classList.add("was-validated");
   }, false);
+
+  document.getElementById("fotoEvento").addEventListener("change", function () {
+    if(!validarImagen(this.files[0])){
+      this.value = "";
+    }
+  });
+
+  document.getElementById("formFileEditar").addEventListener("change", function () {
+    if(!validarImagen(this.files[0])){
+      this.value = "";
+    }
+  });
 });
+
+function validarImagen(imagen) {
+  const formatosPermitidos = ["image/jpeg", "image/jpg", "image/png"];
+  const maxSize = 1.5 * 1024 * 1024; // 1.5MB en bytes
+  if (!imagen) return true;
+
+  if (!formatosPermitidos.includes(imagen.type)) {
+    mostrarAlerta("error", "Solo se permiten imágenes en formato JPG, JPEG o PNG");
+    return false;
+  }
+  if (imagen.size > maxSize) {
+    mostrarAlerta("error", "La imagen no puede superar los 1.5MB");
+    return false;
+  }
+  return true;
+}
 
 function limpiarBuscador() {
   document.getElementById("buscador").value = "";
@@ -238,15 +268,70 @@ function mostrarEventos(data, numeroPaginas = 0) {
     btnVer.setAttribute("data-bs-target", "#modalVerEvento");
     btnVer.addEventListener("click", function () {
       document.getElementById("contenidoModalEvento").innerHTML = `
-                <h4 class="text-center">${evento.titulo}<br></h4>
-                <img src="${evento.foto}" alt="${evento.titulo}" class="img-fluid img-thumbnail img-evento-modal mt-3 mb-2"><br>
-                <p class="mb-1"><strong>Descripción:</strong> ${evento.descripcion}</p>
-                <p><b>Fecha inicio:</b> ${formatearFecha(evento.fechaInicio)}</p>
-                <p><b>Fecha fin:</b> ${formatearFecha(evento.fechaFin)}</p>
-                <p><b>Organizador:</b> ${evento.emailUsuario}</p>
-                <p><b>Categoría:</b> ${evento.nombreCategoria}</p>
-                <p><b>Localización:</b> ${evento.localizacion}</p>
-                ${mapa}`;
+        <h4 class="text-light mb-0 text-center mb-2">${evento.titulo || "-"}</h4>
+        <div class="text-center mb-4">
+          ${evento.foto
+            ? `<img src="${evento.foto}" alt="${evento.titulo}" class="img-fluid img-thumbnail img-evento-modal mb-2" />`
+            : `<div class="avatar-placeholder mx-auto mb-2"><i class="fas fa-calendar-days"></i></div>`
+          }
+        </div>
+
+        <div class="card bg-dark border-secondary mb-3">
+          <div class="card-header text-light border-secondary">
+            <i class="fas fa-calendar-days me-2"></i>
+            Información básica
+          </div>
+          <div class="card-body">
+            <div class="row g-3">
+              <div class="col-md-12">
+                <p class="mb-1 text-muted">Descripción</p>
+                <p class="mb-0 text-light fw-semibold">${evento.descripcion || "-"}</p>
+              </div>
+              <div class="col-md-6">
+                <p class="mb-1 text-muted">Localización</p>
+                <p class="mb-0 text-light fw-semibold">${evento.localizacion || "-"}</p>
+              </div>
+              <div class="col-md-6">
+                <p class="mb-1 text-muted">Categoría</p>
+                <p class="mb-0 text-light fw-semibold">${evento.nombreCategoria || "-"}</p>
+              </div>
+              <div class="col-md-6">
+                <p class="mb-1 text-muted">Organizador</p>
+                <p class="mb-0 text-light fw-semibold">${evento.emailUsuario || "-"}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card bg-dark border-secondary mb-3">
+          <div class="card-header text-light border-secondary">
+            <i class="fas fa-clock me-2"></i>
+            Fechas y horarios
+          </div>
+          <div class="card-body">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <p class="mb-1 text-muted">Fecha de inicio</p>
+                <p class="mb-0 text-light fw-semibold">${formatearFecha(evento.fechaInicio) || "-"}</p>
+              </div>
+              <div class="col-md-6">
+                <p class="mb-1 text-muted">Fecha de fin</p>
+                <p class="mb-0 text-light fw-semibold">${formatearFecha(evento.fechaFin) || "-"}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card bg-dark border-secondary">
+          <div class="card-header text-light border-secondary">
+            <i class="fas fa-map-marker-alt me-2"></i>
+            Ubicación
+          </div>
+          <div class="card-body">
+            ${mapa}
+          </div>
+        </div>
+      `;
     });
 
     let mapa = "";

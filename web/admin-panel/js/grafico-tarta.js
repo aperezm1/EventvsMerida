@@ -48,7 +48,7 @@ function crearGraficoVacioTarta() {
 }
 
 async function cargarGraficoTarta() {
-  const URL = "http://localhost:8080/api/eventos/eventos-por-categoria";
+  const URL = "https://eventvsmerida-x2t1.onrender.com/api/eventos/eventos-por-categoria";
 
   try {
     const respuesta = await fetch(URL, {
