@@ -2,6 +2,8 @@ package es.nullpointers.eventvsmerida.controller;
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import es.nullpointers.eventvsmerida.dto.request.EventoCrearRequest;
+import es.nullpointers.eventvsmerida.dto.response.EventosPorCategoriaResponse;
+import es.nullpointers.eventvsmerida.dto.response.EventosPorMesResponse;
 import es.nullpointers.eventvsmerida.dto.response.EventoResponse;
 import es.nullpointers.eventvsmerida.dto.request.EventoActualizarRequest;
 import es.nullpointers.eventvsmerida.service.EventoService;
@@ -198,4 +200,25 @@ public class EventoController {
         long cantidad = eventoService.contarEventos();
         return ResponseEntity.ok(cantidad);
     }
+
+
+    /**
+     * Método GET que llama al servicio para obtener la cantidad de eventos agrupados por mes del año.
+     *
+     * @return ResponseEntity con un listado del mes y la cantidad.
+     */
+    @GetMapping("/eventos-por-mes")
+    public List<EventosPorMesResponse> obtenerEventosPorMes() {
+        List<EventosPorMesResponse> resultado = eventoService.obtenerEventosPorMes();
+        return ResponseEntity.ok().body(resultado).getBody();
+    }
+
+
+    @GetMapping("/eventos-por-categoria")
+    public List<EventosPorCategoriaResponse> obtenerEventosPorCategoria() {
+        List<EventosPorCategoriaResponse> resultado = eventoService.obtenerEventosPorCategoria();
+        return ResponseEntity.ok().body(resultado).getBody();
+    }
+
+
 }

@@ -196,11 +196,6 @@
               class="d-flex align-items-center justify-content-between small"
             >
               <div class="text-muted">Copyright &copy; Null Pointers 2026</div>
-              <div>
-                <a href="#">Privacy Policy</a>
-                &middot;
-                <a href="#">Terms &amp; Conditions</a>
-              </div>
             </div>
           </div>
         </footer>
@@ -229,130 +224,174 @@
           </div>
           <div class="modal-body">
             <form
-              class="row g-3 needs-validation"
+              class="needs-validation"
               id="formAgregarEvento"
               novalidate
             >
-              <div class="col-md-6">
-                <label for="nombre" class="form-label">Título</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="titulo"
-                  name="titulo"
-                  required
-                  minlength="2"
-                  maxlength="50"
-                />
-                <div class="invalid-feedback">Introduce un título</div>
+              <!-- Información básica -->
+              <div class="card bg-dark border-secondary mb-3">
+                <div class="card-header text-light border-secondary">
+                  <i class="fas fa-calendar-days me-2"></i>
+                  Información básica
+                </div>
+                <div class="card-body">
+                  <div class="row g-3">
+                    <div class="col-md-6">
+                      <label for="titulo" class="form-label">
+                        Título <span class="campo-obligatorio">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="titulo"
+                        name="titulo"
+                        required
+                        minlength="2"
+                        maxlength="50"
+                      />
+                      <div class="invalid-feedback">Introduce un título</div>
+                    </div>
+                    <div class="col-md-6">
+                      <label for="localizacionEvento" class="form-label">
+                        Localización <span class="campo-obligatorio">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="localizacion"
+                        required
+                        minlength="2"
+                        maxlength="50"
+                      />
+                      <div class="invalid-feedback">Introduce una localización.</div>
+                    </div>
+                    <div class="col-md-12">
+                      <label for="descripcion" class="form-label">
+                        Descripción <span class="campo-obligatorio">*</span>
+                      </label>
+                      <textarea
+                        class="form-control"
+                        id="descripcion"
+                        rows="3"
+                        required
+                      ></textarea>
+                      <div class="invalid-feedback">Introduce una descripción</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-                <label for="localizacionEvento" class="form-label mt-2"
-                  >Localización</label
-                >
-                <input
-                  type="text"
-                  class="form-control"
-                  id="localizacion"
-                  required
-                  minlength="2"
-                  maxlength="50"
-                />
-                <div class="invalid-feedback">Introduce una localización.</div>
-              </div>
-              <div class="col-md-6">
-                <label for="exampleFormControlTextarea1" class="form-label"
-                  >Descripción</label
-                >
-                <textarea
-                  class="form-control"
-                  id="descripcion"
-                  rows="3"
-                  required
-                ></textarea>
-                <div class="invalid-feedback">Introduce una descripción</div>
-              </div>
-              <div class="col-md-6">
-                <div class="row">
-                  <div class="col-md-6">
-                    <label for="startDate">Fecha de inicio</label>
-                    <input
-                      id="fechaInicio"
-                      class="form-control"
-                      type="date"
-                      required
-                    />
-                    <div class="invalid-feedback">
-                      Introduce una fecha de inicio
+              <!-- Fechas y horarios -->
+              <div class="card bg-dark border-secondary mb-3">
+                <div class="card-header text-light border-secondary">
+                  <i class="fas fa-clock me-2"></i>
+                  Fechas y horarios
+                </div>
+                <div class="card-body">
+                  <div class="row g-3">
+                    <div class="col-md-3">
+                      <label for="fechaInicio" class="form-label">
+                        Fecha de inicio <span class="campo-obligatorio">*</span>
+                      </label>
+                      <input
+                        id="fechaInicio"
+                        class="form-control"
+                        type="date"
+                        required
+                      />
+                      <div class="invalid-feedback">Introduce una fecha de inicio</div>
                     </div>
-                  </div>
-                  <div class="col-md-6">
-                    <label for="startTime">Hora de inicio</label>
-                    <input
-                      id="horaInicio"
-                      class="form-control"
-                      type="time"
-                      required
-                    />
-                    <div class="invalid-feedback">
-                      Introduce una hora de inicio
+                    <div class="col-md-3">
+                      <label for="horaInicio" class="form-label">
+                        Hora de inicio <span class="campo-obligatorio">*</span>
+                      </label>
+                      <input
+                        id="horaInicio"
+                        class="form-control"
+                        type="time"
+                        required
+                      />
+                      <div class="invalid-feedback">Introduce una hora de inicio</div>
+                    </div>
+                    <div class="col-md-3">
+                      <label for="fechaFin" class="form-label">
+                        Fecha de fin <span class="campo-obligatorio">*</span>
+                      </label>
+                      <input
+                        id="fechaFin"
+                        class="form-control"
+                        type="date"
+                        required
+                      />
+                      <div class="invalid-feedback">Introduce una fecha de fin</div>
+                    </div>
+                    <div class="col-md-3">
+                      <label for="horaFin" class="form-label">
+                        Hora de fin <span class="campo-obligatorio">*</span>
+                      </label>
+                      <input
+                        id="horaFin"
+                        class="form-control"
+                        type="time"
+                        required
+                      />
+                      <div class="invalid-feedback">Introduce una hora de fin</div>
                     </div>
                   </div>
                 </div>
               </div>
-              <div class="col-md-6">
-                <div class="row">
-                  <div class="col-md-6">
-                    <label for="startDate">Fecha de fin</label>
-                    <input
-                      id="fechaFin"
-                      class="form-control"
-                      type="date"
-                      required
-                    />
-                    <div class="invalid-feedback">
-                      Introduce una fecha de fin
+
+              <!-- Clasificación -->
+              <div class="card bg-dark border-secondary mb-3">
+                <div class="card-header text-light border-secondary">
+                  <i class="fas fa-tags me-2"></i>
+                  Clasificación
+                </div>
+                <div class="card-body">
+                  <div class="row g-3">
+                    <div class="col-md-6">
+                      <label for="organizadores" class="form-label">Organizador</label>
+                      <select class="form-select" id="organizadores">
+                        <option value="">Selecciona un organizador</option>
+                      </select>
+                      <div class="invalid-feedback">Selecciona un rol.</div>
                     </div>
-                  </div>
-                  <div class="col-md-6">
-                    <label for="startTime">Hora de fin</label>
-                    <input
-                      id="horaFin"
-                      class="form-control"
-                      type="time"
-                      required
-                    />
-                    <div class="invalid-feedback">
-                      Introduce una hora de fin
+                    <div class="col-md-6">
+                      <label for="categorias" class="form-label">
+                        Categoría <span class="campo-obligatorio">*</span>
+                      </label>
+                      <select class="form-select" id="categorias" required>
+                        <option value="">Selecciona una categoría</option>
+                      </select>
+                      <div class="invalid-feedback">Selecciona un rol.</div>
                     </div>
                   </div>
                 </div>
               </div>
-              <div class="col-md-6">
-                <label for="idRol" class="form-label">Organizador</label>
-                <select class="form-select" id="organizadores">
-                  <option value="">Selecciona un organizador</option>
-                </select>
-                <div class="invalid-feedback">Selecciona un rol.</div>
-              </div>
-              <div class="col-md-6">
-                <label for="idRol" class="form-label">Categoría</label>
-                <select class="form-select" id="categorias" required>
-                  <option value="">Selecciona una categoría</option>
-                </select>
-                <div class="invalid-feedback">Selecciona un rol.</div>
-              </div>
-              <div class="mb-3">
-                <label for="formFile" class="form-label">
+
+              <!-- Imagen del evento -->
+              <div class="card bg-dark border-secondary">
+                <div class="card-header text-light border-secondary">
+                  <i class="fas fa-image me-2"></i>
                   Cartel / Imagen del evento
-                </label>
-                <input
-                  class="form-control"
-                  type="file"
-                  id="fotoEvento"
-                  required
-                />
-                <div class="invalid-feedback">
-                  Selecciona una imagen / cartel para el evento
+                </div>
+                <div class="card-body">
+                  <div class="row g-3">
+                    <div class="col-md-12">
+                      <label for="fotoEvento" class="form-label">
+                        Seleccionar imagen <span class="campo-obligatorio">*</span>
+                      </label>
+                      <input
+                        class="form-control"
+                        type="file"
+                        id="fotoEvento"
+                        required
+                      />
+                      <div class="invalid-feedback">
+                        Selecciona una imagen / cartel para el evento
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </form>
@@ -377,6 +416,7 @@
       </div>
     </div>
 
+    <!-- Modal Ver Evento -->
     <div
       class="modal fade"
       id="modalVerEvento"
@@ -387,12 +427,12 @@
       <div class="modal-dialog modal-lg">
         <div class="modal-content bg-dark text-light">
           <div class="modal-header">
-            <h5 class="modal-title" id="modalVerEventoLabel">
+            <h1 class="modal-title fs-5" id="modalVerEventoLabel">
               Detalle del evento
-            </h5>
+            </h1>
             <button
               type="button"
-              class="btn-close btn-close-white"
+              class="btn-close custom-close"
               data-bs-dismiss="modal"
               aria-label="Cerrar"
             ></button>
@@ -422,139 +462,162 @@
               aria-label="Cerrar"
             ></button>
           </div>
-          <div class="modal-body" id="contenidoModalEvento">
+          <div class="modal-body" id="contenidoModalEditarEvento">
             <form
-              class="row g-3 needs-validation"
+              class="needs-validation"
               id="formEditarEvento"
               novalidate
             >
-              <div class="col-md-6">
-                <label for="tituloEventoEditar" class="form-label"
-                  >Título</label
-                >
-                <input
-                  type="text"
-                  class="form-control"
-                  id="tituloEventoEditar"
-                  required
-                  minlength="2"
-                  maxlength="50"
-                />
-                <div class="invalid-feedback">Introduce un título</div>
-                <label for="localizacionEditar" class="form-label mt-2"
-                  >Localización</label
-                >
-                <input
-                  type="text"
-                  class="form-control"
-                  id="localizacionEditar"
-                  required
-                  minlength="2"
-                  maxlength="50"
-                  title="Solo letras y espacios"
-                />
-                <div class="invalid-feedback">Introduce una localización</div>
-              </div>
-              <div class="col-md-6">
-                <label for="descripcionEventoEditar" class="form-label"
-                  >Descripción</label
-                >
-                <textarea
-                  class="form-control"
-                  id="descripcionEventoEditar"
-                  rows="3"
-                  required
-                ></textarea>
-                <div class="invalid-feedback">Introduce una descripción</div>
-              </div>
-              <div class="col-md-6">
-                <div class="row">
-                  <div class="col-md-6">
-                    <label for="fechaInicioEditar">Fecha de inicio</label>
-                    <input
-                      id="fechaInicioEditar"
-                      class="form-control"
-                      type="date"
-                      required
-                    />
-                    <div class="invalid-feedback">
-                      Introduce una fecha de inicio
+              <!-- Información básica -->
+              <div class="card bg-dark border-secondary mb-3">
+                <div class="card-header text-light border-secondary bg-primary">
+                  <i class="fas fa-calendar-days me-2"></i>
+                  Información básica
+                </div>
+                <div class="card-body">
+                  <div class="row g-3">
+                    <div class="col-md-6">
+                      <label for="tituloEventoEditar" class="form-label">Título</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="tituloEventoEditar"
+                        required
+                        minlength="2"
+                        maxlength="50"
+                      />
+                      <div class="invalid-feedback">Introduce un título</div>
                     </div>
-                  </div>
-                  <div class="col-md-6">
-                    <label for="horaInicioEditar">Hora de inicio</label>
-                    <input
-                      id="horaInicioEditar"
-                      class="form-control"
-                      type="time"
-                      required
-                    />
-                    <div class="invalid-feedback">
-                      Introduce una hora de inicio
+                    <div class="col-md-6">
+                      <label for="localizacionEditar" class="form-label">Localización</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="localizacionEditar"
+                        required
+                        minlength="2"
+                        maxlength="50"
+                        title="Solo letras y espacios"
+                      />
+                      <div class="invalid-feedback">Introduce una localización</div>
+                    </div>
+                    <div class="col-md-12">
+                      <label for="descripcionEventoEditar" class="form-label">Descripción</label>
+                      <textarea
+                        class="form-control"
+                        id="descripcionEventoEditar"
+                        rows="3"
+                        required
+                      ></textarea>
+                      <div class="invalid-feedback">Introduce una descripción</div>
                     </div>
                   </div>
                 </div>
               </div>
-              <div class="col-md-6">
-                <div class="row">
-                  <div class="col-md-6">
-                    <label for="fechaFinEditar">Fecha de fin</label>
-                    <input
-                      id="fechaFinEditar"
-                      class="form-control"
-                      type="date"
-                      required
-                    />
-                    <div class="invalid-feedback">
-                      Introduce una fecha de fin
+
+              <!-- Fechas y horarios -->
+              <div class="card bg-dark border-secondary mb-3">
+                <div class="card-header text-light border-secondary bg-primary">
+                  <i class="fas fa-clock me-2"></i>
+                  Fechas y horarios
+                </div>
+                <div class="card-body">
+                  <div class="row g-3">
+                    <div class="col-md-3">
+                      <label for="fechaInicioEditar" class="form-label">Fecha de inicio</label>
+                      <input
+                        id="fechaInicioEditar"
+                        class="form-control"
+                        type="date"
+                        required
+                      />
+                      <div class="invalid-feedback">Introduce una fecha de inicio</div>
                     </div>
-                  </div>
-                  <div class="col-md-6">
-                    <label for="horaFinEditar">Hora de fin</label>
-                    <input
-                      id="horaFinEditar"
-                      class="form-control"
-                      type="time"
-                      required
-                    />
-                    <div class="invalid-feedback">
-                      Introduce una hora de fin
+                    <div class="col-md-3">
+                      <label for="horaInicioEditar" class="form-label">Hora de inicio</label>
+                      <input
+                        id="horaInicioEditar"
+                        class="form-control"
+                        type="time"
+                        required
+                      />
+                      <div class="invalid-feedback">Introduce una hora de inicio</div>
+                    </div>
+                    <div class="col-md-3">
+                      <label for="fechaFinEditar" class="form-label">Fecha de fin</label>
+                      <input
+                        id="fechaFinEditar"
+                        class="form-control"
+                        type="date"
+                        required
+                      />
+                      <div class="invalid-feedback">Introduce una fecha de fin</div>
+                    </div>
+                    <div class="col-md-3">
+                      <label for="horaFinEditar" class="form-label">Hora de fin</label>
+                      <input
+                        id="horaFinEditar"
+                        class="form-control"
+                        type="time"
+                        required
+                      />
+                      <div class="invalid-feedback">Introduce una hora de fin</div>
                     </div>
                   </div>
                 </div>
               </div>
-              <div class="col-md-6">
-                <label for="idRol" class="form-label">Organizador</label>
-                <select class="form-select" id="organizadoresEditar">
-                  <option value="">Selecciona un organizador</option>
-                </select>
-                <div class="invalid-feedback">Selecciona un organizador.</div>
+
+              <!-- Clasificación -->
+              <div class="card bg-dark border-secondary mb-3">
+                <div class="card-header text-light border-secondary bg-primary">
+                  <i class="fas fa-tags me-2"></i>
+                  Clasificación
+                </div>
+                <div class="card-body">
+                  <div class="row g-3">
+                    <div class="col-md-6">
+                      <label for="idRol" class="form-label">Organizador</label>
+                      <select class="form-select" id="organizadoresEditar">
+                        <option value="">Selecciona un organizador</option>
+                      </select>
+                      <div class="invalid-feedback">Selecciona un organizador.</div>
+                    </div>
+                    <div class="col-md-6">
+                      <label for="categoriasEditar" class="form-label">Categoría</label>
+                      <select class="form-select" id="categoriasEditar" required>
+                        <option value="">Selecciona una categoría</option>
+                      </select>
+                      <div class="invalid-feedback">Selecciona una categoría.</div>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div class="col-md-6">
-                <label for="categoriasEditar" class="form-label"
-                  >Categoría</label
-                >
-                <select class="form-select" id="categoriasEditar" required>
-                  <option value="">Selecciona una categoría</option>
-                </select>
-                <div class="invalid-feedback">Selecciona una categoría.</div>
-              </div>
-              <div class="mb-3">
-                <label for="formFile" class="form-label"
-                  >Cartel / Imagen del evento</label
-                >
-                <input
-                  class="form-control"
-                  type="file"
-                  id="formFile"
-                />
-              </div>
-              <div class="mb-3">
-                <img
-                  src=""
-                  class="img-thumbnail img-evento-modal"
-                  id="imagenEvento"
-                />
+
+              <!-- Imagen del evento -->
+              <div class="card bg-dark border-secondary">
+                <div class="card-header text-light border-secondary bg-primary">
+                  <i class="fas fa-image me-2"></i>
+                  Cartel / Imagen del evento
+                </div>
+                <div class="card-body">
+                  <div class="row g-3">
+                    <div class="col-md-12">
+                      <label for="formFileEditar" class="form-label">Cambiar imagen</label>
+                      <input
+                        class="form-control"
+                        type="file"
+                        id="formFileEditar"
+                      />
+                    </div>
+                    <div class="col-md-12">
+                      <img
+                        src=""
+                        class="img-thumbnail img-evento-modal"
+                        id="imagenEvento"
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
             </form>
           </div>
