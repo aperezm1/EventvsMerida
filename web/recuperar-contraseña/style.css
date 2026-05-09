@@ -1,0 +1,111 @@
+body {
+  background: #f5f5f5;
+  background-image: url('/images/logo.jpeg');
+  background-repeat: no-repeat;
+  background-size: auto;
+  background-position: center;
+}
+
+.card-reset, #success-container {
+  max-width: 450px;
+  margin: auto;
+  margin-top: 100px;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  background: white;
+}
+
+#success-container{
+    display: none;
+}
+
+.colored-toast.swal2-icon-success {
+  background-color: #a5dc86 !important;
+}
+
+.colored-toast.swal2-icon-error {
+  background-color: #f27474 !important;
+}
+
+.colored-toast.swal2-icon-warning {
+  background-color: #f8bb86 !important;
+}
+
+.colored-toast.swal2-icon-info {
+  background-color: #3fc3ee !important;
+}
+
+.colored-toast.swal2-icon-question {
+  background-color: #87adbd !important;
+}
+
+.colored-toast .swal2-title {
+  color: white;
+}
+
+.colored-toast .swal2-close {
+  color: white;
+}
+
+.colored-toast .swal2-html-container {
+  color: white;
+}
+
+.check-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+/* SVG base */
+.checkmark {
+    width: 100px;
+    height: 100px;
+    stroke-width: 3;
+    stroke: #28a745;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    animation: scaleIn 0.3s ease-in-out;
+}
+
+/* círculo */
+.checkmark-circle {
+    stroke-dasharray: 166;
+    stroke-dashoffset: 166;
+    animation: drawCircle 0.6s ease forwards;
+}
+
+/* tick */
+.checkmark-check {
+    stroke-dasharray: 48;
+    stroke-dashoffset: 48;
+    animation: drawCheck 0.4s ease 0.6s forwards;
+}
+
+/* animación entrada */
+@keyframes scaleIn {
+    0% {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* dibujar círculo */
+@keyframes drawCircle {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+/* dibujar tick */
+@keyframes drawCheck {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
