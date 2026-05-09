@@ -20,7 +20,11 @@ window.addEventListener("DOMContentLoaded", async () => {
         event.preventDefault();
 
         const contrasenia = document.getElementById("contrasena").value;
-        const confirmarContrasenia = document.getElementById("confirmarContrasena").value;
+        const confirmarContrasenia = document.getElementById(
+          "confirmarContrasena",
+        ).value;
+
+        validarEdad(document.getElementById("fechaNacimiento"), 14, 100, true);
 
         if (!form.checkValidity()) {
           event.stopPropagation();
@@ -61,20 +65,43 @@ window.addEventListener("DOMContentLoaded", async () => {
   formEditar.addEventListener(
     "submit",
     function (event) {
+      validarEdad(
+        document.getElementById("fechaNacimientoEditar"),
+        14,
+        100,
+        false,
+      );
+
       if (!formEditar.checkValidity()) {
         event.preventDefault();
         event.stopPropagation();
         formEditar.classList.add("was-validated");
       } else {
         event.preventDefault();
-        const usuario = {
-          nombre: document.getElementById("nombreEditar").value,
-          apellidos: document.getElementById("apellidosEditar").value,
-          fechaNacimiento: formatearFecha(
+        console.log(
+          formatearFecha(
             document.getElementById("fechaNacimientoEditar").value,
           ),
-          email: document.getElementById("correoEditar").value,
-          telefono: document.getElementById("telefonoEditar").value,
+        );
+        const usuario = {
+          nombre:
+            document.getElementById("nombreEditar").value === ""
+              ? null
+              : document.getElementById("nombreEditar").value,
+          apellidos:
+            document.getElementById("apellidosEditar").value === ""
+              ? null
+              : document.getElementById("apellidosEditar").value,
+          fechaNacimiento:
+            formatearFecha(
+              document.getElementById("fechaNacimientoEditar").value,
+            ) === ""
+              ? null
+              : formatearFecha(
+                  document.getElementById("fechaNacimientoEditar").value,
+                ),
+          email: document.getElementById("correoEditar").value === "" ? null : document.getElementById("correoEditar").value,
+          telefono: document.getElementById("telefonoEditar").value === "" ? null : document.getElementById("telefonoEditar").value,
           password: contraseniaModificada ? contrasenia : null,
           idRol: 1,
         };
@@ -163,7 +190,42 @@ window.addEventListener("DOMContentLoaded", async () => {
       }
     });
   }
+
+  if (modalEditarUsuario) {
+    modalEditarUsuario.addEventListener("hidden.bs.modal", function () {
+      const inputImagen = document.getElementById("formFileEditar");
+      if (inputImagen) inputImagen.value = "";
+      formEditar.classList.remove("was-validated");
+    });
+  }
+  document.getElementById("fotoUsuario").addEventListener("change", function () {
+    if(!validarImagen(this.files[0])){
+      this.value = "";
+    }
+  });
+
+  document.getElementById("formFileEditar").addEventListener("change", function () {
+    if(!validarImagen(this.files[0])){
+      this.value = "";
+    }
+  });
 });
+
+function validarImagen(imagen) {
+  const formatosPermitidos = ["image/jpeg", "image/jpg", "image/png"];
+  const maxSize = 1.5 * 1024 * 1024; // 1.5MB en bytes
+  if (!imagen) return true;
+
+  if (!formatosPermitidos.includes(imagen.type)) {
+    mostrarAlerta("error", "Solo se permiten imágenes en formato JPG, JPEG o PNG");
+    return false;
+  }
+  if (imagen.size > maxSize) {
+    mostrarAlerta("error", "La imagen no puede superar los 1.5MB");
+    return false;
+  }
+  return true;
+}
 
 async function cargarUsuarios(URL_BASE) {
   const tabla =
@@ -185,6 +247,7 @@ async function cargarUsuarios(URL_BASE) {
     });
 
     const data = await resp.json();
+    data.sort((a, b) => a.id - b.id);
 
     // Mostrar mensaje si no hay usuarios y limpiar tabla
     const usuariosVacio =
@@ -256,9 +319,9 @@ async function cargarUsuarios(URL_BASE) {
       btnVer.setAttribute("data-bs-toggle", "modal");
       btnVer.setAttribute("data-bs-target", "#modalVerUsuario");
       btnVer.addEventListener("click", async function () {
-        const detalle = await obtenerUsuarioPorId(URL_BASE, usuario.id);
+        const detalle = await obtenerOrganizadorPorId(URL_BASE, usuario.id);
         if (detalle) {
-          verUsuario(detalle);
+          verOrganizador(detalle);
         }
       });
 
@@ -271,7 +334,7 @@ async function cargarUsuarios(URL_BASE) {
       btnEditar.setAttribute("data-bs-toggle", "modal");
       btnEditar.setAttribute("data-bs-target", "#modalEditarUsuario");
       btnEditar.addEventListener("click", async function () {
-        const detalle = await obtenerUsuarioPorId(URL_BASE, usuario.id);
+        const detalle = await obtenerOrganizadorPorId(URL_BASE, usuario.id);
         const data = detalle || usuario;
         document.getElementById("formEditarUsuario").dataset.id = data.id;
         document.getElementById("nombreEditar").value = data.nombre;
@@ -289,7 +352,7 @@ async function cargarUsuarios(URL_BASE) {
           sinFotoUsuario.style.display = "none";
         } else {
           imagenUsuario.style.display = "none";
-          sinFotoUsuario.style.display = "block";
+          sinFotoUsuario.style.display = "flex";
         }
       });
 
@@ -299,8 +362,9 @@ async function cargarUsuarios(URL_BASE) {
       btnEliminar.innerHTML = '<i class="fa-solid fa-trash"></i>';
       btnEliminar.setAttribute("data-id", usuario.id);
       btnEliminar.setAttribute("data-nombre", usuario.nombre);
+      btnEliminar.setAttribute("data-apellidos", usuario.apellidos);
       btnEliminar.addEventListener("click", function () {
-        eliminarUsuario(URL_BASE, this.dataset.id, this.dataset.nombre);
+        eliminarUsuario(URL_BASE, this.dataset.id, this.dataset.nombre, this.dataset.apellidos);
       });
 
       divGrupo.appendChild(btnVer);
@@ -374,9 +438,9 @@ async function editarUsuario(URL_BASE, id, datosFormulario) {
   }
 }
 
-async function eliminarUsuario(URL_BASE, id, nombre) {
+async function eliminarUsuario(URL_BASE, id, nombre, apellidos) {
   Swal.fire({
-    title: `¿Estás seguro que deseas eliminar el usuario \"` + nombre + `\"?`,
+    title: `¿Estás seguro que deseas eliminar el usuario \"` + nombre + " " + apellidos + `\"?`,
     text: "Esta acción no puede revertirse",
     icon: "warning",
     showCancelButton: true,
@@ -408,37 +472,7 @@ async function eliminarUsuario(URL_BASE, id, nombre) {
   });
 }
 
-function verUsuario(usuario) {
-  let contenido = `
-    <h4 class="text-center">${usuario.nombre} ${usuario.apellidos}<br></h4>
-  `;
-  
-  if (usuario.fotoUrl) {
-    contenido += `<img src="${usuario.fotoUrl}" alt="${usuario.nombre}" class="img-fluid img-thumbnail img-usuario-modal mt-3 mb-2"><br>`;
-  } else {
-    contenido += `<div class="text-center text-muted mb-3">No hay foto de perfil</div>`;
-  }
-  
-  contenido += `
-    <p class="mb-1"><strong>Nombre:</strong> ${usuario.nombre}</p>
-    <p class="mb-1"><strong>Apellidos:</strong> ${usuario.apellidos}</p>
-    <p class="mb-1"><strong>Email:</strong> ${usuario.email}</p>
-    <p class="mb-1"><strong>Teléfono:</strong> ${usuario.telefono}</p>
-    <p class="mb-1"><strong>Fecha de nacimiento:</strong> ${formatearFecha(usuario.fechaNacimiento)}</p>
-  `;
-  
-  document.getElementById("contenidoModalUsuario").innerHTML = contenido;
-}
-
-function formatearFecha(fechaISO) {
-  const fecha = new Date(fechaISO);
-  const dia = fecha.getDate().toString().padStart(2, "0");
-  const mes = (fecha.getMonth() + 1).toString().padStart(2, "0");
-  const anio = fecha.getFullYear();
-  return `${dia}/${mes}/${anio}`;
-}
-
-async function obtenerUsuarioPorId(URL_BASE, id) {
+async function obtenerOrganizadorPorId(URL_BASE, id) {
   try {
     const resp = await fetch(URL_BASE + "usuarios/" + id, {
       method: "GET",
@@ -458,4 +492,99 @@ async function obtenerUsuarioPorId(URL_BASE, id) {
     mostrarAlerta("error", "No se pudo cargar el usuario");
     return null;
   }
+}
+
+function verOrganizador(usuario) {
+  const tieneFoto =
+    usuario.fotoUrl &&
+    usuario.fotoUrl.trim() !== "" &&
+    usuario.fotoUrl !== "null" &&
+    usuario.fotoUrl !== "undefined";
+
+  let contenido = `
+    <div id="contenidoModalVerUsuario">
+      <div class="text-center mb-4">
+        <div class="avatar-wrapper mx-auto mb-2">
+          ${
+            tieneFoto
+              ? `<img
+                  src="${usuario.fotoUrl}"
+                  alt="Foto de ${usuario.nombre}"
+                  class="avatar-usuario-modal"
+                />`
+              : `<div class="avatar-placeholder">
+                  <i class="fas fa-user"></i>
+                </div>`
+          }
+        </div>
+
+        <h4 class="text-light mb-0">
+          ${usuario.nombre || "-"} ${usuario.apellidos || ""}
+        </h4>
+
+        <small class="text-muted">
+          Información del usuario
+        </small>
+      </div>
+
+      <div class="card bg-dark border-secondary mb-3">
+        <div class="card-header text-light border-secondary">
+          <i class="fas fa-id-card me-2"></i>
+          Datos personales
+        </div>
+
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <p class="mb-1 text-muted">Nombre</p>
+              <p class="mb-0 text-light fw-semibold">
+                ${usuario.nombre || "-"}
+              </p>
+            </div>
+
+            <div class="col-md-6">
+              <p class="mb-1 text-muted">Apellidos</p>
+              <p class="mb-0 text-light fw-semibold">
+                ${usuario.apellidos || "-"}
+              </p>
+            </div>
+
+            <div class="col-md-6">
+              <p class="mb-1 text-muted">Fecha de nacimiento</p>
+              <p class="mb-0 text-light fw-semibold">
+                ${formatearFecha(usuario.fechaNacimiento) || "-"}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card bg-dark border-secondary">
+        <div class="card-header text-light border-secondary">
+          <i class="fas fa-address-book me-2"></i>
+          Datos de contacto
+        </div>
+
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <p class="mb-1 text-muted">Email</p>
+              <p class="mb-0 text-light fw-semibold">
+                ${usuario.email || "-"}
+              </p>
+            </div>
+
+            <div class="col-md-6">
+              <p class="mb-1 text-muted">Teléfono</p>
+              <p class="mb-0 text-light fw-semibold">
+                ${usuario.telefono || "-"}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById("contenidoModalUsuario").innerHTML = contenido;
 }

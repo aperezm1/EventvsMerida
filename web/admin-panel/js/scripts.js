@@ -101,3 +101,93 @@ async function logeado() {
     return 500;
   }
 }
+
+function validarEdad(input, edadMinima, edadMaxima, fechaObligatoria) {
+  const feedback = input.parentElement.querySelector(".invalid-feedback");
+  const fechaNacimiento = input.value;
+
+  if (!fechaNacimiento) {
+    if (fechaObligatoria) {
+      input.setCustomValidity("Campo obligatorio");
+
+      if (feedback) {
+        feedback.textContent = "La fecha de nacimiento es obligatoria.";
+      }
+
+      return false;
+    }
+
+    input.setCustomValidity("");
+
+    if (feedback) {
+      feedback.textContent = "Ingresa una fecha válida.";
+    }
+
+    return true;
+  }
+
+  const fechaMinimaPermitida = calcularFechaPorEdad(edadMaxima);
+  const fechaMaximaPermitida = calcularFechaPorEdad(edadMinima);
+
+  if (fechaNacimiento < fechaMinimaPermitida) {
+    input.setCustomValidity("Edad demasiado alta");
+
+    if (feedback) {
+      feedback.textContent = `La edad máxima permitida es de ${edadMaxima} años.`;
+    }
+
+    return false;
+  }
+
+  if (fechaNacimiento > fechaMaximaPermitida) {
+    input.setCustomValidity("Edad insuficiente");
+
+    if (feedback) {
+      feedback.textContent = `Debe tener al menos ${edadMinima} años.`;
+    }
+
+    return false;
+  }
+
+  input.setCustomValidity("");
+
+  if (feedback) {
+    feedback.textContent = "Ingresa una fecha válida.";
+  }
+
+  return true;
+}
+
+function calcularFechaPorEdad(edad) {
+  const hoy = new Date();
+
+  const fecha = new Date(
+    hoy.getFullYear() - edad,
+    hoy.getMonth(),
+    hoy.getDate(),
+  );
+
+  const year = fecha.getFullYear();
+  const month = String(fecha.getMonth() + 1).padStart(2, "0");
+  const day = String(fecha.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
+function formatearFecha(fechaISO) {
+  if (!fechaISO) {
+    return "";
+  }
+
+  const fecha = new Date(fechaISO);
+
+  if (isNaN(fecha.getTime())) {
+    return "";
+  }
+
+  const dia = fecha.getDate().toString().padStart(2, "0");
+  const mes = (fecha.getMonth() + 1).toString().padStart(2, "0");
+  const anio = fecha.getFullYear();
+
+  return `${dia}/${mes}/${anio}`;
+}

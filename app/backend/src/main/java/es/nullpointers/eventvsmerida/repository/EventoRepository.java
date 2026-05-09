@@ -1,5 +1,6 @@
 package es.nullpointers.eventvsmerida.repository;
 
+import es.nullpointers.eventvsmerida.dto.response.EventosPorCategoriaResponse;
 import es.nullpointers.eventvsmerida.entity.Evento;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -41,4 +42,25 @@ public interface EventoRepository extends JpaRepository<Evento, Long> {
                     "OR unaccent(lower(e.localizacion)) LIKE concat('%', unaccent(lower(:q)), '%') " +
                     "OR unaccent(lower(c.nombre)) LIKE concat('%', unaccent(lower(:q)), '%')", nativeQuery = true)
     Page<Evento> searchByQuery(@Param("q") String q, Pageable pageable);
+
+
+    @Query("""
+        SELECT MONTH(e.fechaInicio), COUNT(e)
+        FROM Evento e
+        WHERE YEAR(e.fechaInicio) = 2026
+        GROUP BY MONTH(e.fechaInicio)
+        ORDER BY MONTH(e.fechaInicio)
+    """)
+    List<Object[]> contarEventosPorMes();
+
+
+    @Query(value = """
+    SELECT c.nombre AS categoria, COUNT(e.id) AS total
+    FROM "Categoria" c
+    LEFT JOIN "Evento" e ON e.id_categoria = c.id
+    GROUP BY c.id, c.nombre
+    ORDER BY COUNT(e.id) DESC
+""", nativeQuery = true)
+    List<EventosPorCategoriaResponse> contarEventosPorCategoria();
+
 }

@@ -173,11 +173,6 @@
               class="d-flex align-items-center justify-content-between small"
             >
               <div class="text-muted">Copyright &copy; Null Pointers 2026</div>
-              <div>
-                <a href="#">Privacy Policy</a>
-                &middot;
-                <a href="#">Terms &amp; Conditions</a>
-              </div>
             </div>
           </div>
         </footer>
@@ -207,44 +202,55 @@
           </div>
           <div class="modal-body">
             <form
-              class="row g-3 needs-validation"
+              class="needs-validation"
               id="formAgregarRol"
               novalidate
             >
-              <div class="col-md-6">
-                <label for="nombreRol" class="form-label"
-                  >Nombre del rol</label
-                >
-                <input
-                  type="text"
-                  class="form-control"
-                  id="nombreRol"
-                  name="nombreRol"
-                  required
-                  minlength="2"
-                  maxlength="50"
-                />
-                <div class="invalid-feedback">
-                  Introduce un nombre de rol
+              <!-- Información del rol -->
+              <div class="card bg-dark border-secondary mb-3">
+                <div class="card-header text-light border-secondary">
+                  <i class="fas fa-users-cog me-2"></i>
+                  Información del rol
+                </div>
+                <div class="card-body">
+                  <div class="row g-3">
+                    <div class="col-md-6">
+                      <label for="nombreRol" class="form-label">
+                        Nombre del rol <span class="campo-obligatorio">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="nombreRol"
+                        name="nombreRol"
+                        required
+                        minlength="2"
+                        maxlength="50"
+                      />
+                      <div class="invalid-feedback">
+                        Introduce un nombre de rol
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div class="modal-footer">
-                <button
-                  type="button"
-                  class="btn btn-secondary bg-danger"
-                  data-bs-dismiss="modal"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  form="formAgregarRol"
-                  class="btn btn-primary"
-                >
-                  Agregar rol
-                </button>
-              </div>
             </form>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary bg-danger"
+              data-bs-dismiss="modal"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              form="formAgregarRol"
+              class="btn btn-primary"
+            >
+              Agregar rol
+            </button>
           </div>
         </div>
       </div>
@@ -273,44 +279,55 @@
           </div>
           <div class="modal-body">
             <form
-              class="row g-3 needs-validation"
+              class="needs-validation"
               id="formEditarRol"
               novalidate
             >
-              <div class="col-md-6">
-                <label for="nombreRolEditar" class="form-label"
-                  >Nombre del rol</label
-                >
-                <input
-                  type="text"
-                  class="form-control"
-                  id="nombreRolEditar"
-                  name="nombreRolEditar"
-                  required
-                  minlength="2"
-                  maxlength="50"
-                />
-                <div class="invalid-feedback">
-                  Introduce un nombre de rol
+              <!-- Información del rol -->
+              <div class="card bg-dark border-secondary mb-3">
+                <div class="card-header text-light border-secondary bg-primary">
+                  <i class="fas fa-users-cog me-2"></i>
+                  Información del rol
+                </div>
+                <div class="card-body">
+                  <div class="row g-3">
+                    <div class="col-md-6">
+                      <label for="nombreRolEditar" class="form-label">
+                        Nombre del rol <span class="campo-obligatorio">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="nombreRolEditar"
+                        name="nombreRolEditar"
+                        required
+                        minlength="2"
+                        maxlength="50"
+                      />
+                      <div class="invalid-feedback">
+                        Introduce un nombre de rol
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div class="modal-footer">
-                <button
-                  type="button"
-                  class="btn btn-secondary bg-danger"
-                  data-bs-dismiss="modal"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  form="formEditarRol"
-                  class="btn btn-primary"
-                >
-                  Guardar cambios
-                </button>
-              </div>
             </form>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary bg-danger"
+              data-bs-dismiss="modal"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              form="formEditarRol"
+              class="btn btn-primary"
+            >
+              Guardar cambios
+            </button>
           </div>
         </div>
       </div>
