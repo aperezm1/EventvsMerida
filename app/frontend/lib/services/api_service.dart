@@ -659,6 +659,112 @@ class ApiService {
     }
   }
 
+  /// POST /api/eventos/add
+  static Future<ApiResponse<Evento>> crearEventoConImagen(Map<String, dynamic> datosEvento, XFile imagen,) async {
+    try {
+      final uri = Uri.parse('$baseUrl/eventos/add');
+      final request = http.MultipartRequest('POST', uri);
+
+      request.fields['evento'] = jsonEncode(datosEvento);
+
+      final extension = p.extension(imagen.path).toLowerCase();
+
+      late MediaType mediaType;
+
+      if (extension == '.png') {
+        mediaType = MediaType('image', 'png');
+      } else if (extension == '.jpg' || extension == '.jpeg') {
+        mediaType = MediaType('image', 'jpeg');
+      } else {
+        return ApiResponse<Evento>.error(
+          mensaje: 'Formato de imagen no soportado. Usa PNG, JPG o JPEG.',
+          codigoEstado: 400,
+        );
+      }
+
+      request.files.add(
+        await http.MultipartFile.fromPath(
+          'imagen',
+          imagen.path,
+          contentType: mediaType,
+          filename: p.basename(imagen.path),
+        ),
+      );
+
+      final streamedResponse = await request.send().timeout(_tiempoLimite);
+      final response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode == 201) {
+        try {
+          final mapa = jsonDecode(response.body) as Map<String, dynamic>;
+          final evento = Evento.fromJson(mapa);
+
+          return ApiResponse<Evento>.exito(
+            datos: evento,
+            mensaje: 'Evento creado correctamente',
+            codigoEstado: 201,
+          );
+        } catch (_) {
+          return ApiResponse<Evento>.error(
+            mensaje: 'No se pudo leer el evento creado.',
+            codigoEstado: 201,
+          );
+        }
+      }
+
+      final mensaje = _leerMensajeError(response.body);
+
+      switch (response.statusCode) {
+        case 400:
+          return ApiResponse<Evento>.error(
+            mensaje: mensaje.isEmpty ? 'Los datos del evento no son válidos.' : mensaje,
+            codigoEstado: 400,
+          );
+
+        case 403:
+          return ApiResponse<Evento>.error(
+            mensaje: mensaje.isEmpty ? 'No tienes permisos para crear eventos.' : mensaje,
+            codigoEstado: 403,
+          );
+
+        case 404:
+          return ApiResponse<Evento>.error(
+            mensaje: mensaje.isEmpty ? 'No se encontró el usuario o la categoría indicada.' : mensaje,
+            codigoEstado: 404,
+          );
+
+        case 409:
+          return ApiResponse<Evento>.error(
+            mensaje: mensaje.isEmpty ? 'Ya existe un evento con el mismo título y fechas.' : mensaje,
+            codigoEstado: 409,
+          );
+
+        case 500:
+          return ApiResponse<Evento>.error(
+            mensaje: 'Error interno del servidor. Intenta más tarde.',
+            codigoEstado: 500,
+          );
+
+        default:
+          return ApiResponse<Evento>.error(
+            mensaje: mensaje.isEmpty
+                ? 'No se pudo crear el evento (${response.statusCode}).'
+                : mensaje,
+            codigoEstado: response.statusCode,
+          );
+      }
+    } on TimeoutException {
+      return ApiResponse<Evento>.sinConexion(mensaje: _mensajeSinConexion);
+    } on SocketException {
+      return ApiResponse<Evento>.sinConexion(mensaje: _mensajeSinConexion);
+    } catch (e) {
+      return ApiResponse<Evento>.error(
+        mensaje: 'Error inesperado al crear el evento: $e',
+        codigoEstado: 500,
+      );
+    }
+  }
+
   // ============================================================================
   // USUARIO-EVENTOS
   // ============================================================================

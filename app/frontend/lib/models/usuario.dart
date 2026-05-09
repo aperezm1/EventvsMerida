@@ -26,7 +26,7 @@ class Usuario {
     'fechaNacimiento': fechaNacimiento.toIso8601String(),
     'email': email,
     'telefono': telefono,
-    'idRol': rol,
+    'rol': rol,
     'fotoUrl': fotoUrl,
   };
 
