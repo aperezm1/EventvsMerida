@@ -269,7 +269,15 @@ public class ManejadorGlobalExcepciones {
         return mensaje;
     }
 
-
+    /**
+     * Construye una respuesta HTTP de error a partir de la información recibida.
+     *
+     * @param stackTrace traza del error utilizada para localizar la clase y el método donde se produjo.
+     * @param status estado HTTP que se devolverá en la respuesta.
+     * @param mensajeLog mensaje detallado que se registrará en el log interno.
+     * @param mensajeRespuesta mensaje que se devolverá al cliente en el cuerpo de la respuesta.
+     * @return ResponseEntity con el estado HTTP indicado y el mensaje de error correspondiente.
+     */
     private ResponseEntity<ErrorResponse> construirRespuesta(StackTraceElement[] stackTrace, HttpStatus status, String mensajeLog, String mensajeRespuesta) {
         String claseMetodo = obtenerClaseMetodoDesdeStackTrace(stackTrace);
         log.error("Error en " + claseMetodo + ": " + mensajeLog);

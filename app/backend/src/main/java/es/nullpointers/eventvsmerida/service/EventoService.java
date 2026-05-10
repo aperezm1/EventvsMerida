@@ -335,11 +335,11 @@ public class EventoService {
         return eventosResponse;
     }
 
-        /**
-        * Método para contar la cantidad de eventos agrupados por categoría.
-        *
-        * @return Listado de cada categoría con el número de eventos que pertenecen a esa categoría. Si una categoría no tiene eventos, se incluye con cantidad 0.
-        */
+    /**
+    * Método para contar la cantidad de eventos agrupados por categoría.
+    *
+    * @return Listado de cada categoría con el número de eventos que pertenecen a esa categoría. Si una categoría no tiene eventos, se incluye con cantidad 0.
+    */
     public List<EventosPorCategoriaResponse> obtenerEventosPorCategoria() {
         return eventoRepository.contarEventosPorCategoria();
     }
