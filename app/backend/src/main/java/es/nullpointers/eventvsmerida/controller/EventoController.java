@@ -224,7 +224,12 @@ public class EventoController {
         return ResponseEntity.ok().body(resultado).getBody();
     }
 
-
+    /**
+     * Método GET que llama al servicio para obtener los eventos agrupados por categoría.
+     *
+     * @return ResposeEntity con una lista de categorías y el número total de eventos
+     * asociados a cada una, junto con el estado HTTP 200(OK)
+     */
     @GetMapping("/eventos-por-categoria")
     public List<EventosPorCategoriaResponse> obtenerEventosPorCategoria() {
         List<EventosPorCategoriaResponse> resultado = eventoService.obtenerEventosPorCategoria();

@@ -10,6 +10,10 @@ import java.util.concurrent.TimeUnit;
 /**
  * Clase que se encarga de la consulta y descarga de la imagen a través del protocolo CURL con una
  * URL recibidd devolviendo la imagen en un array de bytes.
+ *
+ * @author Eva Retamar
+ * @author David Muñoz
+ * @author Adrián Pérez
  */
 public final class CurlDownloader {
     // Constructor vacío
@@ -17,6 +21,7 @@ public final class CurlDownloader {
 
     /**
      * Método que con el protocolo CURL realiza la peticion HTTP a la URL de la imagen obteniendo los bytes de esta.
+     *
      * @param url URL de la imagen que se quiere descargar,
      * @param timeout Tiempo de respuesta establecido para realizar la acción.
      * @return
@@ -82,6 +87,7 @@ public final class CurlDownloader {
     /**
      * Método que se encarga de leer el flujo de de entrada de la descarga de la imagen y los devuelve
      * en bytes para tratarlos.
+     *
      * @param in Flujo de entrada de datos.
      * @return Array de bytes la imagen.
      */

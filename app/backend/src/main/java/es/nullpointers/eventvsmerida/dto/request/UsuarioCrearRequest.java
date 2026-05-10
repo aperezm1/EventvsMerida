@@ -8,6 +8,18 @@ import java.time.LocalDate;
 /**
  * DTO para la creación de un nuevo usuario.
  *
+ * @param nombre nombre del usuario. Es obligatorio.
+ * @param apellidos apellidos del usuario. Son obligatorios.
+ * @param fechaNacimiento fecha de nacimiento del usuario. Es obligatoria,
+ *                        no puede ser futura y debe cumplir la validación de edad establecida.
+ * @param email correo electrónico del usuario. Es obligatorio y debe tener un formato válido.
+ * @param telefono número de teléfono del usuario. Es obligatorio, debe tener 9 dígitos
+ *                 y empezar por 6, 7 o 9.
+ * @param password contraseña del usuario. Es obligatoria y debe tener al menos 8 caracteres,
+ *                 una mayúscula, una minúscula y un número.
+ * @param idRol identificador del rol asignado al usuario. Es obligatorio.
+ * @param fotoPath ruta o path de la foto de perfil del usuario, si se proporciona.
+ *
  * @author Eva Retamar
  * @author David Muñoz
  * @author Adrián Pérez

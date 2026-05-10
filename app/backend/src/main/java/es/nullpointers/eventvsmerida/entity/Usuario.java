@@ -9,6 +9,16 @@ import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDate;
 
+/**
+ * Entidad que representa a un usuario de la aplicación.
+ *
+ * <p>Contiene los datos personales, credenciales de acceso, foto de perfil
+ * y rol asociado al usuario.</p>
+ *
+ * @author Eva Retamar
+ * @author David Muñoz
+ * @author Adrián Pérez
+ */
 @Getter
 @Setter
 @Entity

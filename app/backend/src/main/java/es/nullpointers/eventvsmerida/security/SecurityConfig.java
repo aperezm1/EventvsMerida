@@ -48,7 +48,7 @@ public class SecurityConfig {
      * Configura la cadena de filtros de seguridad para la aplicación.
      *
      * Reglas aplicadas (resumen):
-     * - POST/PUT/DELETE sobre /api/eventos/** => Administrador u Organizador
+     * - GET/POST/PUT/DELETE sobre /api/eventos/** => Administrador u Organizador
      * - POST/PUT/DELETE de categorías (add/update/delete) => solo Administrador
      * - GET específicos de usuarios => solo Administrador
      * - /api/roles/** y Swagger => solo Administrador
