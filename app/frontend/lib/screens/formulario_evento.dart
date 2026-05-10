@@ -5,12 +5,17 @@ import 'package:latlong2/latlong.dart';
 
 import '../core/router/app_routes.dart';
 import '../models/categoria.dart';
+import '../models/evento.dart';
 import '../models/usuario.dart';
 import '../services/api_service.dart';
 import '../services/shared_preferences_service.dart';
 
 class FormularioEvento extends StatefulWidget {
-  const FormularioEvento({super.key});
+  final Evento? evento;
+
+  const FormularioEvento({super.key, this.evento});
+
+  bool get esEdicion => evento != null;
 
   @override
   State<FormularioEvento> createState() => _FormularioEventoState();
@@ -45,6 +50,7 @@ class _FormularioEventoState extends State<FormularioEvento> {
     super.initState();
     _cargarUsuario();
     _cargarCategorias();
+    _rellenarDatosSiEsEdicion();
   }
 
   @override
@@ -83,11 +89,37 @@ class _FormularioEventoState extends State<FormularioEvento> {
 
     final categorias = respuesta.datos ?? [];
 
+    Categoria? categoriaDelEvento;
+
+    if (widget.evento != null) {
+      for (final categoria in categorias) {
+        if (categoria.nombre == widget.evento!.nombreCategoria) {
+          categoriaDelEvento = categoria;
+          break;
+        }
+      }
+    }
+
     setState(() {
       _categorias = categorias;
-      _categoriaSeleccionada = categorias.isNotEmpty ? categorias.first : null;
+      _categoriaSeleccionada = categoriaDelEvento ??
+          (categorias.isNotEmpty ? categorias.first : null);
       _cargandoCategorias = false;
     });
+  }
+
+  void _rellenarDatosSiEsEdicion() {
+    final evento = widget.evento;
+
+    if (evento == null) return;
+
+    _tituloController.text = evento.titulo;
+    _descripcionController.text = evento.descripcion;
+    _fechaInicioController.text = evento.fechaInicio.toIso8601String();
+    _fechaFinController.text = evento.fechaFin.toIso8601String();
+    _localizacionController.text = evento.localizacion;
+    _latitudSeleccionada = evento.latitud;
+    _longitudSeleccionada = evento.longitud;
   }
 
   Future<void> _seleccionarImagen() async {
@@ -195,7 +227,7 @@ class _FormularioEventoState extends State<FormularioEvento> {
       return;
     }
 
-    if (_imagenSeleccionada == null) {
+    if (!widget.esEdicion && _imagenSeleccionada == null) {
       _mostrarMensaje('Debes seleccionar una imagen para el evento');
       return;
     }
@@ -204,7 +236,16 @@ class _FormularioEventoState extends State<FormularioEvento> {
       _guardando = true;
     });
 
-    final respuesta = await ApiService.crearEventoConImagen(_crearBody(), _imagenSeleccionada!);
+    final respuesta = widget.esEdicion
+      ? await ApiService.actualizarEventoConImagen(
+        widget.evento!.id,
+        _crearBody(),
+        _imagenSeleccionada,
+      )
+      : await ApiService.crearEventoConImagen(
+        _crearBody(),
+        _imagenSeleccionada!,
+    );
 
     if (!mounted) return;
 
@@ -306,9 +347,11 @@ class _FormularioEventoState extends State<FormularioEvento> {
   }
 
   Widget _selectorImagen() {
-    final nombreImagen = _imagenSeleccionada == null
-        ? 'Seleccionar imagen'
-        : _imagenSeleccionada!.name;
+    final nombreImagen = _imagenSeleccionada != null
+      ? _imagenSeleccionada!.name
+      : widget.esEdicion
+        ? 'Mantener imagen actual'
+        : 'Seleccionar imagen';
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
@@ -411,7 +454,10 @@ class _FormularioEventoState extends State<FormularioEvento> {
                 child: CircularProgressIndicator(strokeWidth: 2),
               )
                   : const Icon(Icons.save),
-              label: Text(_guardando ? 'Guardando...' : 'Guardar evento'),
+              label: Text(_guardando ? 'Guardando...'
+                  : widget.esEdicion
+                    ? 'Actualizar evento'
+                    : 'Guardar evento'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: _cs.primary,
                 foregroundColor: _cs.surface,
@@ -428,7 +474,7 @@ class _FormularioEventoState extends State<FormularioEvento> {
     return Scaffold(
       backgroundColor: _cs.surface,
       appBar: AppBar(
-        title: const Text('Añadir evento'),
+        title: Text(widget.esEdicion ? 'Editar evento' : 'Añadir evento'),
         backgroundColor: _cs.primary,
         foregroundColor: _cs.surface,
         centerTitle: true,
