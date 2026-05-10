@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:eventvsmerida/services/shared_preferences_service.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
@@ -71,6 +72,24 @@ class ApiService {
         try {
           final mapa = jsonDecode(response.body) as Map<String, dynamic>;
           final usuario = Usuario.fromJson(mapa);
+
+          await _guardarCookieDesdeRespuesta(response);
+
+          final email = datosUsuario['email']?.toString();
+          final password = datosUsuario['password']?.toString();
+
+          if (email != null &&
+              email.isNotEmpty &&
+              password != null &&
+              password.isNotEmpty) {
+            final respuestaLogin = await iniciarSesion(email, password);
+            if (!respuestaLogin.exito) {
+              return ApiResponse<Usuario>.error(
+                mensaje: 'Usuario registrado, pero no se pudo iniciar sesión automáticamente.',
+                codigoEstado: 201,
+              );
+            }
+          }
 
           return ApiResponse<Usuario>.exito(
             datos: usuario,
@@ -145,6 +164,8 @@ class ApiService {
           try {
             final mapa = jsonDecode(respuesta.body) as Map<String, dynamic>;
             final usuario = Usuario.fromJson(mapa);
+
+            await _guardarCookieDesdeRespuesta(respuesta);
 
             return ApiResponse<Usuario>.exito(
               datos: usuario,
@@ -665,6 +686,9 @@ class ApiService {
       final uri = Uri.parse('$baseUrl/eventos/add');
       final request = http.MultipartRequest('POST', uri);
 
+      final cabeceras = await _cabecerasConSesion();
+      request.headers.addAll(cabeceras);
+
       request.fields['evento'] = jsonEncode(datosEvento);
 
       final extension = p.extension(imagen.path).toLowerCase();
@@ -766,11 +790,9 @@ class ApiService {
   }
 
   ///GET /api/eventos/organizador/{idUsuario}
-  static Future<ApiResponse<List<Evento>>> obtenerEventosPorOrganizador(
-      int idUsuario,
-      ) async {
+  static Future<ApiResponse<List<Evento>>> obtenerEventosPorOrganizador(int idUsuario) async {
     try {
-      final respuesta = await _get('/eventos/organizador/$idUsuario');
+      final respuesta = await _getConSesion('/eventos/organizador/$idUsuario');
 
       if (respuesta.statusCode == 200) {
         try {
@@ -844,7 +866,7 @@ class ApiService {
   /// DELETE /api/eventos/delete/{id}
   static Future<ApiResponse<void>> eliminarEvento(int idEvento) async {
     try {
-      final respuesta = await _deleteSinBody('/eventos/delete/$idEvento');
+      final respuesta = await _deleteSinBodyConSesion('/eventos/delete/$idEvento');
 
       switch (respuesta.statusCode) {
         case 204:
@@ -899,6 +921,9 @@ class ApiService {
     try {
       final uri = Uri.parse('$baseUrl/eventos/update/$idEvento');
       final request = http.MultipartRequest('PUT', uri);
+
+      final cabeceras = await _cabecerasConSesion();
+      request.headers.addAll(cabeceras);
 
       request.fields['evento'] = jsonEncode(datosEvento);
 
@@ -1308,15 +1333,6 @@ class ApiService {
     });
   }
 
-  static Future<http.Response> _deleteSinBody(String ruta) {
-    return _solicitud(() {
-      return http.delete(
-        Uri.parse('$baseUrl$ruta'),
-        headers: _cabecerasJson,
-      );
-    });
-  }
-
   static Future<http.Response> _delete(String ruta, Object cuerpo) {
     return _solicitud(() {
       return http.delete(
@@ -1331,6 +1347,28 @@ class ApiService {
       Future<http.Response> Function() accion,
       ) async {
     return await accion().timeout(_tiempoLimite);
+  }
+
+  static Future<http.Response> _getConSesion(String ruta) async {
+    final cabeceras = await _cabecerasConSesion();
+
+    return _solicitud(() {
+      return http.get(
+        Uri.parse('$baseUrl$ruta'),
+        headers: cabeceras,
+      );
+    });
+  }
+
+  static Future<http.Response> _deleteSinBodyConSesion(String ruta) async {
+    final cabeceras = await _cabecerasConSesion();
+
+    return _solicitud(() {
+      return http.delete(
+        Uri.parse('$baseUrl$ruta'),
+        headers: cabeceras,
+      );
+    });
   }
 
   // ============================================================================
@@ -1356,5 +1394,31 @@ class ApiService {
     }
 
     return '';
+  }
+
+  static Future<void> _guardarCookieDesdeRespuesta(http.Response respuesta) async {
+    final setCookie = respuesta.headers['set-cookie'];
+
+    if (setCookie == null || setCookie.isEmpty) {
+      return;
+    }
+
+    final sessionCookie = setCookie.split(';').first;
+
+    if (sessionCookie.isNotEmpty) {
+      await SharedPreferencesService.guardarSessionCookie(sessionCookie);
+    }
+  }
+
+  static Future<Map<String, String>> _cabecerasConSesion() async {
+    final cookie = await SharedPreferencesService.cargarSessionCookie();
+
+    if (cookie == null || cookie.isEmpty) {
+      return {};
+    }
+
+    return {
+      'Cookie': cookie,
+    };
   }
 }

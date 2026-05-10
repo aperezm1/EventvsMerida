@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../core/router/app_routes.dart';
-import '../models/api_response.dart';
 import '../models/evento.dart';
 import '../models/usuario.dart';
 import '../services/api_service.dart';
@@ -20,6 +19,10 @@ class _AdministrarEventosState extends State<AdministrarEventos> {
   Usuario? _usuario;
   List<Evento> _eventos = [];
   bool _cargando = true;
+  int _paginaActual = 0;
+  bool _ultimaPagina = false;
+  bool _cargandoMas = false;
+  static const int _tamanoPagina = 15;
 
   ColorScheme get _cs => Theme.of(context).colorScheme;
 
@@ -32,6 +35,9 @@ class _AdministrarEventosState extends State<AdministrarEventos> {
   Future<void> _cargarDatos() async {
     setState(() {
       _cargando = true;
+      _paginaActual = 0;
+      _ultimaPagina = false;
+      _eventos = [];
     });
 
     final usuario = await SharedPreferencesService.cargarUsuario();
@@ -44,38 +50,69 @@ class _AdministrarEventosState extends State<AdministrarEventos> {
         _eventos = [];
         _cargando = false;
       });
+
       _mostrarMensaje('No hay usuario logueado');
       return;
     }
 
-    final ApiResponse<List<Evento>> respuesta;
     final rol = usuario.rol.trim().toLowerCase();
 
     if (rol == 'administrador') {
-      respuesta = await ApiService.obtenerEventos();
-    } else if (rol == 'organizador') {
-      respuesta = await ApiService.obtenerEventosPorOrganizador(usuario.id);
-    } else {
+      final resultado = await ApiService.obtenerEventosPaginados(
+        page: 0,
+        size: _tamanoPagina,
+        fechaFinDesde: null,
+      );
+
+      if(!mounted) return;
+
+      if(resultado == null || resultado['error'] != null) {
+        setState(() {
+          _usuario = usuario;
+          _eventos = [];
+          _cargando = false;
+        });
+
+        _mostrarMensaje(resultado?['error'] ?? 'No se pudieron cargar los eventos');
+        return;
+      }
+
       setState(() {
         _usuario = usuario;
-        _eventos = [];
+        _eventos = List<Evento>.from(resultado['items'] ?? []);
+        _ultimaPagina = resultado['last'] == true;
+        _paginaActual = 0;
         _cargando = false;
       });
-      _mostrarMensaje('No tienes permisos para administrar eventos');
+
       return;
     }
 
-    if (!mounted) return;
+    if (rol == 'organizador') {
+      final respuesta = await ApiService.obtenerEventosPorOrganizador(usuario.id);
+
+      if (!mounted) return;
+
+      setState(() {
+        _usuario = usuario;
+        _eventos = respuesta.exito ? (respuesta.datos ?? []) : [];
+        _cargando = false;
+      });
+
+      if (!respuesta.exito) {
+        _mostrarMensaje(respuesta.mensaje);
+      }
+
+      return;
+    }
 
     setState(() {
       _usuario = usuario;
-      _eventos = respuesta.exito ? (respuesta.datos ?? []) : [];
+      _eventos = [];
       _cargando = false;
     });
 
-    if (!respuesta.exito) {
-      _mostrarMensaje(respuesta.mensaje);
-    }
+    _mostrarMensaje('No tienes permisos para administrar eventos');
   }
 
   bool get _puedeAdministrar {
@@ -85,6 +122,49 @@ class _AdministrarEventosState extends State<AdministrarEventos> {
 
   String _formatearFecha(DateTime fecha) {
     return DateFormat('dd/MM/yyyy HH:mm').format(fecha);
+  }
+
+  Future<void> _cargarMasEventos() async {
+    if (_cargandoMas || _ultimaPagina) return;
+
+    final usuario = _usuario;
+    if (usuario == null) return;
+
+    final rol = usuario.rol.trim().toLowerCase();
+
+    if (rol != 'administrador') return;
+
+    setState(() {
+      _cargandoMas = true;
+    });
+
+    final siguientePagina = _paginaActual + 1;
+
+    final resultado = await ApiService.obtenerEventosPaginados(
+      page: siguientePagina,
+      size: _tamanoPagina,
+      fechaFinDesde: null,
+    );
+
+    if (!mounted) return;
+
+    if (resultado == null || resultado['error'] != null) {
+      setState(() {
+        _cargandoMas = false;
+      });
+
+      _mostrarMensaje(resultado?['error'] ?? 'No se pudieron cargar más eventos');
+      return;
+    }
+
+    final nuevosEventos = List<Evento>.from(resultado['items'] ?? []);
+
+    setState(() {
+      _eventos.addAll(nuevosEventos);
+      _paginaActual = siguientePagina;
+      _ultimaPagina = resultado['last'] == true;
+      _cargandoMas = false;
+    });
   }
 
   Future<void> _abrirFormularioCrear() async {
@@ -292,9 +372,30 @@ class _AdministrarEventosState extends State<AdministrarEventos> {
           child: RefreshIndicator(
             onRefresh: _cargarDatos,
             child: ListView.builder(
-              itemCount: _eventos.length,
+              itemCount: _eventos.length + 1,
               itemBuilder: (context, index) {
-                return _buildEventoCard(_eventos[index]);
+                if(index < _eventos.length) {
+                  return _buildEventoCard(_eventos[index]);
+                }
+                final rol = _usuario?.rol.trim().toLowerCase();
+                if (rol != 'administrador') {
+                  return const SizedBox(height: 16);
+                }
+                if (_ultimaPagina) {
+                  return const Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Center(
+                      child: Text('No hay más eventos'),
+                    ),
+                  );
+                }
+                return Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: ElevatedButton(
+                    onPressed: _cargandoMas ? null : _cargarMasEventos,
+                    child: Text(_cargandoMas ? 'Cargando...' : 'Cargar más eventos'),
+                  ),
+                );
               },
             ),
           ),

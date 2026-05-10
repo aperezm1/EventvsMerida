@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../core/router/app_routes.dart';
@@ -26,12 +27,13 @@ class _FormularioEventoState extends State<FormularioEvento> {
 
   final TextEditingController _tituloController = TextEditingController();
   final TextEditingController _descripcionController = TextEditingController();
-  final TextEditingController _fechaInicioController = TextEditingController();
-  final TextEditingController _fechaFinController = TextEditingController();
   final TextEditingController _localizacionController = TextEditingController();
 
   Usuario? _usuario;
   bool _guardando = false;
+
+  DateTime? _fechaInicio;
+  DateTime? _fechaFin;
 
   XFile? _imagenSeleccionada;
   final ImagePicker _imagePicker = ImagePicker();
@@ -57,8 +59,6 @@ class _FormularioEventoState extends State<FormularioEvento> {
   void dispose() {
     _tituloController.dispose();
     _descripcionController.dispose();
-    _fechaInicioController.dispose();
-    _fechaFinController.dispose();
     _localizacionController.dispose();
     super.dispose();
   }
@@ -115,11 +115,57 @@ class _FormularioEventoState extends State<FormularioEvento> {
 
     _tituloController.text = evento.titulo;
     _descripcionController.text = evento.descripcion;
-    _fechaInicioController.text = evento.fechaInicio.toIso8601String();
-    _fechaFinController.text = evento.fechaFin.toIso8601String();
+    _fechaInicio = evento.fechaInicio;
+    _fechaFin = evento.fechaFin;
     _localizacionController.text = evento.localizacion;
     _latitudSeleccionada = evento.latitud;
     _longitudSeleccionada = evento.longitud;
+  }
+
+  Future<void> _seleccionarFechaHora({required bool esInicio}) async {
+    final ahora = DateTime.now();
+
+    final fechaInicial = esInicio
+        ? (_fechaInicio ?? ahora)
+        : (_fechaFin ?? _fechaInicio ?? ahora);
+
+    final fecha = await showDatePicker(
+      context: context,
+      initialDate: fechaInicial,
+      firstDate: DateTime(ahora.year, ahora.month, ahora.day),
+      lastDate: DateTime(2035, 12, 31),
+    );
+
+    if (fecha == null || !mounted) return;
+
+    final horaInicial = TimeOfDay.fromDateTime(fechaInicial);
+
+    final hora = await showTimePicker(
+      context: context,
+      initialTime: horaInicial,
+    );
+
+    if (hora == null || !mounted) return;
+
+    final fechaHora = DateTime(
+      fecha.year,
+      fecha.month,
+      fecha.day,
+      hora.hour,
+      hora.minute,
+    );
+
+    setState(() {
+      if (esInicio) {
+        _fechaInicio = fechaHora;
+
+        if (_fechaFin != null && _fechaFin!.isBefore(fechaHora)) {
+          _fechaFin = null;
+        }
+      } else {
+        _fechaFin = fechaHora;
+      }
+    });
   }
 
   Future<void> _seleccionarImagen() async {
@@ -164,20 +210,18 @@ class _FormularioEventoState extends State<FormularioEvento> {
     return null;
   }
 
-  DateTime? _parsearFecha(String texto) {
-    try {
-      return DateTime.parse(texto);
-    } catch (_) {
-      return null;
-    }
+  String _formatearFechaHora(DateTime? fecha) {
+    if (fecha == null) return 'Seleccionar';
+
+    return DateFormat('dd/MM/yyyy HH:mm').format(fecha);
   }
 
   Map<String, dynamic> _crearBody() {
     return {
       'titulo': _tituloController.text.trim(),
       'descripcion': _descripcionController.text.trim(),
-      'fechaInicio': _fechaInicioController.text.trim(),
-      'fechaFin': _fechaFinController.text.trim(),
+      'fechaInicio': _fechaInicio!.toIso8601String(),
+      'fechaFin': _fechaFin!.toIso8601String(),
       'localizacion': _localizacionController.text.trim(),
       'latitud': _latitudSeleccionada,
       'longitud': _longitudSeleccionada,
@@ -209,15 +253,17 @@ class _FormularioEventoState extends State<FormularioEvento> {
       return;
     }
 
-    final fechaInicio = _parsearFecha(_fechaInicioController.text.trim());
-    final fechaFin = _parsearFecha(_fechaFinController.text.trim());
-
-    if (fechaInicio == null || fechaFin == null) {
-      _mostrarMensaje('Las fechas deben tener formato válido: 2026-05-01T18:00:00');
+    if (_fechaInicio == null) {
+      _mostrarMensaje('Selecciona la fecha y hora de inicio');
       return;
     }
 
-    if (fechaFin.isBefore(fechaInicio)) {
+    if (_fechaFin == null) {
+      _mostrarMensaje('Selecciona la fecha y hora de fin');
+      return;
+    }
+
+    if (_fechaFin!.isBefore(_fechaInicio!)) {
       _mostrarMensaje('La fecha de fin no puede ser anterior a la fecha de inicio');
       return;
     }
@@ -328,6 +374,33 @@ class _FormularioEventoState extends State<FormularioEvento> {
     );
   }
 
+  Widget _selectorFechaHora({
+    required String titulo,
+    required DateTime? fecha,
+    required VoidCallback onTap,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: onTap,
+        child: InputDecorator(
+          decoration: _decoracion(titulo),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                _formatearFechaHora(fecha),
+                style: TextStyle(color: _cs.onSurface),
+              ),
+              Icon(Icons.calendar_month, color: _cs.primary),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _campoTexto({
     required String label,
     required TextEditingController controller,
@@ -426,13 +499,15 @@ class _FormularioEventoState extends State<FormularioEvento> {
             controller: _descripcionController,
             maxLines: 4,
           ),
-          _campoTexto(
-            label: 'Fecha inicio (2026-05-01T18:00:00)',
-            controller: _fechaInicioController,
+          _selectorFechaHora(
+            titulo: 'Fecha y hora de inicio',
+            fecha: _fechaInicio,
+            onTap: () => _seleccionarFechaHora(esInicio: true),
           ),
-          _campoTexto(
-            label: 'Fecha fin (2026-05-01T20:00:00)',
-            controller: _fechaFinController,
+          _selectorFechaHora(
+            titulo: 'Fecha y hora de fin',
+            fecha: _fechaFin,
+            onTap: () => _seleccionarFechaHora(esInicio: false),
           ),
           _campoTexto(
             label: 'Localización',
