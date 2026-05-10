@@ -9,6 +9,7 @@ import '../models/categoria.dart';
 import '../models/evento.dart';
 import '../models/usuario.dart';
 import '../services/api_service.dart';
+import '../services/geocoding_service.dart';
 import '../services/shared_preferences_service.dart';
 
 class FormularioEvento extends StatefulWidget {
@@ -40,6 +41,7 @@ class _FormularioEventoState extends State<FormularioEvento> {
 
   double? _latitudSeleccionada;
   double? _longitudSeleccionada;
+  String _ultimaLocalizacionBuscada = '';
 
   List<Categoria> _categorias = [];
   Categoria? _categoriaSeleccionada;
@@ -120,6 +122,8 @@ class _FormularioEventoState extends State<FormularioEvento> {
     _localizacionController.text = evento.localizacion;
     _latitudSeleccionada = evento.latitud;
     _longitudSeleccionada = evento.longitud;
+
+    _ultimaLocalizacionBuscada = evento.localizacion.trim();
   }
 
   Future<void> _seleccionarFechaHora({required bool esInicio}) async {
@@ -199,6 +203,51 @@ class _FormularioEventoState extends State<FormularioEvento> {
     setState(() {
       _latitudSeleccionada = punto.latitude;
       _longitudSeleccionada = punto.longitude;
+      _ultimaLocalizacionBuscada = _localizacionController.text.trim();
+    });
+  }
+
+  Future<void> _buscarUbicacionEnMapa() async {
+    final localizacion = _localizacionController.text.trim();
+
+    if (localizacion.isEmpty) {
+      _mostrarMensaje('Escribe primero la localización');
+      return;
+    }
+
+    final puntoEncontrado = await GeocodingService.buscarCoordenadas(localizacion);
+
+    if (!mounted) return;
+
+    if (puntoEncontrado == null) {
+      _mostrarMensaje('No se encontró la ubicación. Selecciona el punto manualmente.');
+
+      final puntoManual = await context.push<LatLng>(
+        AppRoutes.seleccionarUbicacion,
+      );
+
+      if (puntoManual == null) return;
+
+      setState(() {
+        _latitudSeleccionada = puntoManual.latitude;
+        _longitudSeleccionada = puntoManual.longitude;
+        _ultimaLocalizacionBuscada = _localizacionController.text.trim();
+      });
+
+      return;
+    }
+
+    final puntoConfirmado = await context.push<LatLng>(
+      AppRoutes.seleccionarUbicacion,
+      extra: puntoEncontrado,
+    );
+
+    if (puntoConfirmado == null) return;
+
+    setState(() {
+      _latitudSeleccionada = puntoConfirmado.latitude;
+      _longitudSeleccionada = puntoConfirmado.longitude;
+      _ultimaLocalizacionBuscada = _localizacionController.text.trim();
     });
   }
 
@@ -273,6 +322,13 @@ class _FormularioEventoState extends State<FormularioEvento> {
       return;
     }
 
+    if (_latitudSeleccionada != null &&
+        _longitudSeleccionada != null &&
+        _localizacionController.text.trim() != _ultimaLocalizacionBuscada) {
+      _mostrarMensaje('Has cambiado la localización. Vuelve a buscar o seleccionar el punto en el mapa.');
+      return;
+    }
+
     if (!widget.esEdicion && _imagenSeleccionada == null) {
       _mostrarMensaje('Debes seleccionar una imagen para el evento');
       return;
@@ -281,6 +337,17 @@ class _FormularioEventoState extends State<FormularioEvento> {
     setState(() {
       _guardando = true;
     });
+
+    final bodyEvento = _crearBody();
+
+    print('========== GUARDAR EVENTO ==========');
+    print('ES EDICION: ${widget.esEdicion}');
+    print('USUARIO LOGUEADO ID: ${_usuario?.id}');
+    print('USUARIO LOGUEADO EMAIL: ${_usuario?.email}');
+    print('USUARIO LOGUEADO ROL: ${_usuario?.rol}');
+    print('BODY EVENTO: $bodyEvento');
+    print('IMAGEN SELECCIONADA: ${_imagenSeleccionada?.name}');
+    print('====================================');
 
     final respuesta = widget.esEdicion
       ? await ApiService.actualizarEventoConImagen(
@@ -292,6 +359,11 @@ class _FormularioEventoState extends State<FormularioEvento> {
         _crearBody(),
         _imagenSeleccionada!,
     );
+
+    print('RESPUESTA EVENTO EXITO: ${respuesta.exito}');
+    print('RESPUESTA EVENTO MENSAJE: ${respuesta.mensaje}');
+    print('RESPUESTA EVENTO CODIGO: ${respuesta.codigoEstado}');
+    print('RESPUESTA EVENTO DATOS: ${respuesta.datos}');
 
     if (!mounted) return;
 
@@ -485,6 +557,21 @@ class _FormularioEventoState extends State<FormularioEvento> {
     );
   }
 
+  Widget _botonBuscarUbicacion() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: SizedBox(
+        width: double.infinity,
+        height: 48,
+        child: OutlinedButton.icon(
+          onPressed: _buscarUbicacionEnMapa,
+          icon: const Icon(Icons.search),
+          label: const Text('Buscar localización en el mapa'),
+        ),
+      ),
+    );
+  }
+
   Widget _buildFormulario() {
     return Form(
       key: _formKey,
@@ -513,6 +600,7 @@ class _FormularioEventoState extends State<FormularioEvento> {
             label: 'Localización',
             controller: _localizacionController,
           ),
+          _botonBuscarUbicacion(),
           _selectorUbicacionMapa(),
           _selectorImagen(),
           _selectorCategoria(),

@@ -89,7 +89,19 @@ class _AdministrarEventosState extends State<AdministrarEventos> {
     }
 
     if (rol == 'organizador') {
+      print('========== CARGAR EVENTOS ORGANIZADOR ==========');
+      print('USUARIO ID: ${usuario.id}');
+      print('USUARIO EMAIL: ${usuario.email}');
+      print('USUARIO ROL: ${usuario.rol}');
+      print('ROL NORMALIZADO: $rol');
+
       final respuesta = await ApiService.obtenerEventosPorOrganizador(usuario.id);
+
+      print('EVENTOS ORGANIZADOR EXITO: ${respuesta.exito}');
+      print('EVENTOS ORGANIZADOR MENSAJE: ${respuesta.mensaje}');
+      print('EVENTOS ORGANIZADOR CODIGO: ${respuesta.codigoEstado}');
+      print('EVENTOS ORGANIZADOR CANTIDAD: ${respuesta.datos?.length}');
+      print('===============================================');
 
       if (!mounted) return;
 

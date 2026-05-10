@@ -4,7 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 
 class SeleccionarUbicacion extends StatefulWidget {
-  const SeleccionarUbicacion({super.key});
+  final LatLng? puntoInicial;
+
+  const SeleccionarUbicacion({super.key, this.puntoInicial});
 
   @override
   State<SeleccionarUbicacion> createState() => _SeleccionarUbicacionState();
@@ -16,6 +18,15 @@ class _SeleccionarUbicacionState extends State<SeleccionarUbicacion> {
   LatLng? _puntoSeleccionado;
 
   ColorScheme get _cs => Theme.of(context).colorScheme;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _puntoSeleccionado = widget.puntoInicial;
+  }
+
+  LatLng get _centroInicial => widget.puntoInicial ?? _merida;
 
   void _confirmarUbicacion() {
     if (_puntoSeleccionado == null) {
@@ -48,8 +59,8 @@ class _SeleccionarUbicacionState extends State<SeleccionarUbicacion> {
         children: [
           FlutterMap(
             options: MapOptions(
-              initialCenter: _merida,
-              initialZoom: 15,
+              initialCenter: _centroInicial,
+              initialZoom: widget.puntoInicial == null ? 15 : 17,
               onTap: (tapPosition, point) {
                 setState(() {
                   _puntoSeleccionado = point;
