@@ -15,6 +15,7 @@ import 'package:eventvsmerida/screens/privacidad.dart';
 import 'package:eventvsmerida/screens/registro.dart';
 import 'package:eventvsmerida/screens/splash.dart';
 import 'package:eventvsmerida/screens/terminos.dart';
+import 'package:latlong2/latlong.dart';
 
 import '../../models/evento.dart';
 import '../../screens/administrar_eventos.dart';
@@ -59,5 +60,10 @@ final List<GoRoute> _shellRoutes = [
       return FormularioEvento(evento: evento);
     },
   ),
-  GoRoute(path: AppRoutes.seleccionarUbicacion, builder: (context, state) => const SeleccionarUbicacion()),
+  GoRoute(path: AppRoutes.seleccionarUbicacion,
+    builder: (context, state) {
+      final puntoInicial = state.extra as LatLng?;
+      return SeleccionarUbicacion(puntoInicial: puntoInicial);
+    },
+  ),
 ];
