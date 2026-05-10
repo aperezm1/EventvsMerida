@@ -7,6 +7,10 @@ import jakarta.validation.constraints.Pattern;
 /**
  * DTO para la solicitud de inicio de sesión.
  *
+ * @param email correo electrónico del usuario. Debe tener un formato válido.
+ * @param password contraseña del usuario. Debe tener al menos 8 caracteres,
+ *                 una mayúscula, una minúscula y un número.
+ *
  * @author Eva Retamar
  * @author David Muñoz
  * @author Adrián Pérez

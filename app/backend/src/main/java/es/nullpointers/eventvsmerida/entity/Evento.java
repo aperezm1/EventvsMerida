@@ -9,6 +9,17 @@ import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDateTime;;
 
+/**
+ * Entidad que representa un evento dentro de la aplicación.
+ *
+ * <p>Contiene la información principal del evento, incluyendo título,
+ * descripción, fechas, localización, coordenadas, imagen, usuario creador
+ * y categoría asociada.</p>
+ *
+ * @author Eva Retamar
+ * @author David Muñoz
+ * @author Adrián Pérez
+ */
 @Getter
 @Setter
 @Entity

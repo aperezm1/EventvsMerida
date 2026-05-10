@@ -6,6 +6,17 @@ import lombok.Setter;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+/**
+ * Entidad que representa la relación entre un usuario y un evento.
+ *
+ * <p>Se utiliza para gestionar los eventos guardados por los usuarios.
+ * La relación se identifica mediante una clave primaria compuesta formada
+ * por el identificador del usuario y el identificador del evento.</p>
+ *
+ * @author Eva Retamar
+ * @author David Muñoz
+ * @author Adrián Pérez
+ */
 @Getter
 @Setter
 @Entity

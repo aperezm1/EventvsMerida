@@ -19,7 +19,15 @@ import java.time.Duration;
 import java.util.Map;
 
 /**
- * Clase que se encarga de subir la imagen al bucket de Supabase una vez ha sido descargada con CURL.
+ * Componente encargado de gestionar la subida, eliminación y generación
+ * de URLs de imágenes almacenadas en Supabase Storage.
+ *
+ * <p>Gestiona imágenes públicas de eventos y fotos privadas de perfil
+ * de usuarios, utilizando la API REST de Supabase mediante {@link RestClient}.</p>
+ *
+ * @author Eva Retamar
+ * @author David Muñoz
+ * @author Adrián Pérez
  */
 @Slf4j
 @Component
@@ -30,7 +38,16 @@ public class SupabaseStorage {
     private final String bucketEventos = "imagenesEvento";
     private final String bucketUsuarios = "imagenesPerfil";
 
-    // Constructor que con @Value obtiene las propiedades del application.properties
+    /**
+     * Constructor que inicializa el cliente REST de Supabase.
+     *
+     * <p>Obtiene la URL y la clave de Supabase desde las propiedades de configuración
+     * de la aplicación y configura las cabeceras necesarias para autenticarse contra
+     * la API de Supabase Storage.</p>
+     *
+     * @param supabaseUrl URL base del proyecto Supabase.
+     * @param key clave de acceso utilizada para autenticar las peticiones a Supabase.
+     */
     public SupabaseStorage(@Value("${supabase.url}") String supabaseUrl, @Value("${supabase.key}") String key) {
         this.supabaseUrl = supabaseUrl;
 
@@ -144,9 +161,9 @@ public class SupabaseStorage {
     /**
      * Método que se encarga de subir una imagen de perfil a un bucket privado.
      *
-     * @param imagen Archivo de imagen.
-     * @param emailUsuario Carpeta destino dentro del bucket.
-     * @return Object path privado almacenado en la BD.
+     * @param imagen archivo de imagen de perfil subido por el usuario.
+     * @param emailUsuario email del usuario, utilizado como base para generar el nombre del archivo.
+     * @return path interno del objeto almacenado en Supabase.
      */
     public String subirImagenUsuario(MultipartFile imagen, String emailUsuario) {
         if (imagen == null || imagen.isEmpty()) {

@@ -7,6 +7,16 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * Entidad que representa una categoría de eventos.
+ *
+ * <p>Permite clasificar los eventos dentro de la aplicación,
+ * por ejemplo música, teatro, deporte, cultura u otras categorías.</p>
+ *
+ * @author Eva Retamar
+ * @author David Muñoz
+ * @author Adrián Pérez
+ */
 @Getter
 @Setter
 @AllArgsConstructor
