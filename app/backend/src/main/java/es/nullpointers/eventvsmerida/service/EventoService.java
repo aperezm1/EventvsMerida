@@ -313,7 +313,8 @@ public class EventoService {
     }
 
     /**
-     * Método para obtener los eventos asociados a un usuario organizador.
+     * Método para obtener los eventos asociados a un usuario organizador,
+     * ordenados por fecha de inicio.
      *
      * @param idUsuario ID del usuario organizador.
      * @return Lista de eventos creados por ese organizador.
@@ -324,8 +325,7 @@ public class EventoService {
                 "No se encontró el usuario con id " + idUsuario
         );
 
-        List<Evento> eventos = eventoRepository.findByUsuario_Id(idUsuario);
-
+        List<Evento> eventos = eventoRepository.findByUsuario_IdOrderByFechaInicioAsc(usuario.getId());
         List<EventoResponse> eventosResponse = new ArrayList<>();
 
         for (Evento evento : eventos) {

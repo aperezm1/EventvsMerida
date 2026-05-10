@@ -29,7 +29,7 @@ public interface EventoRepository extends JpaRepository<Evento, Long> {
 
     List<Evento> findByCategoria_IdIn(List<Long> categoriaIds);
 
-    List<Evento> findByUsuario_Id(Long idUsuario);
+    List<Evento> findByUsuario_IdOrderByFechaInicioAsc(Long idUsuario);
 
     Page<Evento> findByFechaFinAfter(LocalDateTime fechaFin, Pageable pageable);
 
