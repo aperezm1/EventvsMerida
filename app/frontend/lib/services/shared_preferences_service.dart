@@ -44,15 +44,6 @@ class SharedPreferencesService {
     }
   }
 
-  /*static Future<void> cerrarSesion() async {
-    usuarioSesionActual = null;
-    usuarioNotifier.value = null;
-
-    final prefs = await _prefs;
-    await prefs.remove(_usuarioKey);
-    await prefs.remove(_autoLoginKey);
-  }*/
-
   static Future<void> cerrarSesion() async {
     usuarioSesionActual = null;
     usuarioNotifier.value = null;

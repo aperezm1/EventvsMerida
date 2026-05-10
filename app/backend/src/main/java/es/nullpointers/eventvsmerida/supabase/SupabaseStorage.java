@@ -145,8 +145,7 @@ public class SupabaseStorage {
      * Método que se encarga de subir una imagen de perfil a un bucket privado.
      *
      * @param imagen Archivo de imagen.
-     * @param carpeta Carpeta destino dentro del bucket.
-     * @param nombreBase Nombre base para generar el nombre del fichero.
+     * @param emailUsuario Carpeta destino dentro del bucket.
      * @return Object path privado almacenado en la BD.
      */
     public String subirImagenUsuario(MultipartFile imagen, String emailUsuario) {
