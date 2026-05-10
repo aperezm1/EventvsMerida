@@ -718,12 +718,6 @@ class ApiService {
       final streamedResponse = await request.send().timeout(_tiempoLimite);
       final response = await http.Response.fromStream(streamedResponse);
 
-      print('========== API CREAR EVENTO ==========');
-      print('STATUS: ${response.statusCode}');
-      print('BODY: ${response.body}');
-      print('HEADERS: ${response.headers}');
-      print('=====================================');
-
       if (response.statusCode == 201) {
         try {
           final mapa = jsonDecode(response.body) as Map<String, dynamic>;
@@ -799,13 +793,6 @@ class ApiService {
   static Future<ApiResponse<List<Evento>>> obtenerEventosPorOrganizador(int idUsuario) async {
     try {
       final respuesta = await _getConSesion('/eventos/organizador/$idUsuario');
-
-      print('========== API EVENTOS ORGANIZADOR ==========');
-      print('URL: $baseUrl/eventos/organizador/$idUsuario');
-      print('STATUS: ${respuesta.statusCode}');
-      print('BODY: ${respuesta.body}');
-      print('HEADERS: ${respuesta.headers}');
-      print('============================================');
 
       if (respuesta.statusCode == 200) {
         try {

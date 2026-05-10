@@ -338,17 +338,6 @@ class _FormularioEventoState extends State<FormularioEvento> {
       _guardando = true;
     });
 
-    final bodyEvento = _crearBody();
-
-    print('========== GUARDAR EVENTO ==========');
-    print('ES EDICION: ${widget.esEdicion}');
-    print('USUARIO LOGUEADO ID: ${_usuario?.id}');
-    print('USUARIO LOGUEADO EMAIL: ${_usuario?.email}');
-    print('USUARIO LOGUEADO ROL: ${_usuario?.rol}');
-    print('BODY EVENTO: $bodyEvento');
-    print('IMAGEN SELECCIONADA: ${_imagenSeleccionada?.name}');
-    print('====================================');
-
     final respuesta = widget.esEdicion
       ? await ApiService.actualizarEventoConImagen(
         widget.evento!.id,
@@ -359,11 +348,6 @@ class _FormularioEventoState extends State<FormularioEvento> {
         _crearBody(),
         _imagenSeleccionada!,
     );
-
-    print('RESPUESTA EVENTO EXITO: ${respuesta.exito}');
-    print('RESPUESTA EVENTO MENSAJE: ${respuesta.mensaje}');
-    print('RESPUESTA EVENTO CODIGO: ${respuesta.codigoEstado}');
-    print('RESPUESTA EVENTO DATOS: ${respuesta.datos}');
 
     if (!mounted) return;
 
