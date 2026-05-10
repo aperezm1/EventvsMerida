@@ -11,6 +11,7 @@ class SharedPreferencesService {
   static const String _usuarioKey = 'usuario_data';
   static const String _autoLoginKey = 'autologin_data';
   static const String _tutorialKey = 'tutorial_data';
+  static const String _sessionCookieKey = 'session_cookie';
 
   // Sesion en memoria para la ejecucion actual de la app.
   static Usuario? usuarioSesionActual;
@@ -43,6 +44,15 @@ class SharedPreferencesService {
     }
   }
 
+  /*static Future<void> cerrarSesion() async {
+    usuarioSesionActual = null;
+    usuarioNotifier.value = null;
+
+    final prefs = await _prefs;
+    await prefs.remove(_usuarioKey);
+    await prefs.remove(_autoLoginKey);
+  }*/
+
   static Future<void> cerrarSesion() async {
     usuarioSesionActual = null;
     usuarioNotifier.value = null;
@@ -50,6 +60,17 @@ class SharedPreferencesService {
     final prefs = await _prefs;
     await prefs.remove(_usuarioKey);
     await prefs.remove(_autoLoginKey);
+    await prefs.remove(_sessionCookieKey);
+  }
+
+  static Future<void> guardarSessionCookie(String cookie) async {
+    final prefs = await _prefs;
+    await prefs.setString(_sessionCookieKey, cookie);
+  }
+
+  static Future<String?> cargarSessionCookie() async {
+    final prefs = await _prefs;
+    return prefs.getString(_sessionCookieKey);
   }
 
   static Future<Usuario?> cargarUsuario() async {

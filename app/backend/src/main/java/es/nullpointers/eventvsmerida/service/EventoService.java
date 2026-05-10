@@ -312,6 +312,29 @@ public class EventoService {
         return eventosMes;
     }
 
+    /**
+     * Método para obtener los eventos asociados a un usuario organizador,
+     * ordenados por fecha de inicio.
+     *
+     * @param idUsuario ID del usuario organizador.
+     * @return Lista de eventos creados por ese organizador.
+     */
+    public List<EventoResponse> obtenerEventosPorOrganizador(Long idUsuario) {
+        Usuario usuario = usuarioService.obtenerUsuarioPorIdOExcepcion(
+                idUsuario,
+                "No se encontró el usuario con id " + idUsuario
+        );
+
+        List<Evento> eventos = eventoRepository.findByUsuario_IdOrderByFechaInicioAsc(usuario.getId());
+        List<EventoResponse> eventosResponse = new ArrayList<>();
+
+        for (Evento evento : eventos) {
+            eventosResponse.add(EventoMapper.convertirAResponse(evento));
+        }
+
+        return eventosResponse;
+    }
+
         /**
         * Método para contar la cantidad de eventos agrupados por categoría.
         *

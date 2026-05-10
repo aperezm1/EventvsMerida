@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:eventvsmerida/services/shared_preferences_service.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
@@ -71,6 +72,24 @@ class ApiService {
         try {
           final mapa = jsonDecode(response.body) as Map<String, dynamic>;
           final usuario = Usuario.fromJson(mapa);
+
+          await _guardarCookieDesdeRespuesta(response);
+
+          final email = datosUsuario['email']?.toString();
+          final password = datosUsuario['password']?.toString();
+
+          if (email != null &&
+              email.isNotEmpty &&
+              password != null &&
+              password.isNotEmpty) {
+            final respuestaLogin = await iniciarSesion(email, password);
+            if (!respuestaLogin.exito) {
+              return ApiResponse<Usuario>.error(
+                mensaje: 'Usuario registrado, pero no se pudo iniciar sesión automáticamente.',
+                codigoEstado: 201,
+              );
+            }
+          }
 
           return ApiResponse<Usuario>.exito(
             datos: usuario,
@@ -145,6 +164,8 @@ class ApiService {
           try {
             final mapa = jsonDecode(respuesta.body) as Map<String, dynamic>;
             final usuario = Usuario.fromJson(mapa);
+
+            await _guardarCookieDesdeRespuesta(respuesta);
 
             return ApiResponse<Usuario>.exito(
               datos: usuario,
@@ -659,6 +680,353 @@ class ApiService {
     }
   }
 
+  /// POST /api/eventos/add
+  static Future<ApiResponse<Evento>> crearEventoConImagen(Map<String, dynamic> datosEvento, XFile imagen,) async {
+    try {
+      final uri = Uri.parse('$baseUrl/eventos/add');
+      final request = http.MultipartRequest('POST', uri);
+
+      final cabeceras = await _cabecerasConSesion();
+      request.headers.addAll(cabeceras);
+
+      request.fields['evento'] = jsonEncode(datosEvento);
+
+      final extension = p.extension(imagen.path).toLowerCase();
+
+      late MediaType mediaType;
+
+      if (extension == '.png') {
+        mediaType = MediaType('image', 'png');
+      } else if (extension == '.jpg' || extension == '.jpeg') {
+        mediaType = MediaType('image', 'jpeg');
+      } else {
+        return ApiResponse<Evento>.error(
+          mensaje: 'Formato de imagen no soportado. Usa PNG, JPG o JPEG.',
+          codigoEstado: 400,
+        );
+      }
+
+      request.files.add(
+        await http.MultipartFile.fromPath(
+          'imagen',
+          imagen.path,
+          contentType: mediaType,
+          filename: p.basename(imagen.path),
+        ),
+      );
+
+      final streamedResponse = await request.send().timeout(_tiempoLimite);
+      final response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode == 201) {
+        try {
+          final mapa = jsonDecode(response.body) as Map<String, dynamic>;
+          final evento = Evento.fromJson(mapa);
+
+          return ApiResponse<Evento>.exito(
+            datos: evento,
+            mensaje: 'Evento creado correctamente',
+            codigoEstado: 201,
+          );
+        } catch (_) {
+          return ApiResponse<Evento>.error(
+            mensaje: 'No se pudo leer el evento creado.',
+            codigoEstado: 201,
+          );
+        }
+      }
+
+      final mensaje = _leerMensajeError(response.body);
+
+      switch (response.statusCode) {
+        case 400:
+          return ApiResponse<Evento>.error(
+            mensaje: mensaje.isEmpty ? 'Los datos del evento no son válidos.' : mensaje,
+            codigoEstado: 400,
+          );
+
+        case 403:
+          return ApiResponse<Evento>.error(
+            mensaje: mensaje.isEmpty ? 'No tienes permisos para crear eventos.' : mensaje,
+            codigoEstado: 403,
+          );
+
+        case 404:
+          return ApiResponse<Evento>.error(
+            mensaje: mensaje.isEmpty ? 'No se encontró el usuario o la categoría indicada.' : mensaje,
+            codigoEstado: 404,
+          );
+
+        case 409:
+          return ApiResponse<Evento>.error(
+            mensaje: mensaje.isEmpty ? 'Ya existe un evento con el mismo título y fechas.' : mensaje,
+            codigoEstado: 409,
+          );
+
+        case 500:
+          return ApiResponse<Evento>.error(
+            mensaje: 'Error interno del servidor. Intenta más tarde.',
+            codigoEstado: 500,
+          );
+
+        default:
+          return ApiResponse<Evento>.error(
+            mensaje: mensaje.isEmpty
+                ? 'No se pudo crear el evento (${response.statusCode}).'
+                : mensaje,
+            codigoEstado: response.statusCode,
+          );
+      }
+    } on TimeoutException {
+      return ApiResponse<Evento>.sinConexion(mensaje: _mensajeSinConexion);
+    } on SocketException {
+      return ApiResponse<Evento>.sinConexion(mensaje: _mensajeSinConexion);
+    } catch (e) {
+      return ApiResponse<Evento>.error(
+        mensaje: 'Error inesperado al crear el evento: $e',
+        codigoEstado: 500,
+      );
+    }
+  }
+
+  ///GET /api/eventos/organizador/{idUsuario}
+  static Future<ApiResponse<List<Evento>>> obtenerEventosPorOrganizador(int idUsuario) async {
+    try {
+      final respuesta = await _getConSesion('/eventos/organizador/$idUsuario');
+
+      if (respuesta.statusCode == 200) {
+        try {
+          final lista = jsonDecode(respuesta.body) as List<dynamic>;
+          final eventos = lista
+              .map((item) => Evento.fromJson(item as Map<String, dynamic>))
+              .toList();
+
+          return ApiResponse<List<Evento>>.exito(
+            datos: eventos,
+            mensaje: 'Eventos del organizador cargados correctamente',
+            codigoEstado: 200,
+          );
+        } catch (_) {
+          return ApiResponse<List<Evento>>.error(
+            mensaje: 'No se pudieron leer los eventos del organizador.',
+            codigoEstado: 200,
+          );
+        }
+      }
+
+      final mensaje = _leerMensajeError(respuesta.body);
+
+      switch (respuesta.statusCode) {
+        case 403:
+          return ApiResponse<List<Evento>>.error(
+            mensaje: mensaje.isEmpty
+                ? 'No tienes permisos para consultar estos eventos.'
+                : mensaje,
+            codigoEstado: 403,
+          );
+
+        case 404:
+          return ApiResponse<List<Evento>>.error(
+            mensaje: mensaje.isEmpty
+                ? 'Usuario organizador no encontrado.'
+                : mensaje,
+            codigoEstado: 404,
+          );
+
+        case 500:
+          return ApiResponse<List<Evento>>.error(
+            mensaje: 'Error interno del servidor. Intenta más tarde.',
+            codigoEstado: 500,
+          );
+
+        default:
+          return ApiResponse<List<Evento>>.error(
+            mensaje: mensaje.isEmpty
+                ? 'No se pudieron cargar los eventos del organizador (${respuesta.statusCode}).'
+                : mensaje,
+            codigoEstado: respuesta.statusCode,
+          );
+      }
+    } on TimeoutException {
+      return ApiResponse<List<Evento>>.sinConexion(
+        mensaje: _mensajeSinConexion,
+      );
+    } on SocketException {
+      return ApiResponse<List<Evento>>.sinConexion(
+        mensaje: _mensajeSinConexion,
+      );
+    } catch (e) {
+      return ApiResponse<List<Evento>>.error(
+        mensaje: 'Error inesperado al cargar eventos del organizador: $e',
+        codigoEstado: 500,
+      );
+    }
+  }
+
+  /// DELETE /api/eventos/delete/{id}
+  static Future<ApiResponse<void>> eliminarEvento(int idEvento) async {
+    try {
+      final respuesta = await _deleteSinBodyConSesion('/eventos/delete/$idEvento');
+
+      switch (respuesta.statusCode) {
+        case 204:
+          return ApiResponse<void>.exito(
+            datos: null,
+            mensaje: 'Evento eliminado correctamente',
+            codigoEstado: 204,
+          );
+
+        case 403:
+          return ApiResponse<void>.error(
+            mensaje: 'No tienes permisos para eliminar eventos.',
+            codigoEstado: 403,
+          );
+
+        case 404:
+          return ApiResponse<void>.error(
+            mensaje: 'Evento no encontrado.',
+            codigoEstado: 404,
+          );
+
+        case 500:
+          return ApiResponse<void>.error(
+            mensaje: 'Error interno del servidor. Intenta más tarde.',
+            codigoEstado: 500,
+          );
+
+        default:
+          final mensaje = _leerMensajeError(respuesta.body);
+
+          return ApiResponse<void>.error(
+            mensaje: mensaje.isEmpty
+                ? 'No se pudo eliminar el evento (${respuesta.statusCode}).'
+                : mensaje,
+            codigoEstado: respuesta.statusCode,
+          );
+      }
+    } on TimeoutException {
+      return ApiResponse<void>.sinConexion(mensaje: _mensajeSinConexion);
+    } on SocketException {
+      return ApiResponse<void>.sinConexion(mensaje: _mensajeSinConexion);
+    } catch (e) {
+      return ApiResponse<void>.error(
+        mensaje: 'Error inesperado al eliminar el evento: $e',
+        codigoEstado: 500,
+      );
+    }
+  }
+
+  /// UPDATE /api/eventos/update/{id}
+  static Future<ApiResponse<Evento>> actualizarEventoConImagen(int idEvento, Map<String, dynamic> datosEvento, XFile? imagen) async {
+    try {
+      final uri = Uri.parse('$baseUrl/eventos/update/$idEvento');
+      final request = http.MultipartRequest('PUT', uri);
+
+      final cabeceras = await _cabecerasConSesion();
+      request.headers.addAll(cabeceras);
+
+      request.fields['evento'] = jsonEncode(datosEvento);
+
+      if (imagen != null) {
+        final extension = p.extension(imagen.path).toLowerCase();
+
+        late MediaType mediaType;
+
+        if (extension == '.png') {
+          mediaType = MediaType('image', 'png');
+        } else if (extension == '.jpg' || extension == '.jpeg') {
+          mediaType = MediaType('image', 'jpeg');
+        } else {
+          return ApiResponse<Evento>.error(
+            mensaje: 'Formato de imagen no soportado. Usa PNG, JPG o JPEG.',
+            codigoEstado: 400,
+          );
+        }
+
+        request.files.add(
+          await http.MultipartFile.fromPath(
+            'imagen',
+            imagen.path,
+            contentType: mediaType,
+            filename: p.basename(imagen.path),
+          ),
+        );
+      }
+
+      final streamedResponse = await request.send().timeout(_tiempoLimite);
+      final response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode == 200) {
+        try {
+          final mapa = jsonDecode(response.body) as Map<String, dynamic>;
+          final evento = Evento.fromJson(mapa);
+
+          return ApiResponse<Evento>.exito(
+            datos: evento,
+            mensaje: 'Evento actualizado correctamente',
+            codigoEstado: 200,
+          );
+        } catch (_) {
+          return ApiResponse<Evento>.error(
+            mensaje: 'El evento se actualizó, pero no se pudo leer la respuesta del servidor.',
+            codigoEstado: 200,
+          );
+        }
+      }
+
+      final mensaje = _leerMensajeError(response.body);
+
+      switch (response.statusCode) {
+        case 400:
+          return ApiResponse<Evento>.error(
+            mensaje: mensaje.isEmpty ? 'Los datos del evento no son válidos.' : mensaje,
+            codigoEstado: 400,
+          );
+
+        case 403:
+          return ApiResponse<Evento>.error(
+            mensaje: mensaje.isEmpty ? 'No tienes permisos para actualizar eventos.' : mensaje,
+            codigoEstado: 403,
+          );
+
+        case 404:
+          return ApiResponse<Evento>.error(
+            mensaje: mensaje.isEmpty ? 'Evento, usuario o categoría no encontrada.' : mensaje,
+            codigoEstado: 404,
+          );
+
+        case 409:
+          return ApiResponse<Evento>.error(
+            mensaje: mensaje.isEmpty ? 'Existe un conflicto con los datos enviados.' : mensaje,
+            codigoEstado: 409,
+          );
+
+        case 500:
+          return ApiResponse<Evento>.error(
+            mensaje: mensaje.isEmpty ? 'Error interno del servidor. Intenta más tarde.' : mensaje,
+            codigoEstado: 500,
+          );
+
+        default:
+          return ApiResponse<Evento>.error(
+            mensaje: mensaje.isEmpty
+                ? 'No se pudo actualizar el evento (${response.statusCode}).'
+                : mensaje,
+            codigoEstado: response.statusCode,
+          );
+      }
+    } on TimeoutException {
+      return ApiResponse<Evento>.sinConexion(mensaje: _mensajeSinConexion);
+    } on SocketException {
+      return ApiResponse<Evento>.sinConexion(mensaje: _mensajeSinConexion);
+    } catch (e) {
+      return ApiResponse<Evento>.error(
+        mensaje: 'Error inesperado al actualizar el evento: $e',
+        codigoEstado: 500,
+      );
+    }
+  }
+
   // ============================================================================
   // USUARIO-EVENTOS
   // ============================================================================
@@ -981,6 +1349,28 @@ class ApiService {
     return await accion().timeout(_tiempoLimite);
   }
 
+  static Future<http.Response> _getConSesion(String ruta) async {
+    final cabeceras = await _cabecerasConSesion();
+
+    return _solicitud(() {
+      return http.get(
+        Uri.parse('$baseUrl$ruta'),
+        headers: cabeceras,
+      );
+    });
+  }
+
+  static Future<http.Response> _deleteSinBodyConSesion(String ruta) async {
+    final cabeceras = await _cabecerasConSesion();
+
+    return _solicitud(() {
+      return http.delete(
+        Uri.parse('$baseUrl$ruta'),
+        headers: cabeceras,
+      );
+    });
+  }
+
   // ============================================================================
   // UTILIDADES
   // ============================================================================
@@ -1004,5 +1394,31 @@ class ApiService {
     }
 
     return '';
+  }
+
+  static Future<void> _guardarCookieDesdeRespuesta(http.Response respuesta) async {
+    final setCookie = respuesta.headers['set-cookie'];
+
+    if (setCookie == null || setCookie.isEmpty) {
+      return;
+    }
+
+    final sessionCookie = setCookie.split(';').first;
+
+    if (sessionCookie.isNotEmpty) {
+      await SharedPreferencesService.guardarSessionCookie(sessionCookie);
+    }
+  }
+
+  static Future<Map<String, String>> _cabecerasConSesion() async {
+    final cookie = await SharedPreferencesService.cargarSessionCookie();
+
+    if (cookie == null || cookie.isEmpty) {
+      return {};
+    }
+
+    return {
+      'Cookie': cookie,
+    };
   }
 }

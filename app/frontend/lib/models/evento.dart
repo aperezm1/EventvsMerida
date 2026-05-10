@@ -1,4 +1,5 @@
 class Evento {
+  final int id;
   final String titulo;
   final String descripcion;
   final DateTime fechaInicio;
@@ -11,6 +12,7 @@ class Evento {
   final String nombreCategoria;
 
   Evento({
+    required this.id,
     required this.titulo,
     required this.descripcion,
     required this.fechaInicio,
@@ -25,6 +27,7 @@ class Evento {
 
   factory Evento.fromJson(Map<String, dynamic> json) {
     return Evento(
+      id: json['id'] ?? 0,
       titulo: json['titulo'] ?? '',
       descripcion: json['descripcion'] ?? '',
       fechaInicio: DateTime.parse(json['fechaInicio'].toString()),

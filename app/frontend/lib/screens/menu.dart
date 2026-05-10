@@ -40,6 +40,9 @@ class _MenuState extends State<Menu> {
     AppRoutes.eventosGuardados,
     AppRoutes.terminos,
     AppRoutes.privacidad,
+    AppRoutes.administrarEventos,
+    AppRoutes.formularioEvento,
+    AppRoutes.seleccionarUbicacion,
   ];
 
   // ===========================================================================
