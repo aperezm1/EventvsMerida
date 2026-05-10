@@ -24,6 +24,12 @@ class _PerfilState extends State<Perfil> {
 
   ColorScheme get _cs => Theme.of(context).colorScheme;
 
+  bool get _puedeAdministrarEventos {
+    final rol = _usuario?.rol.trim().toLowerCase();
+
+    return rol == 'organizador' || rol == 'administrador';
+  }
+
   GlobalKey keyCabecera = GlobalKey();
   GlobalKey keySecciones = GlobalKey();
   GlobalKey keyPreferencias = GlobalKey();
@@ -289,6 +295,18 @@ class _PerfilState extends State<Perfil> {
     );
   }
 
+  Widget _buildAdministracion() {
+    return Column(
+      children: [
+        _buildItem(
+          Icons.event_available,
+          'Administrar eventos',
+          onTap: () => context.push(AppRoutes.administrarEventos),
+        ),
+      ],
+    );
+  }
+
   Widget _buildLegal() {
     return Column(
       key: keyinfoLegal,
@@ -416,6 +434,20 @@ class _PerfilState extends State<Perfil> {
                   children: [
                     _buildSeccionTitulo('PREFERENCIAS'),
                     _buildPreferencias(),
+                    if (_puedeAdministrarEventos) ...[
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24.0,
+                          vertical: 16.0,
+                        ),
+                        child: Divider(
+                          color: _cs.primary,
+                          thickness: 2,
+                        ),
+                      ),
+                      _buildSeccionTitulo('ADMINISTRACIÓN'),
+                      _buildAdministracion(),
+                    ],
                     Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 24.0,
