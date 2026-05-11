@@ -23,8 +23,12 @@ class _LoginState extends State<Login> {
 
   bool _autoLogin = false;
   bool _ocultarPassword = true;
+  final _formKey = GlobalKey<FormState>();
 
-  ColorScheme get _cs => Theme.of(context).colorScheme;
+  ColorScheme get _cs =>
+      Theme
+          .of(context)
+          .colorScheme;
 
   // ===========================================================================
   // CICLO DE VIDA
@@ -85,7 +89,10 @@ class _LoginState extends State<Login> {
     final mensajeError = _validarCamposVacios();
 
     if (mensajeError != null) {
-      Mensaje.mostrarSnackBar(context: context, mensaje: mensajeError, icon: Icons.person, color: _cs.error);
+      Mensaje.mostrarSnackBar(context: context,
+          mensaje: mensajeError,
+          icon: Icons.person,
+          color: _cs.error);
       return;
     }
 
@@ -97,13 +104,19 @@ class _LoginState extends State<Login> {
     if (!mounted) return;
 
     if (!respuesta.exito) {
-      Mensaje.mostrarSnackBar(context: context, mensaje: respuesta.mensaje, icon: Icons.person, color: _cs.error);
+      Mensaje.mostrarSnackBar(context: context,
+          mensaje: respuesta.mensaje,
+          icon: Icons.person,
+          color: _cs.error);
       return;
     }
 
     final usuario = respuesta.datos!;
 
-    Mensaje.mostrarSnackBar(context: context, mensaje: "¡Has iniciado sesión correctamente!", icon: Icons.person, color: Colors.green);
+    Mensaje.mostrarSnackBar(context: context,
+        mensaje: "¡Has iniciado sesión correctamente!",
+        icon: Icons.person,
+        color: Colors.green);
     await SharedPreferencesService.iniciarSesion(
       usuario: usuario,
       autoLogin: _autoLogin,
@@ -255,28 +268,216 @@ class _LoginState extends State<Login> {
   }
 
   Widget _buildRegisterLink() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+    return Column(
       children: [
-        Text(
-          '¿Aún no tienes cuenta? ',
-          style: TextStyle(color: _cs.onSurface),
-        ),
-        GestureDetector(
-          onTap: () {
-            context.push(AppRoutes.registro);
-          },
-          child: Text(
-            'Regístrate',
-            style: TextStyle(
-              color: _cs.onSurface,
-              fontWeight: FontWeight.bold,
-              decoration: TextDecoration.underline,
-              decorationThickness: 1.5,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              '¿Aún no tienes cuenta? ',
+              style: TextStyle(color: _cs.onSurface),
             ),
-          ),
+            GestureDetector(
+              onTap: () {
+                context.push(AppRoutes.registro);
+              },
+              child: Text(
+                'Regístrate',
+                style: TextStyle(
+                  color: _cs.onSurface,
+                  fontWeight: FontWeight.bold,
+                  decoration: TextDecoration.underline,
+                  decorationThickness: 1.5,
+                ),
+              ),
+            ),
+          ],
         ),
-      ],
+        const SizedBox(height: 8),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            GestureDetector(
+              onTap: () {
+                //_mostrarModalCorreoEnviado();
+                _buildModalRecuperarContrasenia();
+              },
+              child: Text(
+                '¿Olvidaste tu contraseña?',
+                style: TextStyle(
+                  color: _cs.onSurface,
+                  fontWeight: FontWeight.bold,
+                  decoration: TextDecoration.underline,
+                  decorationThickness: 1.5,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ]
+    );
+  }
+
+  Future<void> _buildModalRecuperarContrasenia() async {
+    bool enviandoCorreo = false;
+
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: _cs.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        side: BorderSide(color: _cs.primary.withValues(alpha: 0.4), width: 1.5),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                left: 24,
+                right: 24,
+                top: 20,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+              ),
+              child: Form(
+                key: _formKey,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 45,
+                        height: 5,
+                        margin: const EdgeInsets.only(bottom: 16),
+                        decoration: BoxDecoration(
+                          color: _cs.onSurface.withValues(alpha: 0.25),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+
+                      Text(
+                        'Recuperar contraseña',
+                        style: TextStyle(
+                          color: _cs.primary,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      TextFormField(
+                        controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        // decoration: Cuenta.decoratio('Contraseña nueva', Icons.key),
+                        // validator: ,
+                      ),
+
+                      const SizedBox(height: 20),
+
+
+                      const SizedBox(height: 20),
+
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: enviandoCorreo
+                                  ? null
+                                  : () {
+                                      Navigator.pop(context);
+                                    },
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: _cs.primary,
+                                side: BorderSide(color: _cs.primary),
+                                minimumSize: const Size.fromHeight(48),
+                              ),
+                              child: const Text('Cancelar'),
+                            ),
+                          ),
+
+                          const SizedBox(width: 12),
+
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: enviandoCorreo
+                                  ? null
+                                  : () async {
+                                      if (!_formKey.currentState!.validate()) return;
+
+                                      setModalState(() {
+                                        enviandoCorreo = true;
+                                      });
+
+                                      final respuesta = await ApiService.recuperarPassword(
+                                        _emailController.text.trim(),
+                                      );
+
+                                      if (!mounted) return;
+
+                                      setModalState(() {
+                                        enviandoCorreo = false;
+                                      });
+
+                                      Navigator.pop(context);
+
+                                      _mostrarModalCorreoEnviado();
+                                    },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: _cs.primary,
+                                foregroundColor: _cs.onPrimary,
+                                minimumSize: const Size.fromHeight(48),
+                              ),
+                              child: Text(
+                                enviandoCorreo ? 'Enviando correo...' : 'Cambiar contraseña',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(color: _cs.surface),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _mostrarModalCorreoEnviado() async {
+    if (!mounted) return;
+
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: Row(
+            children: [
+              Icon(Icons.mark_email_read, color: _cs.primary),
+              const SizedBox(width: 8),
+              const Text('Correo enviado'),
+            ],
+          ),
+          content: const Text(
+            'Te hemos enviado un correo si este está registrado para poder recuperar tu contraseña.\n\n'
+                'Revisa tu bandeja de entrada o la carpeta de SPAM.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Aceptar'),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -286,7 +487,9 @@ class _LoginState extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
+    final size = MediaQuery
+        .of(context)
+        .size;
     final logoWidth = size.width * 0.70;
 
     return Scaffold(
