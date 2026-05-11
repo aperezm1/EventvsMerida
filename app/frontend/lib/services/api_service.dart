@@ -331,6 +331,61 @@ class ApiService {
     }
   }
 
+  static Future<ApiResponse<Usuario>> recuperarPassword(String email) async {
+    try {
+      final respuesta = await _post('/auth/forgot-password?email=$email', {});
+
+      switch (respuesta.statusCode) {
+        case 200:
+          try {
+            return ApiResponse<Usuario>.exito(
+              datos: null,
+              mensaje: 'Correo enviado',
+              codigoEstado: 200,
+            );
+          } catch (_) {
+            return ApiResponse<Usuario>.error(
+              mensaje: 'No se pudo leer la respuesta del servidor.',
+              codigoEstado: 200,
+            );
+          }
+
+        case 400:
+        case 401:
+        case 404:
+          return ApiResponse<Usuario>.error(
+            mensaje: 'No ha sido posible enviar el correo.',
+            codigoEstado: respuesta.statusCode,
+          );
+
+        case 500:
+          return ApiResponse<Usuario>.error(
+            mensaje: 'Error interno del servidor. Intenta más tarde.',
+            codigoEstado: 500,
+          );
+
+        default:
+          final mensaje = _leerMensajeError(respuesta.body);
+
+          return ApiResponse<Usuario>.error(
+            mensaje: mensaje.isEmpty
+                ? 'Error desconocido (${respuesta.statusCode}).'
+                : mensaje,
+            codigoEstado: respuesta.statusCode,
+          );
+      }
+    } on TimeoutException {
+      return ApiResponse<Usuario>.sinConexion(mensaje: _mensajeSinConexion);
+    } on SocketException {
+      return ApiResponse<Usuario>.sinConexion(mensaje: _mensajeSinConexion);
+    } catch (e) {
+      return ApiResponse<Usuario>.error(
+        mensaje: 'Error inesperado al enviar el correo: $e',
+        codigoEstado: 500,
+      );
+    }
+  }
+
   // ============================================================================
   // EVENTOS
   // ============================================================================
