@@ -10,6 +10,6 @@ import { RevealDirective } from '../../directives/reveal.directive';
 })
 export class DownloadComponent {
   readonly repoUrl = 'https://github.com/Null-Pointers-Albarregas/EventvsMerida';
-  readonly apkUrl = '"https://eventvsmerida-landing.vercel.app/downloads/eventvs-merida.apk"';
+  readonly apkUrl = '"https://eventvsmerida.vercel.app/downloads/eventvs-merida.apk"';
   readonly adminUrl = 'https://eventvsmerida-admin.vercel.app';
 }
