@@ -8,6 +8,7 @@ import es.nullpointers.eventvsmerida.entity.Usuario;
 import es.nullpointers.eventvsmerida.mapper.UsuarioMapper;
 import es.nullpointers.eventvsmerida.repository.UsuarioRepository;
 import es.nullpointers.eventvsmerida.supabase.SupabaseStorage;
+import es.nullpointers.eventvsmerida.utils.TextoUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -197,6 +198,9 @@ public class UsuarioService {
         } else if (usuarioRequest.fotoPath() != null && !usuarioRequest.fotoPath().isBlank()) {
             usuarioExistente.setFotoPath(usuarioRequest.fotoPath());
         }
+
+        usuarioExistente.setNombre(TextoUtils.capitalizarTexto(usuarioExistente.getNombre()));
+        usuarioExistente.setApellidos(TextoUtils.capitalizarTexto(usuarioExistente.getApellidos()));
 
         // Se guarda el usuario actualizado en la base de datos
         Usuario usuarioActualizado = usuarioRepository.save(usuarioExistente);
