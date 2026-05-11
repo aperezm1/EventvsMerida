@@ -1,7 +1,7 @@
+import 'package:eventvsmerida/utils/fecha_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../core/router/app_routes.dart';
@@ -11,6 +11,7 @@ import '../models/usuario.dart';
 import '../services/api_service.dart';
 import '../services/geocoding_service.dart';
 import '../services/shared_preferences_service.dart';
+import '../widgets/componentes_compartidos.dart';
 
 class FormularioEvento extends StatefulWidget {
   final Evento? evento;
@@ -24,6 +25,10 @@ class FormularioEvento extends StatefulWidget {
 }
 
 class _FormularioEventoState extends State<FormularioEvento> {
+  // ===========================================================================
+  // VARIABLES
+  // ===========================================================================
+
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   final TextEditingController _tituloController = TextEditingController();
@@ -46,8 +51,13 @@ class _FormularioEventoState extends State<FormularioEvento> {
   List<Categoria> _categorias = [];
   Categoria? _categoriaSeleccionada;
   bool _cargandoCategorias = true;
+  FechaUtils fu = FechaUtils();
 
   ColorScheme get _cs => Theme.of(context).colorScheme;
+
+  // ===========================================================================
+  // CICLO DE VIDA
+  // ===========================================================================
 
   @override
   void initState() {
@@ -64,6 +74,10 @@ class _FormularioEventoState extends State<FormularioEvento> {
     _localizacionController.dispose();
     super.dispose();
   }
+
+  // ===========================================================================
+  // CARGA DE DATOS
+  // ===========================================================================
 
   Future<void> _cargarUsuario() async {
     final usuario = await SharedPreferencesService.cargarUsuario();
@@ -85,7 +99,7 @@ class _FormularioEventoState extends State<FormularioEvento> {
         _cargandoCategorias = false;
       });
 
-      _mostrarMensaje(respuesta.mensaje);
+      Mensaje.mostrarSnackBar(context: context, mensaje: respuesta.mensaje, icon: Icons.close, color: _cs.error);
       return;
     }
 
@@ -104,11 +118,16 @@ class _FormularioEventoState extends State<FormularioEvento> {
 
     setState(() {
       _categorias = categorias;
-      _categoriaSeleccionada = categoriaDelEvento ??
+      _categoriaSeleccionada =
+          categoriaDelEvento ??
           (categorias.isNotEmpty ? categorias.first : null);
       _cargandoCategorias = false;
     });
   }
+
+  // ===========================================================================
+  // FUNCIONES AUXILIARES
+  // ===========================================================================
 
   void _rellenarDatosSiEsEdicion() {
     final evento = widget.evento;
@@ -182,10 +201,8 @@ class _FormularioEventoState extends State<FormularioEvento> {
 
     final extension = imagen.path.toLowerCase();
 
-    if (!extension.endsWith('.png') &&
-        !extension.endsWith('.jpg') &&
-        !extension.endsWith('.jpeg')) {
-      _mostrarMensaje('Formato no válido. Usa PNG, JPG o JPEG.');
+    if (!extension.endsWith('.png') && !extension.endsWith('.jpg') && !extension.endsWith('.jpeg')) {
+      Mensaje.mostrarSnackBar(context: context, mensaje: 'Formato no válido. Usa PNG, JPG o JPEG', icon: Icons.image_not_supported_outlined, color: _cs.error);
       return;
     }
 
@@ -199,7 +216,6 @@ class _FormularioEventoState extends State<FormularioEvento> {
 
     if (punto == null) return;
 
-
     setState(() {
       _latitudSeleccionada = punto.latitude;
       _longitudSeleccionada = punto.longitude;
@@ -211,16 +227,18 @@ class _FormularioEventoState extends State<FormularioEvento> {
     final localizacion = _localizacionController.text.trim();
 
     if (localizacion.isEmpty) {
-      _mostrarMensaje('Escribe primero la localización');
+      Mensaje.mostrarSnackBar(context: context, mensaje: 'Escribe primero la localización', icon: Icons.map, color: _cs.error);
       return;
     }
 
-    final puntoEncontrado = await GeocodingService.buscarCoordenadas(localizacion);
+    final puntoEncontrado = await GeocodingService.buscarCoordenadas(
+      localizacion,
+    );
 
     if (!mounted) return;
 
     if (puntoEncontrado == null) {
-      _mostrarMensaje('No se encontró la ubicación. Selecciona el punto manualmente.');
+      Mensaje.mostrarSnackBar(context: context, mensaje: 'No se encontró la ubicación. Selecciona el punto manualmente', icon: Icons.map, color: _cs.error);
 
       final puntoManual = await context.push<LatLng>(
         AppRoutes.seleccionarUbicacion,
@@ -262,7 +280,7 @@ class _FormularioEventoState extends State<FormularioEvento> {
   String _formatearFechaHora(DateTime? fecha) {
     if (fecha == null) return 'Seleccionar';
 
-    return DateFormat('dd/MM/yyyy HH:mm').format(fecha);
+    return fu.formatearFechaHora(fecha);
   }
 
   Map<String, dynamic> _crearBody() {
@@ -282,14 +300,14 @@ class _FormularioEventoState extends State<FormularioEvento> {
 
   Future<void> _guardarEvento() async {
     if (_usuario == null) {
-      _mostrarMensaje('No hay usuario logueado');
+      Mensaje.mostrarSnackBar(context: context, mensaje: 'No hay usuario logueado', icon: Icons.person, color: _cs.error);
       return;
     }
 
     final rol = _usuario!.rol.trim().toLowerCase();
 
     if (rol != 'organizador' && rol != 'administrador') {
-      _mostrarMensaje('Solo los usuarios organizadores o administradores pueden crear eventos');
+      Mensaje.mostrarSnackBar(context: context, mensaje: 'Solo los usuarios organizadores o administradores pueden crear eventos', icon: Icons.person, color: _cs.error);
       return;
     }
 
@@ -298,39 +316,39 @@ class _FormularioEventoState extends State<FormularioEvento> {
     }
 
     if (_categoriaSeleccionada == null) {
-      _mostrarMensaje('Selecciona una categoría');
+      Mensaje.mostrarSnackBar(context: context, mensaje: 'Selecciona una categoría', icon: Icons.label, color: _cs.error);
       return;
     }
 
     if (_fechaInicio == null) {
-      _mostrarMensaje('Selecciona la fecha y hora de inicio');
+      Mensaje.mostrarSnackBar(context: context, mensaje: 'Selecciona la fecha y hora de inicio', icon: Icons.date_range, color: _cs.error);
       return;
     }
 
     if (_fechaFin == null) {
-      _mostrarMensaje('Selecciona la fecha y hora de fin');
+      Mensaje.mostrarSnackBar(context: context, mensaje: 'Selecciona la fecha y hora de fin', icon: Icons.date_range, color: _cs.error);
       return;
     }
 
     if (_fechaFin!.isBefore(_fechaInicio!)) {
-      _mostrarMensaje('La fecha de fin no puede ser anterior a la fecha de inicio');
+      Mensaje.mostrarSnackBar(context: context, mensaje: 'La fecha de fin no puede ser anterior a la fecha de inicio', icon: Icons.date_range, color: _cs.error);
       return;
     }
 
     if (_latitudSeleccionada == null || _longitudSeleccionada == null) {
-      _mostrarMensaje('Selecciona el punto exacto en el mapa');
+      Mensaje.mostrarSnackBar(context: context, mensaje: 'Selecciona el punto exacto en el mapa', icon: Icons.map, color: _cs.error);
       return;
     }
 
     if (_latitudSeleccionada != null &&
         _longitudSeleccionada != null &&
         _localizacionController.text.trim() != _ultimaLocalizacionBuscada) {
-      _mostrarMensaje('Has cambiado la localización. Vuelve a buscar o seleccionar el punto en el mapa.');
+      Mensaje.mostrarSnackBar(context: context, mensaje: 'Has cambiado la localización. Vuelve a buscar o seleccionar el punto en el mapa.', icon: Icons.map, color: _cs.error);
       return;
     }
 
     if (!widget.esEdicion && _imagenSeleccionada == null) {
-      _mostrarMensaje('Debes seleccionar una imagen para el evento');
+      Mensaje.mostrarSnackBar(context: context, mensaje: 'Debes seleccionar una imagen para el evento', icon: Icons.image, color: _cs.error);
       return;
     }
 
@@ -339,15 +357,15 @@ class _FormularioEventoState extends State<FormularioEvento> {
     });
 
     final respuesta = widget.esEdicion
-      ? await ApiService.actualizarEventoConImagen(
-        widget.evento!.id,
-        _crearBody(),
-        _imagenSeleccionada,
-      )
-      : await ApiService.crearEventoConImagen(
-        _crearBody(),
-        _imagenSeleccionada!,
-    );
+        ? await ApiService.actualizarEventoConImagen(
+            widget.evento!.id,
+            _crearBody(),
+            _imagenSeleccionada,
+          )
+        : await ApiService.crearEventoConImagen(
+            _crearBody(),
+            _imagenSeleccionada!,
+          );
 
     if (!mounted) return;
 
@@ -355,25 +373,21 @@ class _FormularioEventoState extends State<FormularioEvento> {
       _guardando = false;
     });
 
-    _mostrarMensaje(respuesta.mensaje);
+    Mensaje.mostrarSnackBar(context: context, mensaje: respuesta.mensaje, icon: Icons.event_available, color: _cs.error);
 
     if (respuesta.exito) {
       Navigator.of(context).pop(true);
     }
   }
 
-  void _mostrarMensaje(String mensaje) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(mensaje)),
-    );
-  }
+  // ===========================================================================
+  // INTERFAZ
+  // ===========================================================================
 
   InputDecoration _decoracion(String label) {
     return InputDecoration(
       labelText: label,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
         borderSide: BorderSide(color: _cs.primary, width: 2),
@@ -385,9 +399,7 @@ class _FormularioEventoState extends State<FormularioEvento> {
     if (_cargandoCategorias) {
       return const Padding(
         padding: EdgeInsets.only(bottom: 14),
-        child: Center(
-          child: CircularProgressIndicator(),
-        ),
+        child: Center(child: CircularProgressIndicator()),
       );
     }
 
@@ -477,8 +489,8 @@ class _FormularioEventoState extends State<FormularioEvento> {
 
   Widget _selectorImagen() {
     final nombreImagen = _imagenSeleccionada != null
-      ? _imagenSeleccionada!.name
-      : widget.esEdicion
+        ? _imagenSeleccionada!.name
+        : widget.esEdicion
         ? 'Mantener imagen actual'
         : 'Seleccionar imagen';
 
@@ -513,8 +525,8 @@ class _FormularioEventoState extends State<FormularioEvento> {
     final texto = _latitudSeleccionada == null || _longitudSeleccionada == null
         ? 'Seleccionar ubicación en el mapa'
         : 'Ubicación seleccionada\n'
-        'Lat: ${_latitudSeleccionada!.toStringAsFixed(6)} · '
-        'Lng: ${_longitudSeleccionada!.toStringAsFixed(6)}';
+              'Lat: ${_latitudSeleccionada!.toStringAsFixed(6)} · '
+              'Lng: ${_longitudSeleccionada!.toStringAsFixed(6)}';
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
@@ -528,10 +540,7 @@ class _FormularioEventoState extends State<FormularioEvento> {
               Icon(Icons.map, color: _cs.primary),
               const SizedBox(width: 12),
               Expanded(
-                child: Text(
-                  texto,
-                  style: TextStyle(color: _cs.onSurface),
-                ),
+                child: Text(texto, style: TextStyle(color: _cs.onSurface)),
               ),
               Icon(Icons.location_on, color: _cs.primary),
             ],
@@ -561,10 +570,7 @@ class _FormularioEventoState extends State<FormularioEvento> {
       key: _formKey,
       child: Column(
         children: [
-          _campoTexto(
-            label: 'Título',
-            controller: _tituloController,
-          ),
+          _campoTexto(label: 'Título', controller: _tituloController),
           _campoTexto(
             label: 'Descripción',
             controller: _descripcionController,
@@ -596,15 +602,18 @@ class _FormularioEventoState extends State<FormularioEvento> {
               onPressed: _guardando ? null : _guardarEvento,
               icon: _guardando
                   ? const SizedBox(
-                width: 18,
-                height: 18,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              )
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
                   : const Icon(Icons.save),
-              label: Text(_guardando ? 'Guardando...'
-                  : widget.esEdicion
+              label: Text(
+                _guardando
+                    ? 'Guardando...'
+                    : widget.esEdicion
                     ? 'Actualizar evento'
-                    : 'Guardar evento'),
+                    : 'Guardar evento',
+              ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: _cs.primary,
                 foregroundColor: _cs.surface,
@@ -615,6 +624,10 @@ class _FormularioEventoState extends State<FormularioEvento> {
       ),
     );
   }
+
+  // ===========================================================================
+  // BUILD
+  // ===========================================================================
 
   @override
   Widget build(BuildContext context) {

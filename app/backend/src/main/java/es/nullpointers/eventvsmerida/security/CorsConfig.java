@@ -18,6 +18,7 @@ public class CorsConfig {
         "https://eventvsmerida-admin.vercel.app",
         "http://127.0.0.1:5500",
         "http://127.0.0.1:5501",
+        "https://eventvsmerida-recover.vercel.app"
     };
     private static final String[] ALLOWED_METHODS = { "GET", "POST", "PUT", "DELETE", "OPTIONS" };
     private static final String[] ALLOWED_HEADERS = { "Content-Type", "Authorization", "X-Requested-With" };

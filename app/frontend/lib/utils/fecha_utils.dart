@@ -17,6 +17,10 @@ class FechaUtils {
     return DateFormat('dd/MM/yyyy').format(fecha);
   }
 
+  String formatearFechaHora(DateTime fecha) {
+    return DateFormat('dd/MM/yyyy HH:mm').format(fecha);
+  }
+
   DateTime normalizarFecha(DateTime fecha) {
     final f = fecha.toLocal();
     return DateTime(f.year, f.month, f.day);

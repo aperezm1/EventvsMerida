@@ -1388,7 +1388,7 @@ class _EventosState extends State<Eventos> {
           alineamientoTarjeta: ContentAlign.top,
           context: context,
           key: keyPantalla,
-          titulo: '¡Bienvenido a Eventvs Mérida!',
+          titulo: '¡Bienvenido/a a Eventvs Mérida!',
           descripcion: 'En este pequeño tutorial te mostraremos cómo navegar por la aplicación y sus funcionalidades. Puedes saltar el tutorial en cualquier momento pulsando el botón de arriba a la izquierda.',
           icon: Icons.event,
           siguiente: true,

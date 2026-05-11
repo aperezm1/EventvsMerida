@@ -1,4 +1,5 @@
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 
 class DayRangeTextInputFormatter extends TextInputFormatter {
   @override
@@ -10,5 +11,14 @@ class DayRangeTextInputFormatter extends TextInputFormatter {
     final value = int.tryParse(text) ?? 0;
     if (value < 1 || value > 31) return oldValue;
     return newValue;
+  }
+}
+
+class ImageSize {
+  static int maxImagenBytes = 1572864; // 1.5 MB
+
+  static Future<bool> validarTamanioImagen(XFile imagen) async {
+    final bytes = await imagen.length();
+    return bytes <= maxImagenBytes;
   }
 }
