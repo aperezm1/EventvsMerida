@@ -24,7 +24,7 @@ public class EmailService {
             String nombre) {
 
         String enlace =
-                "http://127.0.0.1:5501/index.html?token="
+                "eventvsmerida-recover?token="
                         + token;
 
         SimpleMailMessage mensaje =

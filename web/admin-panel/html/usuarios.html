@@ -310,14 +310,27 @@
                                 Contraseña
                                 <span class="campo-obligatorio">*</span>
                               </label>
-                              <input
-                                type="password"
-                                class="form-control"
-                                id="contrasena"
-                                name="contrasena"
-                                pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&amp;])[A-Za-z\d@$!%*?&amp;]{8,}$"
-                                required
-                              />
+                              <div class="input-group has-validation">
+                                <input
+                                  type="password"
+                                  class="form-control"
+                                  id="contrasena"
+                                  name="contrasena"
+                                  pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[#@$!%*?&amp;])[A-Za-z\d#@$!%*?&amp;]{8,}$"
+                                  required
+                                />
+                                <button
+                                  class="btn btn-outline-secondary border-secondary text-light"
+                                  type="button"
+                                  id="toggleContrasenia"
+                                  aria-label="Mostrar u ocultar contraseña"
+                                >
+                                  <i
+                                    class="fa-solid fa-eye"
+                                    id="iconoContrasena"
+                                  ></i>
+                                </button>
+                              </div>
                               <div class="invalid-feedback">
                                 La contraseña debe tener al menos 8 caracteres,
                                 una mayúscula, una minúscula, un número y un
@@ -333,14 +346,27 @@
                                 Confirmar contraseña
                                 <span class="campo-obligatorio">*</span>
                               </label>
-                              <input
-                                type="password"
-                                class="form-control"
-                                id="confirmarContrasena"
-                                name="confirmarContrasena"
-                                pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&amp;])[A-Za-z\d@$!%*?&amp;]{8,}$"
-                                required
-                              />
+                              <div class="input-group has-validation">
+                                <input
+                                  type="password"
+                                  class="form-control"
+                                  id="confirmarContrasena"
+                                  name="confirmarContrasena"
+                                  pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[#@$!%*?&amp;])[A-Za-z\d#@$!%*?&amp;]{8,}$"
+                                  required
+                                />
+                                <button
+                                  class="btn btn-outline-secondary border-secondary text-light"
+                                  type="button"
+                                  id="toggleConfirmarContrasena"
+                                  aria-label="Mostrar u ocultar confirmar contraseña"
+                                >
+                                  <i
+                                    class="fa-solid fa-eye"
+                                    id="iconoConfirmarContrasena"
+                                  ></i>
+                                </button>
+                              </div>
                               <div class="invalid-feedback">
                                 La contraseña debe tener al menos 8 caracteres,
                                 una mayúscula, una minúscula, un número y un
@@ -425,7 +451,6 @@
               </div>
             </div>
 
-            <!-- Modal -->
             <!-- Modal Editar Usuario -->
             <div
               class="modal fade"
@@ -670,7 +695,6 @@
                       id="modalEditarContraseniaLabel"
                     >
                       Editar contraseña del usuario
-                      <span id="nombreUsuario"></span>
                     </h1>
                     <button
                       type="button"
@@ -689,13 +713,26 @@
                         <label for="contraseniaEditar" class="form-label"
                           >Contraseña</label
                         >
-                        <input
-                          type="password"
-                          class="form-control"
-                          id="contraseniaEditar"
-                          name="contraseniaEditar"
-                          pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[#@$!%*?&amp;])[A-Za-z\d#@$!%*?&amp;]{8,}$"
-                        />
+                        <div class="input-group has-validation">
+                          <input
+                            type="password"
+                            class="form-control"
+                            id="contraseniaEditar"
+                            name="contraseniaEditar"
+                            pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[#@$!%*?&amp;])[A-Za-z\d#@$!%*?&amp;]{8,}$"
+                          />
+                          <button
+                            class="btn btn-outline-secondary border-secondary text-light"
+                            type="button"
+                            id="toggleContraseniaEditar"
+                            aria-label="Mostrar u ocultar contraseña"
+                          >
+                            <i
+                              class="fa-solid fa-eye"
+                              id="iconoContraseniaEditar"
+                            ></i>
+                          </button>
+                        </div>
                         <div class="invalid-feedback">
                           La contraseña debe tener al menos 8 caracteres, una
                           mayúscula, una minúscula, un número y un símbolo.
@@ -707,13 +744,26 @@
                           class="form-label"
                           >Confirmar contraseña</label
                         >
-                        <input
-                          type="password"
-                          class="form-control"
-                          id="confirmarContraseniaEditar"
-                          name="confirmarContaseniaEditar"
-                          pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[#@$!%*?&amp;])[A-Za-z\d#@$!%*?&amp;]{8,}$"
-                        />
+                        <div class="input-group has-validation">
+                          <input
+                            type="password"
+                            class="form-control"
+                            id="confirmarContraseniaEditar"
+                            name="confirmarContaseniaEditar"
+                            pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[#@$!%*?&amp;])[A-Za-z\d#@$!%*?&amp;]{8,}$"
+                          />
+                          <button
+                            class="btn btn-outline-secondary border-secondary text-light"
+                            type="button"
+                            id="toggleConfirmarContraseniaEditar"
+                            aria-label="Mostrar u ocultar confirmar contraseña"
+                          >
+                            <i
+                              class="fa-solid fa-eye"
+                              id="iconoConfirmarContraseniaEditar"
+                            ></i>
+                          </button>
+                        </div>
                         <div class="invalid-feedback">
                           La contraseña debe tener al menos 8 caracteres, una
                           mayúscula, una minúscula, un número y un símbolo.

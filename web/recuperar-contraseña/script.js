@@ -23,7 +23,7 @@ form.addEventListener("submit", async function (e) {
   }
 
   try {
-    const response = await fetch("http://localhost:8080/api/auth/reset-password", {
+    const response = await fetch("https://eventvsmerida-x2t1.onrender.com/api/auth/reset-password", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
