@@ -79,17 +79,19 @@
   animation: particleDrift 12s linear infinite;
 }
 
+$particle-lefts: 6, 18, 31, 43, 57, 69, 82, 94;
+$particle-tops: 10, 62, 25, 78, 41, 7, 53, 35;
+$particle-delays: -1.1, -3.6, -0.5, -5, -2.2, -4.1, -1.7, -6;
+$particle-durations: 11.2, 13.8, 12, 15.8, 13.2, 14.9, 12.6, 17;
+$particle-opacities: 0.34, 0.58, 0.44, 0.68, 0.49, 0.39, 0.54, 0.63;
+
 @for $i from 1 through 8 {
   .p-#{$i} {
-    $l: $i * 12 + 2;
-    left: $l * 1%;
-    $t: $i * 10 + 5;
-    top: $t * 1%;
-    $delay: $i * -1.5;
-    animation-delay: $delay * 1s;
-    $dur: 10 + $i;
-    animation-duration: $dur * 1s;
-    opacity: 0.3 + $i * 0.05;
+    left: nth($particle-lefts, $i) * 1%;
+    top: nth($particle-tops, $i) * 1%;
+    animation-delay: nth($particle-delays, $i) * 1s;
+    animation-duration: nth($particle-durations, $i) * 1s;
+    opacity: nth($particle-opacities, $i);
   }
 }
 

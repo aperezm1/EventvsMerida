@@ -16,7 +16,13 @@
 
     <div class="team-grid">
       @for (member of members; track member.name; let i = $index) {
-        <div class="member-card" appReveal [revealDelay]="i + 1">
+        <a
+          class="member-card"
+          appReveal
+          [revealDelay]="i + 1"
+          [href]="member.url"
+          target="_blank"
+          rel="noopener noreferrer">
          <div class="member-avatar" [style.--color]="member.color">
   <div class="avatar-inner">
     <img [src]="member.image" [alt]="member.name">
@@ -32,15 +38,25 @@
             class="member-glow"
             [style.background]="member.color + '0D'"
           ></div>
-        </div>
+        </a>
       }
     </div>
 
     <div class="team-footer" appReveal [revealDelay]="2">
-      <div class="team-badge">
+      <a
+        class="team-badge"
+        href="https://sites.google.com/iesalbarregas.es/portada/inicio"
+        target="_blank"
+        rel="noopener noreferrer">
         <span>🏫</span>
         <span>IES Albarregas · Mérida</span>
-      </div>
+      </a>
+    </div>
+  </div>
+
+  <div class="team-photo" appReveal [revealDelay]="2">
+    <div class="team-photo-media" #teamPhoto>
+      <img src="assets/merida_letras.jpg" alt="Letras de Mérida" />
     </div>
   </div>
 </section>
