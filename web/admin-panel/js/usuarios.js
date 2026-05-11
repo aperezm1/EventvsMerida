@@ -8,7 +8,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     document.body.classList.remove("auth-pending");
   }
 
-  const URL_BASE = "http://localhost:8080/api/";
+  const URL_BASE = "https://eventvsmerida-x2t1.onrender.com/api/";
   await cargarUsuarios(URL_BASE);
 
   const form = document.getElementById("formAgregarUsuario");
