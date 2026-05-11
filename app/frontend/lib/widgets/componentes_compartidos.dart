@@ -1122,6 +1122,10 @@ class Tutorial {
   }
 }
 
+// ===========================================================================
+// 6. SELECTOR DE IMAGEN
+// ===========================================================================
+
 Future<XFile?> elegirImagen(BuildContext context) async {
   ImagePicker picker = ImagePicker();
   final fuente = await showModalBottomSheet<ImageSource>(
@@ -1132,6 +1136,7 @@ Future<XFile?> elegirImagen(BuildContext context) async {
       side: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
     ),
     builder: (context) {
+      final cs = Theme.of(context).colorScheme;
       return SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -1146,6 +1151,15 @@ Future<XFile?> elegirImagen(BuildContext context) async {
               title: const Text('Cámara'),
               onTap: () => Navigator.pop(context, ImageSource.camera),
             ),
+            const SizedBox(height: 8),
+            Text(
+              'Tamaño máximo: 1,5 MB',
+              style: TextStyle(
+                fontSize: 12,
+                color: cs.onSurface.withValues(alpha: 0.6),
+              ),
+            ),
+            const SizedBox(height: 12),
           ],
         ),
       );
@@ -1162,20 +1176,24 @@ Future<XFile?> elegirImagen(BuildContext context) async {
 
     if (imagen == null) return null;
 
+    final ok = await ImageSize.validarTamanioImagen(imagen);
+    if (!ok) {
+      Mensaje.mostrarSnackBar(context: context, mensaje: 'La imagen no puede superar 1,5 MB', icon: Icons.image_not_supported_outlined, color: Colors.red);
+      return null;
+    }
+
     return imagen;
   } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Error al seleccionar la imagen')),
-    );
+    Mensaje.mostrarSnackBar(context: context, mensaje: 'Error al seleccionar la imagen', icon: Icons.image_not_supported_outlined, color: Colors.red);
     return null;
   }
 }
 
-typedef ValidadorCampo = String? Function(String label, String? value);
+// ===========================================================================
+// 7. CAMPOS DE FORMULARIO
+// ===========================================================================
 
-// ===========================================================================
-// 6. CAMPOS DE FORMULARIO
-// ===========================================================================
+typedef ValidadorCampo = String? Function(String label, String? value);
 
 class CampoTexto {
   static Widget buildCampoTexto(
@@ -1196,7 +1214,7 @@ class CampoTexto {
     final cs = Theme.of(context).colorScheme;
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 15),
+      padding: const EdgeInsets.only(bottom: 16),
       child: TextFormField(
         controller: controller,
         keyboardType: keyboardType,
@@ -1233,6 +1251,7 @@ class CampoTexto {
     final cs = Theme.of(context).colorScheme;
 
     return InputDecoration(
+      errorMaxLines: 2,
       label: RichText(
         text: TextSpan(
           text: label,

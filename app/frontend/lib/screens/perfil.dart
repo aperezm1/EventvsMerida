@@ -417,85 +417,88 @@ class _PerfilState extends State<Perfil> {
 
   @override
   Widget build(BuildContext context) {
-    final double bottomPad = MediaQuery.of(context).padding.bottom;
-
-    return Column(
-      children: [
-        _buildCabecera(),
-
-        // Lista de contenido
-        Expanded(
-          child: ListView(
-            padding: EdgeInsets.only(top: 24.0, bottom: 16.0 + bottomPad),
-            children: [
-              Container(
-                key: keySecciones,
+    return Scaffold(
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: IntrinsicHeight(
                 child: Column(
                   children: [
-                    _buildSeccionTitulo('PREFERENCIAS'),
-                    _buildPreferencias(),
-                    if (_puedeAdministrarEventos) ...[
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24.0,
-                          vertical: 16.0,
-                        ),
-                        child: Divider(
-                          color: _cs.primary,
-                          thickness: 2,
-                        ),
-                      ),
-                      _buildSeccionTitulo('ADMINISTRACIÓN'),
-                      _buildAdministracion(),
-                    ],
+                    _buildCabecera(),
                     Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24.0,
-                        vertical: 16.0,
+                      padding: const EdgeInsets.only(top: 24.0, bottom: 16.0),
+                      child: Column(
+                        key: keySecciones,
+                        children: [
+                          _buildSeccionTitulo('PREFERENCIAS'),
+                          _buildPreferencias(),
+                          if (_puedeAdministrarEventos) ...[
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 24.0,
+                                vertical: 16.0,
+                              ),
+                              child: Divider(color: _cs.primary, thickness: 2),
+                            ),
+                            _buildSeccionTitulo('ADMINISTRACIÓN'),
+                            _buildAdministracion(),
+                          ],
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24.0,
+                              vertical: 16.0,
+                            ),
+                            child: Divider(color: _cs.primary, thickness: 2),
+                          ),
+                          _buildSeccionTitulo('INFORMACIÓN LEGAL'),
+                          _buildLegal(),
+                          const SizedBox(height: 8),
+                        ],
                       ),
-                      child: Divider(color: _cs.primary, thickness: 2),
                     ),
-                    _buildSeccionTitulo('INFORMACIÓN LEGAL'),
-                    _buildLegal(),
-                    const SizedBox(height: 8),
+                    const Spacer(),
+                    SafeArea(
+                      top: false,
+                      bottom: true,
+                      left: false,
+                      right: false,
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.only(
+                          right: 24.0,
+                          bottom: 8.0,
+                          top: 8.0,
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Image.asset(
+                              'assets/images/logo-eventvs-merida-no-bg.png',
+                              height: 30,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Versión 1.0.0',
+                              style: TextStyle(
+                                color: _cs.onSurface,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
-            ],
-          ),
-        ),
-
-        // Footer fijo: logo + versión
-        SafeArea(
-          top: false,
-          bottom: true,
-          left: false,
-          right: false,
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.only(right: 24.0, bottom: 8.0, top: 8.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Image.asset(
-                  'assets/images/logo-eventvs-merida-no-bg.png',
-                  height: 30,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Versión 1.0.0',
-                  style: TextStyle(
-                    color: _cs.onSurface,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
             ),
-          ),
-        ),
-      ],
+          );
+        },
+      ),
     );
   }
 }

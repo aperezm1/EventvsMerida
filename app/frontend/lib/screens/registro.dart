@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/services.dart';
 
 import '../core/router/app_routes.dart';
 import '../services/api_service.dart';
@@ -82,14 +84,52 @@ class _RegistroState extends State<Registro> {
     }
 
     if (label == 'Contraseña') {
-      final passwordRegex = RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$');
+      final passwordRegex = RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$');
       if (!passwordRegex.hasMatch(texto)) {
-        return 'Debe tener 8 carácteres, mayúscula, minúscula y número';
+        return 'Debe tener 8 carácteres, mayúscula, minúscula, número y símbolo';
       }
     }
 
     if (label == 'Repetir contraseña' && texto != _passwordController.text) {
       return 'Las contraseñas deben coincidir';
+    }
+
+    if (label == 'Día' || label == 'Mes' || label == 'Año') {
+      if (SelectorFecha.mesSeleccionado == null) {
+        return label == 'Año' ? 'Selecciona un mes' : null;
+      }
+
+      final dia = int.tryParse(_diaController.text.trim());
+      final anio = int.tryParse(_anioController.text.trim());
+      final mesTexto = SelectorFecha.mesSeleccionado;
+
+      if (dia == null || anio == null || mesTexto == null) {
+        return null;
+      }
+
+      final mes = int.parse(SelectorFecha.mesNumero[mesTexto] ?? '01');
+      DateTime fecha;
+      try {
+        fecha = DateTime(anio, mes, dia);
+        final valida = fecha.day == dia && fecha.month == mes && fecha.year == anio;
+        if (!valida || fecha.isAfter(DateTime.now())) {
+          return label == 'Año' ? 'Fecha inválida o futura' : null;
+        }
+      } catch (_) {
+        return label == 'Año' ? 'Fecha inválida' : null;
+      }
+
+      final hoy = DateTime.now();
+      final edad = hoy.year -
+          fecha.year -
+          ((hoy.month < fecha.month ||
+              (hoy.month == fecha.month && hoy.day < fecha.day))
+              ? 1
+              : 0);
+
+      if (edad < 14 || edad > 100) {
+        return label == 'Año' ? 'La fecha debe estar entre 14 y 100 años' : null;
+      }
     }
 
     return null;
@@ -256,13 +296,43 @@ class _RegistroState extends State<Registro> {
           side: BorderSide(color: _cs.onSurface.withValues(alpha: 0.5)),
         ),
         Expanded(
-          child: CampoObligatorio(
-            texto: 'He leído y acepto los Terminos y condiciones y la Política de Privacidad',
-            style: TextStyle(
-              color: _cs.onSurface,
-              fontSize: 12,
+          child: RichText(
+            text: TextSpan(
+              style: TextStyle(
+                color: _cs.onSurface,
+                fontSize: 12,
+              ),
+              children: [
+                const TextSpan(text: 'He leído y acepto los '),
+                TextSpan(
+                  text: 'Términos y condiciones',
+                  style: TextStyle(
+                    color: _cs.primary,
+                    decoration: TextDecoration.underline,
+                  ),
+                  recognizer: TapGestureRecognizer()
+                    ..onTap = () => context.push(AppRoutes.terminos),
+                ),
+                const TextSpan(text: ' y la '),
+                TextSpan(
+                  text: 'Política de Privacidad',
+                  style: TextStyle(
+                    color: _cs.primary,
+                    decoration: TextDecoration.underline,
+                  ),
+                  recognizer: TapGestureRecognizer()
+                    ..onTap = () => context.push(AppRoutes.privacidad),
+                ),
+                const TextSpan(
+                  text: ' *',
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
             ),
-          )
+          ),
         ),
       ],
     );
@@ -274,9 +344,11 @@ class _RegistroState extends State<Registro> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             InkWell(
-              onTap: (){
-                setState(() async {
-                  _imagen = await elegirImagen(context);
+              onTap: () async {
+                final imagen = await elegirImagen(context);
+                if (!mounted) return;
+                setState(() {
+                  _imagen = imagen;
                 });
               },
               borderRadius: BorderRadius.circular(18),
@@ -312,7 +384,7 @@ class _RegistroState extends State<Registro> {
                 ),
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
             if (_imagen != null)
               Image.file(
                 File(_imagen!.path),
@@ -359,7 +431,7 @@ class _RegistroState extends State<Registro> {
         GestureDetector(
           onTap: _irALogin,
           child: Text(
-            'Inicia sesion',
+            'Inicia sesión',
             style: TextStyle(
               color: _cs.onSurface,
               fontWeight: FontWeight.bold,
@@ -375,6 +447,7 @@ class _RegistroState extends State<Registro> {
   Widget _buildFormulario() {
     return Form(
       key: _formKey,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -413,17 +486,18 @@ class _RegistroState extends State<Registro> {
             keyboardType: TextInputType.number,
             validator: _validarCampo,
             context: context,
-            obligatorio: true
+            obligatorio: true,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
           ),
-          const SizedBox(height: 10),
+
           SelectorFecha.buildFilaFecha(context: context, diaController: _diaController, mesController: _mesController, anioController: _anioController, onSeleccionarMes: seleccionarMes, validator: _validarCampo, obligatorio: true),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           _buildSelectorImagen(),
-          const SizedBox(height: 15),
+          const SizedBox(height: 0),
           _buildTerminos(),
-          const SizedBox(height: 15),
+          const SizedBox(height: 8),
           _buildBotonRegistro(),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           _buildLinkLogin(),
         ],
       ),
