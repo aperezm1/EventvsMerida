@@ -143,8 +143,7 @@ public class AuthController {
 
         emailService.enviarCorreoRecuperacion(
                 usuario.get().getEmail(),
-                token,
-                usuario.get().getNombre()
+                resetToken.getToken()
         );
 
         return ResponseEntity.ok("Correo enviado");

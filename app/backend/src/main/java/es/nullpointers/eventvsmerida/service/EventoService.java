@@ -20,6 +20,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
@@ -215,15 +216,21 @@ public class EventoService {
      * @return Page<EventoResponse> con la página de eventos y el estado HTTP 200 (OK).
      */
     public Page<EventoResponse> obtenerEventosPaginados(Pageable pageable, OffsetDateTime fechaFinDesde) {
+        Pageable pageableOrdenado = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                Sort.by(Sort.Order.asc("id"))
+        );
+
         Page<Evento> page;
-        
+
         if (fechaFinDesde != null) {
             LocalDateTime filtro = fechaFinDesde.toLocalDateTime();
-            page = eventoRepository.findByFechaFinAfter(filtro, pageable);
+            page = eventoRepository.findByFechaFinAfter(filtro, pageableOrdenado);
         } else {
-            page = eventoRepository.findAll(pageable);
+            page = eventoRepository.findAll(pageableOrdenado);
         }
-        
+
         return page.map(EventoMapper::convertirAResponse);
     }
 
