@@ -9,6 +9,17 @@ import lombok.Setter;
 
 import java.io.Serializable;
 
+/**
+ * Clase embebida que representa la clave primaria compuesta de la relación
+ * entre un usuario y un evento.
+ *
+ * <p>Se utiliza como identificador de la entidad {@link UsuarioEvento},
+ * combinando el identificador del usuario y el identificador del evento.</p>
+ *
+ * @author Eva Retamar
+ * @author David Muñoz
+ * @author Adrián Pérez
+ */
 @Getter
 @Setter
 @EqualsAndHashCode

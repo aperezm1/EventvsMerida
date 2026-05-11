@@ -76,6 +76,18 @@ public class EventoController {
     }
 
     /**
+     * Método GET que llama al servicio para obtener los eventos asociados a un organizador.
+     *
+     * @param idUsuario ID del usuario organizador.
+     * @return ResponseEntity con la lista de eventos del organizador y estado HTTP 200 (OK).
+     */
+    @GetMapping("/organizador/{idUsuario}")
+    public ResponseEntity<List<EventoResponse>> obtenerEventosPorOrganizador(@PathVariable Long idUsuario) {
+        List<EventoResponse> eventos = eventoService.obtenerEventosPorOrganizador(idUsuario);
+        return ResponseEntity.ok(eventos);
+    }
+
+    /**
      * Método POST que llama al servicio para crear un nuevo evento.
      * 
      * @param jsonEvento JSON con los datos del evento a crear, enviado como parte de un multipart/form-data.
@@ -201,7 +213,6 @@ public class EventoController {
         return ResponseEntity.ok(cantidad);
     }
 
-
     /**
      * Método GET que llama al servicio para obtener la cantidad de eventos agrupados por mes del año.
      *
@@ -213,12 +224,15 @@ public class EventoController {
         return ResponseEntity.ok().body(resultado).getBody();
     }
 
-
+    /**
+     * Método GET que llama al servicio para obtener los eventos agrupados por categoría.
+     *
+     * @return ResposeEntity con una lista de categorías y el número total de eventos
+     * asociados a cada una, junto con el estado HTTP 200(OK)
+     */
     @GetMapping("/eventos-por-categoria")
     public List<EventosPorCategoriaResponse> obtenerEventosPorCategoria() {
         List<EventosPorCategoriaResponse> resultado = eventoService.obtenerEventosPorCategoria();
         return ResponseEntity.ok().body(resultado).getBody();
     }
-
-
 }

@@ -35,6 +35,15 @@ public class UsuarioEventoService {
     private final EventoRepository eventoRepository;
     private final UsuarioEventoRepository usuarioEventoRepository;
 
+    /**
+     * Guarda la relación entre un usuario y un evento.
+     *
+     * <p>Busca el usuario por su correo electrónico y el evento por su título,
+     * fecha de inicio y fecha de fin. Si la relación ya existe, lanza una
+     * excepción de conflicto para evitar duplicados.</p>
+     *
+     * @param request DTO con el email del usuario y los datos necesarios para identificar el evento.
+     */
     public void guardarUsuarioEvento(UsuarioEventoRequest request) {
         // Buscar el usuario por email y el evento por título y fechaHora, lanzando excepciones si no se encuentran
         Usuario usuario = usuarioRepository.findByEmail(request.emailUsuario())
@@ -62,6 +71,15 @@ public class UsuarioEventoService {
         usuarioEventoRepository.save(relacion);
     }
 
+    /**
+     * Elimina la relación entre un usuario y un evento guardado.
+     *
+     * <p>Busca el usuario por su correo electrónico y el evento por su título,
+     * fecha de inicio y fecha de fin. Si la relación no existe, lanza una
+     * excepción indicando que el usuario no tenía guardado ese evento.</p>
+     *
+     * @param request DTO con el email del usuario y los datos necesarios para identificar el evento.
+     */
     public void eliminarUsuarioEvento(UsuarioEventoRequest request) {
         // Buscar el usuario por email y el evento por título y fechaHora, lanzando excepciones si no se encuentran
         Usuario usuario = usuarioRepository.findByEmail(request.emailUsuario())
@@ -84,6 +102,16 @@ public class UsuarioEventoService {
         usuarioEventoRepository.deleteById(id);
     }
 
+    /**
+     * Obtiene los eventos guardados por un usuario.
+     *
+     * <p>Busca el usuario por su correo electrónico, obtiene las relaciones
+     * usuario-evento asociadas a ese usuario y convierte cada evento a su DTO
+     * de respuesta.</p>
+     *
+     * @param emailUsuario correo electrónico del usuario.
+     * @return lista de eventos guardados por el usuario.
+     */
     public List<EventoResponse> obtenerEventosGuardadosPorUsuario(String emailUsuario) {
         // Buscar el usuario por email, lanzando una excepción si no se encuentra
         Usuario usuario = usuarioRepository.findByEmail(emailUsuario)

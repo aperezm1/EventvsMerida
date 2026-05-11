@@ -1,3 +1,4 @@
+import 'package:eventvsmerida/screens/seleccionar_ubicacion.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -14,6 +15,11 @@ import 'package:eventvsmerida/screens/privacidad.dart';
 import 'package:eventvsmerida/screens/registro.dart';
 import 'package:eventvsmerida/screens/splash.dart';
 import 'package:eventvsmerida/screens/terminos.dart';
+import 'package:latlong2/latlong.dart';
+
+import '../../models/evento.dart';
+import '../../screens/administrar_eventos.dart';
+import '../../screens/formulario_evento.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -47,4 +53,17 @@ final List<GoRoute> _shellRoutes = [
   GoRoute(path: AppRoutes.privacidad, builder: (context, state) => const Privacidad()),
   GoRoute(path: AppRoutes.cuenta, builder: (context, state) => const Cuenta()),
   GoRoute(path: AppRoutes.eventosGuardados, builder: (context, state) => const EventosGuardados()),
+  GoRoute(path: AppRoutes.administrarEventos, builder: (context, state) => const AdministrarEventos()),
+  GoRoute(path: AppRoutes.formularioEvento,
+    builder: (context, state) {
+      final evento = state.extra as Evento?;
+      return FormularioEvento(evento: evento);
+    },
+  ),
+  GoRoute(path: AppRoutes.seleccionarUbicacion,
+    builder: (context, state) {
+      final puntoInicial = state.extra as LatLng?;
+      return SeleccionarUbicacion(puntoInicial: puntoInicial);
+    },
+  ),
 ];

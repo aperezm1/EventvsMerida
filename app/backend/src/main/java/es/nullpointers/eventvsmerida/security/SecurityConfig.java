@@ -48,7 +48,7 @@ public class SecurityConfig {
      * Configura la cadena de filtros de seguridad para la aplicación.
      *
      * Reglas aplicadas (resumen):
-     * - POST/PUT/DELETE sobre /api/eventos/** => Administrador u Organizador
+     * - GET/POST/PUT/DELETE sobre /api/eventos/** => Administrador u Organizador
      * - POST/PUT/DELETE de categorías (add/update/delete) => solo Administrador
      * - GET específicos de usuarios => solo Administrador
      * - /api/roles/** y Swagger => solo Administrador
@@ -64,10 +64,11 @@ public class SecurityConfig {
             .cors(Customizer.withDefaults())
             .authorizeHttpRequests(auth -> auth
 
-                // Eventos: (POST/PUT/DELETE) -> Administrador u Organizador
+                // Eventos: (GET/POST/PUT/DELETE) -> Administrador u Organizador
                 .requestMatchers(HttpMethod.POST, "/api/eventos/add").hasAnyAuthority("Administrador", "Organizador")
                 .requestMatchers(HttpMethod.PUT,  "/api/eventos/update/*").hasAnyAuthority("Administrador", "Organizador")
                 .requestMatchers(HttpMethod.DELETE, "/api/eventos/delete/*").hasAnyAuthority("Administrador", "Organizador")
+                .requestMatchers(HttpMethod.GET, "/api/eventos/organizador/*").hasAnyAuthority("Administrador", "Organizador")
 
                 // Categorías: (POST/PUT/DELETE) -> solo Administrador
                 .requestMatchers(HttpMethod.POST,   "/api/categorias/add").hasAuthority("Administrador")
