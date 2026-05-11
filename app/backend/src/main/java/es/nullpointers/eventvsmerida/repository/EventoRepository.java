@@ -47,12 +47,12 @@ public interface EventoRepository extends JpaRepository<Evento, Long> {
 
 
     @Query("""
-        SELECT MONTH(e.fechaInicio), COUNT(e)
-        FROM Evento e
-        WHERE YEAR(e.fechaInicio) = 2026
-        GROUP BY MONTH(e.fechaInicio)
-        ORDER BY MONTH(e.fechaInicio)
-    """)
+                SELECT MONTH(e.fechaInicio), COUNT(e)
+                FROM Evento e
+                WHERE YEAR(e.fechaInicio) = 2026
+                GROUP BY MONTH(e.fechaInicio)
+                ORDER BY MONTH(e.fechaInicio)
+            """)
     List<Object[]> contarEventosPorMes();
 
 
