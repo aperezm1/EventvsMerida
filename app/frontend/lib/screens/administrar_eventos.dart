@@ -1,12 +1,13 @@
+import 'package:eventvsmerida/utils/fecha_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
 import '../core/router/app_routes.dart';
 import '../models/evento.dart';
 import '../models/usuario.dart';
 import '../services/api_service.dart';
 import '../services/shared_preferences_service.dart';
+import '../widgets/componentes_compartidos.dart';
 
 class AdministrarEventos extends StatefulWidget {
   const AdministrarEventos({super.key});
@@ -16,6 +17,10 @@ class AdministrarEventos extends StatefulWidget {
 }
 
 class _AdministrarEventosState extends State<AdministrarEventos> {
+  // ===========================================================================
+  // VARIABLES
+  // ===========================================================================
+
   Usuario? _usuario;
   List<Evento> _eventos = [];
   bool _cargando = true;
@@ -23,14 +28,23 @@ class _AdministrarEventosState extends State<AdministrarEventos> {
   bool _ultimaPagina = false;
   bool _cargandoMas = false;
   static const int _tamanoPagina = 15;
+  FechaUtils fu = FechaUtils();
 
   ColorScheme get _cs => Theme.of(context).colorScheme;
+
+  // ===========================================================================
+  // CICLO DE VIDA
+  // ===========================================================================
 
   @override
   void initState() {
     super.initState();
     _cargarDatos();
   }
+
+  // ===========================================================================
+  // CARGA DE DATOS
+  // ===========================================================================
 
   Future<void> _cargarDatos() async {
     setState(() {
@@ -51,7 +65,7 @@ class _AdministrarEventosState extends State<AdministrarEventos> {
         _cargando = false;
       });
 
-      _mostrarMensaje('No hay usuario logueado');
+      Mensaje.mostrarSnackBar(context: context, mensaje: 'No hay usuario logueado', icon: Icons.person, color: _cs.error);
       return;
     }
 
@@ -73,7 +87,7 @@ class _AdministrarEventosState extends State<AdministrarEventos> {
           _cargando = false;
         });
 
-        _mostrarMensaje(resultado?['error'] ?? 'No se pudieron cargar los eventos');
+        Mensaje.mostrarSnackBar(context: context, mensaje: resultado?['error'] ?? 'No se pudieron cargar los eventos', icon: Icons.event_busy_outlined, color: _cs.error);
         return;
       }
 
@@ -100,7 +114,7 @@ class _AdministrarEventosState extends State<AdministrarEventos> {
       });
 
       if (!respuesta.exito) {
-        _mostrarMensaje(respuesta.mensaje);
+        Mensaje.mostrarSnackBar(context: context, mensaje: respuesta.mensaje, icon: Icons.close, color: _cs.error);
       }
 
       return;
@@ -112,16 +126,16 @@ class _AdministrarEventosState extends State<AdministrarEventos> {
       _cargando = false;
     });
 
-    _mostrarMensaje('No tienes permisos para administrar eventos');
+    Mensaje.mostrarSnackBar(context: context, mensaje: 'No tienes permisos para administrar eventos', icon: Icons.event_busy_outlined, color: _cs.error);
   }
+
+  // ===========================================================================
+  // FUNCIONES AUXILIARES
+  // ===========================================================================
 
   bool get _puedeAdministrar {
     final rol = _usuario?.rol.trim().toLowerCase();
     return rol == 'administrador' || rol == 'organizador';
-  }
-
-  String _formatearFecha(DateTime fecha) {
-    return DateFormat('dd/MM/yyyy HH:mm').format(fecha);
   }
 
   Future<void> _cargarMasEventos() async {
@@ -153,7 +167,7 @@ class _AdministrarEventosState extends State<AdministrarEventos> {
         _cargandoMas = false;
       });
 
-      _mostrarMensaje(resultado?['error'] ?? 'No se pudieron cargar más eventos');
+      Mensaje.mostrarSnackBar(context: context, mensaje: resultado?['error'] ?? 'No se pudieron cargar más eventos', icon: Icons.event_busy_outlined, color: _cs.error);
       return;
     }
 
@@ -186,7 +200,25 @@ class _AdministrarEventosState extends State<AdministrarEventos> {
     }
   }
 
-  Future<void> _confirmarEliminar(Evento evento) async {
+  Future<void> _eliminarEvento(Evento evento) async {
+    final respuesta = await ApiService.eliminarEvento(evento.id);
+
+    if (!mounted) return;
+
+    Mensaje.mostrarSnackBar(context: context, mensaje: respuesta.mensaje, icon: Icons.delete, color: _cs.error);
+
+    if (respuesta.exito) {
+      setState(() {
+        _eventos.removeWhere((e) => e.id == evento.id);
+      });
+    }
+  }
+
+  // ===========================================================================
+  // MODALES
+  // ===========================================================================
+
+  Future<void> _modalConfirmarEliminar(Evento evento) async {
     final confirmar = await showDialog<bool>(
       context: context,
       builder: (context) {
@@ -213,26 +245,9 @@ class _AdministrarEventosState extends State<AdministrarEventos> {
     }
   }
 
-  Future<void> _eliminarEvento(Evento evento) async {
-    final respuesta = await ApiService.eliminarEvento(evento.id);
-
-    if (!mounted) return;
-
-    _mostrarMensaje(respuesta.mensaje);
-
-    if (respuesta.exito) {
-      setState(() {
-        _eventos.removeWhere((e) => e.id == evento.id);
-      });
-    }
-  }
-
-  void _mostrarMensaje(String mensaje) {
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(mensaje)),
-    );
-  }
+  // ===========================================================================
+  // INTERFAZ
+  // ===========================================================================
 
   Widget _buildBotonAnadir() {
     return Padding(
@@ -304,7 +319,7 @@ class _AdministrarEventosState extends State<AdministrarEventos> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    _formatearFecha(evento.fechaInicio),
+                    fu.formatearFechaHora(evento.fechaInicio),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
@@ -323,7 +338,7 @@ class _AdministrarEventosState extends State<AdministrarEventos> {
                         label: const Text('Editar'),
                       ),
                       TextButton.icon(
-                        onPressed: () => _confirmarEliminar(evento),
+                        onPressed: () => _modalConfirmarEliminar(evento),
                         icon: Icon(Icons.delete, color: _cs.error),
                         label: Text(
                           'Eliminar',
@@ -403,6 +418,10 @@ class _AdministrarEventosState extends State<AdministrarEventos> {
       ],
     );
   }
+
+  // ===========================================================================
+  // BUILD
+  // ===========================================================================
 
   @override
   Widget build(BuildContext context) {

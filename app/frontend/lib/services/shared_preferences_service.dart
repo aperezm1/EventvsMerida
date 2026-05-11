@@ -101,9 +101,9 @@ class SharedPreferencesService {
     }
   }
 
-    // ===========================
+    // =============================
     // Comprobaciones carga tutorial
-    // ===========================
+    // =============================
 
   static Future<bool> cargarTutorial() async {
     final prefs = await _prefs;

@@ -1,3 +1,4 @@
+import 'package:eventvsmerida/widgets/componentes_compartidos.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:go_router/go_router.dart';
@@ -13,11 +14,19 @@ class SeleccionarUbicacion extends StatefulWidget {
 }
 
 class _SeleccionarUbicacionState extends State<SeleccionarUbicacion> {
+  // ===========================================================================
+  // VARIABLES
+  // ===========================================================================
+
   static const LatLng _merida = LatLng(38.9161, -6.3437);
 
   LatLng? _puntoSeleccionado;
 
   ColorScheme get _cs => Theme.of(context).colorScheme;
+
+  // ===========================================================================
+  // CICLO DE VIDA
+  // ===========================================================================
 
   @override
   void initState() {
@@ -28,16 +37,22 @@ class _SeleccionarUbicacionState extends State<SeleccionarUbicacion> {
 
   LatLng get _centroInicial => widget.puntoInicial ?? _merida;
 
+  // ===========================================================================
+  // FUNCIONES AUXILIARES
+  // ===========================================================================
+
   void _confirmarUbicacion() {
     if (_puntoSeleccionado == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Pulsa un punto del mapa')),
-      );
+      Mensaje.mostrarSnackBar(context: context, mensaje: 'Pulsa un punto del mapa', icon: Icons.map, color: _cs.error);
       return;
     }
 
     context.pop(_puntoSeleccionado);
   }
+
+  // ===========================================================================
+  // BUILD
+  // ===========================================================================
 
   @override
   Widget build(BuildContext context) {
