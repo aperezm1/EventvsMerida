@@ -1,51 +1,85 @@
 package es.nullpointers.eventvsmerida.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClient;
 
-/**
- * Servicio encargado de enviar correos electrónicos relacionados con la recuperación de contraseña.
- *
- * @author Eva Retamar
- * @author David Muñoz
- * @author Adrián Pérez
- */
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+import java.util.List;
+import java.util.Map;
+
 @Service
+@RequiredArgsConstructor
 public class EmailService {
 
-    @Autowired
-    private JavaMailSender mailSender;
+    @Value("${mailjet.api-key}")
+    private String apiKey;
 
-    public void enviarCorreoRecuperacion(
-            String destino,
-            String token,
-            String nombre) {
+    @Value("${mailjet.secret-key}")
+    private String secretKey;
 
-        String enlace =
-                "eventvsmerida-recover?token="
-                        + token;
+    @Value("${mailjet.from-email}")
+    private String fromEmail;
 
-        SimpleMailMessage mensaje =
-                new SimpleMailMessage();
+    @Value("${mailjet.from-name}")
+    private String fromName;
 
-        mensaje.setTo(destino);
+    @Value("${app.recover-url}")
+    private String recoverUrl;
 
-        mensaje.setSubject(
-                "Recuperación de contraseña - Eventvs Mérida"
+    public void enviarCorreoRecuperacion(String destinatario, String token) {
+        String basicAuth = Base64.getEncoder()
+                .encodeToString((apiKey.trim() + ":" + secretKey.trim()).getBytes(StandardCharsets.UTF_8));
+
+        RestClient client = RestClient.builder()
+                .baseUrl("https://api.mailjet.com/v3.1")
+                .defaultHeader(HttpHeaders.AUTHORIZATION, "Basic " + basicAuth)
+                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .build();
+
+        String urlRecuperacion = recoverUrl + "?token=" + token;
+
+        Map<String, Object> body = Map.of(
+                "Messages", List.of(
+                        Map.of(
+                                "From", Map.of(
+                                        "Email", fromEmail,
+                                        "Name", fromName
+                                ),
+                                "To", List.of(
+                                        Map.of(
+                                                "Email", destinatario,
+                                                "Name", destinatario
+                                        )
+                                ),
+                                "Subject", "Recuperación de contraseña - EventvsMerida",
+                                "TextPart", "Has solicitado restablecer tu contraseña. Abre este enlace: " + urlRecuperacion,
+                                "HTMLPart", """
+                                        <html>
+                                            <body>
+                                                <h2>Recuperación de contraseña</h2>
+                                                <p>Has solicitado restablecer tu contraseña.</p>
+                                                <p>
+                                                    %s
+                                                        Restablecer contraseña
+                                                    </a>
+                                                </p>
+                                                <p>Si no has solicitado este cambio, puedes ignorar este correo.</p>
+                                            </body>
+                                        </html>
+                                        """.formatted(urlRecuperacion)
+                        )
+                )
         );
 
-        mensaje.setText(
-                "Hola " + nombre + ",\n\n"
-                        + "Puedes restablecer tu contraseña accediendo al siguiente enlace:\n\n"
-                        + enlace + "\n\n"
-                        + "Este enlace expirará en 30 minutos.\n\n"
-                        + "Si no has solicitado restablecer tu contraseña, ignora este correo. No se realizará ningún cambio en tu cuenta.\n\n"
-                        + "Un saludo,\n"
-                        + "El equipo de Eventvs Mérida 👋"
-        );
-
-        mailSender.send(mensaje);
+        client.post()
+                .uri("/send")
+                .body(body)
+                .retrieve()
+                .toBodilessEntity();
     }
 }
