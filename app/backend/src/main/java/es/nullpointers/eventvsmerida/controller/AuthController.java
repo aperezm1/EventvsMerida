@@ -117,6 +117,12 @@ public class AuthController {
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * Endpoint para recuperar contraseña a través del correo electrónico. Genera un token de recuperación, lo guarda en la base de datos y envía un correo al usuario con el enlace para restablecer su contraseña.
+     *
+     * @param email Correo electrónico del usuario que ha olvidado su contraseña
+     * @return ResponseEntity con mensaje de connfirmación de envío del correo o error si el usuario no se encuentra.
+     */
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestParam String email) {
 
@@ -135,8 +141,6 @@ public class AuthController {
 
         tokenRepository.save(resetToken);
 
-        String enlace = "http://localhost:8080/reset-password?token=" + token;
-
         emailService.enviarCorreoRecuperacion(
                 usuario.get().getEmail(),
                 token,
@@ -146,13 +150,19 @@ public class AuthController {
         return ResponseEntity.ok("Correo enviado");
     }
 
+    /**
+     * Endpoint para establecer una nueva contraseña utilizando el token de recuperación. Verifica que el token sea válido y no haya expirado, y luego actualiza la contraseña del usuario.
+     *
+     * @param request DTO de solicitud que contiene el token de recuperación y la nueva contraseña. La nueva contraseña debe cumplir con los requisitos de seguridad establecidos.
+     * @return Devuelve un mensaje indicando el resultado de la operación, como "Contraseña actualizada correctamente" o errores específicos como "TOKEN inválido".
+     */
     @PostMapping("/reset-password")
     public String resetPassword(
             @RequestBody ResetPasswordRequest request) {
 
         return authService.resetPassword(
-                request.getToken(),
-                request.getNuevaPassword()
+                request.token(),
+                request.nuevaPassword()
         );
     }
 }

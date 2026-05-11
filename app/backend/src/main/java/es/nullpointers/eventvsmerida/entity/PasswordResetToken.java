@@ -5,6 +5,13 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+/**
+ * Entidad que representa un reseteo de contraseña. Contiene un token único, una fecha de expiración, un indicador de si el token ha sido usado y una referencia al usuario asociado.
+ *
+ * @author Eva Retamar
+ * @author David Muñoz
+ * @author Adrián Pérez
+ */
 @Entity
 @Table(name = "password_reset_tokens")
 public class PasswordResetToken {

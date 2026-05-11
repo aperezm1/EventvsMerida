@@ -11,6 +11,13 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
+/**
+ * Servicio encargado de gestionar la del proceso de restablecimiento de contraseña.
+ *
+ * @author Eva Retamar
+ * @author David Muñoz
+ * @author Adrián Pérez
+ */
 @Slf4j
 @RequiredArgsConstructor
 @Service
@@ -21,7 +28,6 @@ public class AuthService {
 
     public String resetPassword(String token, String nuevaPassword) {
 
-        // 1. Buscar token en BD
         PasswordResetToken resetToken =
                 tokenRepository.findByToken(token);
 
@@ -29,31 +35,27 @@ public class AuthService {
             return "INVALID_TOKEN";
         }
 
-        // 2. Comprobar si ya fue usado
         if (Boolean.TRUE.equals(resetToken.getUsado())) {
             return "USED_TOKEN";
         }
 
-        // 3. Comprobar expiración
+        // Comprobar expiración
         if (resetToken.getExpiracion().isBefore(LocalDateTime.now())) {
             return "EXPIRED_TOKEN";
         }
 
-        // 4. Obtener usuario
         Usuario usuario = resetToken.getUsuario();
 
         if (usuario == null) {
             return "Usuario no encontrado";
         }
 
-        // 5. Cambiar contraseña (IMPORTANTE: encriptada)
         usuario.setPassword(
                 passwordEncoder.encode(nuevaPassword)
         );
 
         usuarioRepository.save(usuario);
 
-        // 6. Marcar token como usado (mejor que borrarlo)
         resetToken.setUsado(true);
         tokenRepository.save(resetToken);
 
