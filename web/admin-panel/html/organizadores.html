@@ -310,18 +310,30 @@
                         <div class="card-body">
                           <div class="row g-3">
                             <div class="col-md-6">
-                              <label for="contrasena" class="form-label">
-                                Contraseña
-                                <span class="campo-obligatorio">*</span>
-                              </label>
-                              <input
-                                type="password"
-                                class="form-control"
-                                id="contrasena"
-                                name="contrasena"
-                                pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&amp;])[A-Za-z\d@$!%*?&amp;]{8,}$"
-                                required
-                              />
+                              <label for="contrasenia" class="form-label"
+                                >Contraseña
+                                <span class="campo-obligatorio">*</span></label
+                              >
+                              <div class="input-group has-validation">
+                                <input
+                                  type="password"
+                                  class="form-control"
+                                  id="contrasenia"
+                                  name="contrasenia"
+                                  pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[#@$!%*?&amp;])[A-Za-z\d#@$!%*?&amp;]{8,}$"
+                                />
+                                <button
+                                  class="btn btn-outline-secondary border-secondary text-light"
+                                  type="button"
+                                  id="toggleContrasenia"
+                                  aria-label="Mostrar u ocultar confirmar contraseña"
+                                >
+                                  <i
+                                    class="fa-solid fa-eye"
+                                    id="iconoContrasenia"
+                                  ></i>
+                                </button>
+                              </div>
                               <div class="invalid-feedback">
                                 La contraseña debe tener al menos 8 caracteres,
                                 una mayúscula, una minúscula, un número y un
@@ -331,20 +343,31 @@
 
                             <div class="col-md-6">
                               <label
-                                for="confirmarContrasena"
+                                for="confirmarContrasenia"
                                 class="form-label"
+                                >Confirmar contraseña
+                                <span class="campo-obligatorio">*</span></label
                               >
-                                Confirmar contraseña
-                                <span class="campo-obligatorio">*</span>
-                              </label>
-                              <input
-                                type="password"
-                                class="form-control"
-                                id="confirmarContrasena"
-                                name="confirmarContrasena"
-                                pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&amp;])[A-Za-z\d@$!%*?&amp;]{8,}$"
-                                required
-                              />
+                              <div class="input-group has-validation">
+                                <input
+                                  type="password"
+                                  class="form-control"
+                                  id="confirmarContrasenia"
+                                  name="confirmarContasenia"
+                                  pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[#@$!%*?&amp;])[A-Za-z\d#@$!%*?&amp;]{8,}$"
+                                />
+                                <button
+                                  class="btn btn-outline-secondary border-secondary text-light"
+                                  type="button"
+                                  id="toggleConfirmarContrasenia"
+                                  aria-label="Mostrar u ocultar confirmar contraseña"
+                                >
+                                  <i
+                                    class="fa-solid fa-eye"
+                                    id="iconoConfirmarContrasenia"
+                                  ></i>
+                                </button>
+                              </div>
                               <div class="invalid-feedback">
                                 La contraseña debe tener al menos 8 caracteres,
                                 una mayúscula, una minúscula, un número y un
@@ -679,39 +702,73 @@
                       novalidate
                     >
                       <div class="col-md-6">
-                        <label for="contraseniaEditar" class="form-label"
-                          >Contraseña</label
-                        >
-                        <input
-                          type="password"
-                          class="form-control"
-                          id="contraseniaEditar"
-                          name="contraseniaEditar"
-                          pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
-                          required
-                        />
-                        <div class="invalid-feedback">
-                          La contraseña debe tener al menos 8 caracteres, una
-                          mayúscula, una minúscula, un número y un símbolo.
+                        <label for="contraseniaEditar" class="form-label">
+                          Contraseña
+                        </label>
+
+                        <div class="input-group has-validation">
+                          <input
+                            type="password"
+                            class="form-control"
+                            id="contraseniaEditar"
+                            name="contraseniaEditar"
+                            pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[#@$!%*?&])[A-Za-z\d#@$!%*?&]{8,}$"
+                            required
+                          />
+
+                          <button
+                            class="btn btn-outline-secondary border-secondary text-light"
+                            type="button"
+                            id="toggleContraseniaEditar"
+                            aria-label="Mostrar u ocultar contraseña"
+                          >
+                            <i
+                              class="fa-solid fa-eye"
+                              id="iconoContraseniaEditar"
+                            ></i>
+                          </button>
+
+                          <div class="invalid-feedback">
+                            La contraseña debe tener al menos 8 caracteres, una
+                            mayúscula, una minúscula, un número y un símbolo.
+                          </div>
                         </div>
                       </div>
+
                       <div class="col-md-6">
                         <label
                           for="confirmarContraseniaEditar"
                           class="form-label"
-                          >Confirmar contraseña</label
                         >
-                        <input
-                          type="password"
-                          class="form-control"
-                          id="confirmarContraseniaEditar"
-                          name="confirmarContraseniaEditar"
-                          pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
-                          required
-                        />
-                        <div class="invalid-feedback">
-                          La contraseña debe tener al menos 8 caracteres, una
-                          mayúscula, una minúscula, un número y un símbolo.
+                          Confirmar contraseña
+                        </label>
+
+                        <div class="input-group has-validation">
+                          <input
+                            type="password"
+                            class="form-control"
+                            id="confirmarContraseniaEditar"
+                            name="confirmarContraseniaEditar"
+                            pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[#@$!%*?&])[A-Za-z\d#@$!%*?&]{8,}$"
+                            required
+                          />
+
+                          <button
+                            class="btn btn-outline-secondary border-secondary text-light"
+                            type="button"
+                            id="toggleConfirmarContraseniaEditar"
+                            aria-label="Mostrar u ocultar confirmar contraseña"
+                          >
+                            <i
+                              class="fa-solid fa-eye"
+                              id="iconoConfirmarContraseniaEditar"
+                            ></i>
+                          </button>
+
+                          <div class="invalid-feedback">
+                            La contraseña debe tener al menos 8 caracteres, una
+                            mayúscula, una minúscula, un número y un símbolo.
+                          </div>
                         </div>
                       </div>
                     </form>

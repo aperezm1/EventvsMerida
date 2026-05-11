@@ -191,3 +191,43 @@ function formatearFecha(fechaISO) {
 
   return `${dia}/${mes}/${anio}`;
 }
+
+function configurarMostrarContraseniasFormulario(idsInputs, controles) {
+  const inputs = idsInputs
+    .map((id) => document.getElementById(id))
+    .filter((input) => input !== null);
+
+  const botones = controles
+    .map((control) => ({
+      boton: document.getElementById(control.idBoton),
+      idIcono: control.idIcono,
+    }))
+    .filter((control) => control.boton !== null);
+
+  if (inputs.length === 0 || botones.length === 0) return;
+
+  function actualizarIconos(mostrando) {
+    botones.forEach(({ boton, idIcono }) => {
+      boton.innerHTML = mostrando
+        ? `<i class="fa-solid fa-eye-slash" id="${idIcono}"></i>`
+        : `<i class="fa-solid fa-eye" id="${idIcono}"></i>`;
+
+      boton.setAttribute(
+        "aria-label",
+        mostrando ? "Ocultar contraseña" : "Mostrar contraseña",
+      );
+    });
+  }
+
+  botones.forEach(({ boton }) => {
+    boton.addEventListener("click", () => {
+      const mostrar = inputs[0].type === "password";
+
+      inputs.forEach((input) => {
+        input.type = mostrar ? "text" : "password";
+      });
+
+      actualizarIconos(mostrar);
+    });
+  });
+}
