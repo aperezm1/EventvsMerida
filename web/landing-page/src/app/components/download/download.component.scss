@@ -43,6 +43,54 @@
   background-size: 50px 50px;
 }
 
+.particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.particle {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: var(--gold);
+  border-radius: 50%;
+  opacity: 0.5;
+  animation: particleDrift 12s linear infinite;
+}
+
+$particle-lefts: 7, 19, 33, 46, 58, 71, 84, 92;
+$particle-tops: 12, 68, 27, 81, 44, 6, 55, 36;
+$particle-delays: -1.2, -3.8, -0.6, -5.1, -2.4, -4.4, -1.8, -6.2;
+$particle-durations: 11.5, 14, 12.2, 16, 13.4, 15.2, 12.8, 17.4;
+$particle-opacities: 0.35, 0.6, 0.45, 0.7, 0.5, 0.4, 0.55, 0.65;
+
+@for $i from 1 through 8 {
+  .p-#{$i} {
+    left: nth($particle-lefts, $i) * 1%;
+    top: nth($particle-tops, $i) * 1%;
+    animation-delay: nth($particle-delays, $i) * 1s;
+    animation-duration: nth($particle-durations, $i) * 1s;
+    opacity: nth($particle-opacities, $i);
+  }
+}
+
+@keyframes particleDrift {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 0.5;
+  }
+
+  50% {
+    opacity: 0.8;
+  }
+
+  100% {
+    transform: translateY(-120px) rotate(180deg);
+    opacity: 0;
+  }
+}
+
 .download-inner {
   max-width: 1100px;
   margin: 0 auto;
