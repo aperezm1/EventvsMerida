@@ -189,6 +189,34 @@ window.addEventListener("DOMContentLoaded", async () => {
       this.value = "";
     }
   });
+
+  configurarMostrarContraseniasFormulario(
+    ["contrasenia", "confirmarContrasenia"],
+    [
+      {
+        idBoton: "toggleContrasenia",
+        idIcono: "iconoContrasena",
+      },
+      {
+        idBoton: "toggleConfirmarContrasena",
+        idIcono: "iconoConfirmarContrasena",
+      },
+    ],
+  );
+
+  configurarMostrarContraseniasFormulario(
+    ["contraseniaEditar", "confirmarContraseniaEditar"],
+    [
+      {
+        idBoton: "toggleContraseniaEditar",
+        idIcono: "iconoContrasenaEditar",
+      },
+      {
+        idBoton: "toggleConfirmarContraseniaEditar",
+        idIcono: "iconoConfirmarContrasenaEditar",
+      },
+    ],
+  );
 });
 
 function validarImagen(file) {

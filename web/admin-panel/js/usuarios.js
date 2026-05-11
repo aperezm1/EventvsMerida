@@ -8,8 +8,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     document.body.classList.remove("auth-pending");
   }
 
-  const URL_BASE = "https://eventvsmerida-x2t1.onrender.com/api/";
-
+  const URL_BASE = "http://localhost:8080/api/";
   await cargarUsuarios(URL_BASE);
 
   const form = document.getElementById("formAgregarUsuario");
@@ -60,7 +59,6 @@ window.addEventListener("DOMContentLoaded", async () => {
 
   const formEditar = document.getElementById("formEditarUsuario");
   let contrasenia = "";
-  let nombreUsuario = "";
 
   formEditar.addEventListener(
     "submit",
@@ -83,6 +81,7 @@ window.addEventListener("DOMContentLoaded", async () => {
             document.getElementById("fechaNacimientoEditar").value,
           ),
         );
+        contraseniaModificada = true
         const usuario = {
           nombre:
             document.getElementById("nombreEditar").value === ""
@@ -100,8 +99,14 @@ window.addEventListener("DOMContentLoaded", async () => {
               : formatearFecha(
                   document.getElementById("fechaNacimientoEditar").value,
                 ),
-          email: document.getElementById("correoEditar").value === "" ? null : document.getElementById("correoEditar").value,
-          telefono: document.getElementById("telefonoEditar").value === "" ? null : document.getElementById("telefonoEditar").value,
+          email:
+            document.getElementById("correoEditar").value === ""
+              ? null
+              : document.getElementById("correoEditar").value,
+          telefono:
+            document.getElementById("telefonoEditar").value === ""
+              ? null
+              : document.getElementById("telefonoEditar").value,
           password: contraseniaModificada ? contrasenia : null,
           idRol: 1,
         };
@@ -198,17 +203,49 @@ window.addEventListener("DOMContentLoaded", async () => {
       formEditar.classList.remove("was-validated");
     });
   }
-  document.getElementById("fotoUsuario").addEventListener("change", function () {
-    if(!validarImagen(this.files[0])){
-      this.value = "";
-    }
-  });
+  document
+    .getElementById("fotoUsuario")
+    .addEventListener("change", function () {
+      if (!validarImagen(this.files[0])) {
+        this.value = "";
+      }
+    });
 
-  document.getElementById("formFileEditar").addEventListener("change", function () {
-    if(!validarImagen(this.files[0])){
-      this.value = "";
-    }
-  });
+  document
+    .getElementById("formFileEditar")
+    .addEventListener("change", function () {
+      if (!validarImagen(this.files[0])) {
+        this.value = "";
+      }
+    });
+
+  configurarMostrarContraseniasFormulario(
+    ["contrasena", "confirmarContrasena"],
+    [
+      {
+        idBoton: "toggleContrasenia",
+        idIcono: "iconoContrasena",
+      },
+      {
+        idBoton: "toggleConfirmarContrasena",
+        idIcono: "iconoConfirmarContrasena",
+      },
+    ],
+  );
+
+  configurarMostrarContraseniasFormulario(
+    ["contraseniaEditar", "confirmarContraseniaEditar"],
+    [
+      {
+        idBoton: "toggleContraseniaEditar",
+        idIcono: "iconoContraseniaEditar",
+      },
+      {
+        idBoton: "toggleConfirmarContraseniaEditar",
+        idIcono: "ConfirmarContraseniaEditar",
+      },
+    ],
+  );
 });
 
 function validarImagen(imagen) {
@@ -217,7 +254,10 @@ function validarImagen(imagen) {
   if (!imagen) return true;
 
   if (!formatosPermitidos.includes(imagen.type)) {
-    mostrarAlerta("error", "Solo se permiten imágenes en formato JPG, JPEG o PNG");
+    mostrarAlerta(
+      "error",
+      "Solo se permiten imágenes en formato JPG, JPEG o PNG",
+    );
     return false;
   }
   if (imagen.size > maxSize) {
@@ -343,7 +383,6 @@ async function cargarUsuarios(URL_BASE) {
           data.fechaNacimiento;
         document.getElementById("correoEditar").value = data.email;
         document.getElementById("telefonoEditar").value = data.telefono;
-        document.getElementById("nombreUsuario").innerText = data.nombre;
         const imagenUsuario = document.getElementById("imagenUsuario");
         const sinFotoUsuario = document.getElementById("sinFotoUsuario");
         if (data.fotoUrl) {
@@ -364,7 +403,12 @@ async function cargarUsuarios(URL_BASE) {
       btnEliminar.setAttribute("data-nombre", usuario.nombre);
       btnEliminar.setAttribute("data-apellidos", usuario.apellidos);
       btnEliminar.addEventListener("click", function () {
-        eliminarUsuario(URL_BASE, this.dataset.id, this.dataset.nombre, this.dataset.apellidos);
+        eliminarUsuario(
+          URL_BASE,
+          this.dataset.id,
+          this.dataset.nombre,
+          this.dataset.apellidos,
+        );
       });
 
       divGrupo.appendChild(btnVer);
@@ -440,7 +484,12 @@ async function editarUsuario(URL_BASE, id, datosFormulario) {
 
 async function eliminarUsuario(URL_BASE, id, nombre, apellidos) {
   Swal.fire({
-    title: `¿Estás seguro que deseas eliminar el usuario \"` + nombre + " " + apellidos + `\"?`,
+    title:
+      `¿Estás seguro que deseas eliminar el usuario \"` +
+      nombre +
+      " " +
+      apellidos +
+      `\"?`,
     text: "Esta acción no puede revertirse",
     icon: "warning",
     showCancelButton: true,
