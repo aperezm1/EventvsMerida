@@ -466,6 +466,7 @@ class _CuentaState extends State<Cuenta> {
 
                       if (!confirmar) return;
 
+                      await ApiService.cerrarSesionRemota();
                       await SharedPreferencesService.cerrarSesion();
                       if (!mounted) return;
                       context.go(AppRoutes.eventos);
@@ -841,3 +842,4 @@ class _CuentaState extends State<Cuenta> {
     );
   }
 }
+

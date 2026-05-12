@@ -73,4 +73,3 @@ public class RefreshToken {
         this.usuario = usuario;
     }
 }
-

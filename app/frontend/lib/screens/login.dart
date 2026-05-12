@@ -117,6 +117,7 @@ class _LoginState extends State<Login> {
     final respuesta = await ApiService.iniciarSesion(
       _emailController.text.trim(),
       _passwordController.text,
+      rememberMe: _autoLogin,
     );
 
     if (!mounted) return;
