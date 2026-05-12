@@ -1454,7 +1454,7 @@ class ApiService {
       ) async {
     final response = await _solicitud(accion);
 
-    if (response.statusCode == 401 || response.statusCode == 403) {
+    if (response.statusCode == 401 || response.statusCode == 403 || response.statusCode == 302) {
       final refreshed = await _refrescarSesion();
       if (refreshed) {
         return _solicitud(accion);
@@ -1485,7 +1485,7 @@ class ApiService {
       return true;
     }
 
-    if (respuesta.statusCode == 401 || respuesta.statusCode == 403) {
+    if (respuesta.statusCode == 401 || respuesta.statusCode == 403 || respuesta.statusCode == 302) {
       await SecureStorageService.borrarRefreshToken();
     }
 
