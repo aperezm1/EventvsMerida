@@ -34,6 +34,7 @@ class _FormularioEventoState extends State<FormularioEvento> {
   final TextEditingController _tituloController = TextEditingController();
   final TextEditingController _descripcionController = TextEditingController();
   final TextEditingController _localizacionController = TextEditingController();
+  final ScrollController _categoriasScrollController = ScrollController();
 
   Usuario? _usuario;
   bool _guardando = false;
@@ -52,6 +53,7 @@ class _FormularioEventoState extends State<FormularioEvento> {
   Categoria? _categoriaSeleccionada;
   bool _cargandoCategorias = true;
   FechaUtils fu = FechaUtils();
+  bool modalCategoriaAbierto = false;
 
   ColorScheme get _cs => Theme.of(context).colorScheme;
 
@@ -99,7 +101,12 @@ class _FormularioEventoState extends State<FormularioEvento> {
         _cargandoCategorias = false;
       });
 
-      Mensaje.mostrarSnackBar(context: context, mensaje: respuesta.mensaje, icon: Icons.close, color: _cs.error);
+      Mensaje.mostrarSnackBar(
+        context: context,
+        mensaje: respuesta.mensaje,
+        icon: Icons.close,
+        color: _cs.error,
+      );
       return;
     }
 
@@ -118,9 +125,6 @@ class _FormularioEventoState extends State<FormularioEvento> {
 
     setState(() {
       _categorias = categorias;
-      _categoriaSeleccionada =
-          categoriaDelEvento ??
-          (categorias.isNotEmpty ? categorias.first : null);
       _cargandoCategorias = false;
     });
   }
@@ -145,7 +149,7 @@ class _FormularioEventoState extends State<FormularioEvento> {
     _ultimaLocalizacionBuscada = evento.localizacion.trim();
   }
 
-  Future<void> _seleccionarFechaHora({required bool esInicio}) async {
+  Future<DateTime?> _seleccionarFechaHora({required bool esInicio}) async {
     final ahora = DateTime.now();
 
     final fechaInicial = esInicio
@@ -159,7 +163,7 @@ class _FormularioEventoState extends State<FormularioEvento> {
       lastDate: DateTime(2035, 12, 31),
     );
 
-    if (fecha == null || !mounted) return;
+    if (fecha == null || !mounted) return null;
 
     final horaInicial = TimeOfDay.fromDateTime(fechaInicial);
 
@@ -168,7 +172,7 @@ class _FormularioEventoState extends State<FormularioEvento> {
       initialTime: horaInicial,
     );
 
-    if (hora == null || !mounted) return;
+    if (hora == null || !mounted) return null;
 
     final fechaHora = DateTime(
       fecha.year,
@@ -189,6 +193,8 @@ class _FormularioEventoState extends State<FormularioEvento> {
         _fechaFin = fechaHora;
       }
     });
+
+    return fechaHora;
   }
 
   Future<void> _seleccionarImagen() async {
@@ -201,8 +207,15 @@ class _FormularioEventoState extends State<FormularioEvento> {
 
     final extension = imagen.path.toLowerCase();
 
-    if (!extension.endsWith('.png') && !extension.endsWith('.jpg') && !extension.endsWith('.jpeg')) {
-      Mensaje.mostrarSnackBar(context: context, mensaje: 'Formato no válido. Usa PNG, JPG o JPEG', icon: Icons.image_not_supported_outlined, color: _cs.error);
+    if (!extension.endsWith('.png') &&
+        !extension.endsWith('.jpg') &&
+        !extension.endsWith('.jpeg')) {
+      Mensaje.mostrarSnackBar(
+        context: context,
+        mensaje: 'Formato no válido. Usa PNG, JPG o JPEG',
+        icon: Icons.image_not_supported_outlined,
+        color: _cs.error,
+      );
       return;
     }
 
@@ -227,7 +240,12 @@ class _FormularioEventoState extends State<FormularioEvento> {
     final localizacion = _localizacionController.text.trim();
 
     if (localizacion.isEmpty) {
-      Mensaje.mostrarSnackBar(context: context, mensaje: 'Escribe primero la localización', icon: Icons.map, color: _cs.error);
+      Mensaje.mostrarSnackBar(
+        context: context,
+        mensaje: 'Escribe primero la localización',
+        icon: Icons.map,
+        color: _cs.error,
+      );
       return;
     }
 
@@ -238,7 +256,12 @@ class _FormularioEventoState extends State<FormularioEvento> {
     if (!mounted) return;
 
     if (puntoEncontrado == null) {
-      Mensaje.mostrarSnackBar(context: context, mensaje: 'No se encontró la ubicación. Selecciona el punto manualmente', icon: Icons.map, color: _cs.error);
+      Mensaje.mostrarSnackBar(
+        context: context,
+        mensaje: 'No se encontró la ubicación. Selecciona el punto manualmente',
+        icon: Icons.map,
+        color: _cs.error,
+      );
 
       final puntoManual = await context.push<LatLng>(
         AppRoutes.seleccionarUbicacion,
@@ -277,6 +300,14 @@ class _FormularioEventoState extends State<FormularioEvento> {
     return null;
   }
 
+  String? _validarFechaObligatoria(DateTime? value) {
+    if (value == null) {
+      return 'Selecciona una fecha';
+    }
+
+    return null;
+  }
+
   String _formatearFechaHora(DateTime? fecha) {
     if (fecha == null) return 'Seleccionar';
 
@@ -300,14 +331,25 @@ class _FormularioEventoState extends State<FormularioEvento> {
 
   Future<void> _guardarEvento() async {
     if (_usuario == null) {
-      Mensaje.mostrarSnackBar(context: context, mensaje: 'No hay usuario logueado', icon: Icons.person, color: _cs.error);
+      Mensaje.mostrarSnackBar(
+        context: context,
+        mensaje: 'No hay usuario logueado',
+        icon: Icons.person,
+        color: _cs.error,
+      );
       return;
     }
 
     final rol = _usuario!.rol.trim().toLowerCase();
 
     if (rol != 'organizador' && rol != 'administrador') {
-      Mensaje.mostrarSnackBar(context: context, mensaje: 'Solo los usuarios organizadores o administradores pueden crear eventos', icon: Icons.person, color: _cs.error);
+      Mensaje.mostrarSnackBar(
+        context: context,
+        mensaje:
+            'Solo los usuarios organizadores o administradores pueden crear eventos',
+        icon: Icons.person,
+        color: _cs.error,
+      );
       return;
     }
 
@@ -316,39 +358,75 @@ class _FormularioEventoState extends State<FormularioEvento> {
     }
 
     if (_categoriaSeleccionada == null) {
-      Mensaje.mostrarSnackBar(context: context, mensaje: 'Selecciona una categoría', icon: Icons.label, color: _cs.error);
+      Mensaje.mostrarSnackBar(
+        context: context,
+        mensaje: 'Selecciona una categoría',
+        icon: Icons.label,
+        color: _cs.error,
+      );
       return;
     }
 
     if (_fechaInicio == null) {
-      Mensaje.mostrarSnackBar(context: context, mensaje: 'Selecciona la fecha y hora de inicio', icon: Icons.date_range, color: _cs.error);
+      Mensaje.mostrarSnackBar(
+        context: context,
+        mensaje: 'Selecciona la fecha y hora de inicio',
+        icon: Icons.date_range,
+        color: _cs.error,
+      );
       return;
     }
 
     if (_fechaFin == null) {
-      Mensaje.mostrarSnackBar(context: context, mensaje: 'Selecciona la fecha y hora de fin', icon: Icons.date_range, color: _cs.error);
+      Mensaje.mostrarSnackBar(
+        context: context,
+        mensaje: 'Selecciona la fecha y hora de fin',
+        icon: Icons.date_range,
+        color: _cs.error,
+      );
       return;
     }
 
     if (_fechaFin!.isBefore(_fechaInicio!)) {
-      Mensaje.mostrarSnackBar(context: context, mensaje: 'La fecha de fin no puede ser anterior a la fecha de inicio', icon: Icons.date_range, color: _cs.error);
+      Mensaje.mostrarSnackBar(
+        context: context,
+        mensaje: 'La fecha de fin no puede ser anterior a la fecha de inicio',
+        icon: Icons.date_range,
+        color: _cs.error,
+      );
       return;
     }
 
     if (_latitudSeleccionada == null || _longitudSeleccionada == null) {
-      Mensaje.mostrarSnackBar(context: context, mensaje: 'Selecciona el punto exacto en el mapa', icon: Icons.map, color: _cs.error);
+      Mensaje.mostrarSnackBar(
+        context: context,
+        mensaje: 'Selecciona el punto exacto en el mapa',
+        icon: Icons.map,
+        color: _cs.error,
+      );
       return;
     }
 
     if (_latitudSeleccionada != null &&
         _longitudSeleccionada != null &&
         _localizacionController.text.trim() != _ultimaLocalizacionBuscada) {
-      Mensaje.mostrarSnackBar(context: context, mensaje: 'Has cambiado la localización. Vuelve a buscar o seleccionar el punto en el mapa.', icon: Icons.map, color: _cs.error);
+      Mensaje.mostrarSnackBar(
+        context: context,
+        mensaje:
+            'Has cambiado la localización. Vuelve a buscar o seleccionar el punto en el mapa.',
+        icon: Icons.map,
+        color: _cs.error,
+      );
       return;
     }
 
     if (!widget.esEdicion && _imagenSeleccionada == null) {
-      Mensaje.mostrarSnackBar(context: context, mensaje: 'Debes seleccionar una imagen para el evento', icon: Icons.image, color: _cs.error);
+      Mensaje.mostrarSnackBar(
+        context: context,
+        mensaje: 'Debes seleccionar una imagen para el evento',
+        icon: Icons.image,
+        color: _cs.error,
+      );
       return;
     }
 
@@ -373,7 +451,12 @@ class _FormularioEventoState extends State<FormularioEvento> {
       _guardando = false;
     });
 
-    Mensaje.mostrarSnackBar(context: context, mensaje: respuesta.mensaje, icon: Icons.event_available, color: _cs.error);
+    Mensaje.mostrarSnackBar(
+      context: context,
+      mensaje: respuesta.mensaje,
+      icon: Icons.event_available,
+      color: _cs.error,
+    );
 
     if (respuesta.exito) {
       Navigator.of(context).pop(true);
@@ -418,25 +501,50 @@ class _FormularioEventoState extends State<FormularioEvento> {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
-      child: DropdownButtonFormField<Categoria>(
-        initialValue: _categoriaSeleccionada,
-        decoration: _decoracion('Categoría'),
-        items: _categorias.map((categoria) {
-          return DropdownMenuItem<Categoria>(
-            value: categoria,
-            child: Text(categoria.nombre),
-          );
-        }).toList(),
-        onChanged: (categoria) {
-          setState(() {
-            _categoriaSeleccionada = categoria;
-          });
-        },
-        validator: (value) {
-          if (value == null) {
+      child: FormField<String>(
+        validator: (_) {
+          if (_categoriaSeleccionada == null) {
             return 'Selecciona una categoría';
           }
+
           return null;
+        },
+        builder: (FormFieldState<String> state) {
+          return InkWell(
+            borderRadius: BorderRadius.circular(16),
+            onTap: () {
+              setState(() {
+                modalCategoriaAbierto = true;
+              });
+
+              _buildModalSeleccionarCategoria();
+            },
+            child: InputDecorator(
+              decoration: _decoracion(
+                'Categoría',
+              ).copyWith(errorText: state.errorText),
+              child: Row(
+                children: [
+                  Icon(Icons.category, color: _cs.primary),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      _categoriaSeleccionada?.nombre ??
+                          'Seleccione una categoría',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: _categoriaSeleccionada == null
+                            ? _cs.onSurface.withValues(alpha: 0.6)
+                            : _cs.onSurface,
+                      ),
+                    ),
+                  ),
+                  Icon(Icons.keyboard_arrow_down_outlined, color: _cs.primary),
+                ],
+              ),
+            ),
+          );
         },
       ),
     );
@@ -445,26 +553,42 @@ class _FormularioEventoState extends State<FormularioEvento> {
   Widget _selectorFechaHora({
     required String titulo,
     required DateTime? fecha,
-    required VoidCallback onTap,
+    required Future<DateTime?> Function() onTap,
+    String? Function(DateTime?)? validator,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: onTap,
-        child: InputDecorator(
-          decoration: _decoracion(titulo),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                _formatearFechaHora(fecha),
-                style: TextStyle(color: _cs.onSurface),
+      child: FormField<DateTime>(
+        autovalidateMode: AutovalidateMode.onUserInteraction,
+        initialValue: fecha,
+        validator: validator ?? _validarFechaObligatoria,
+        builder: (FormFieldState<DateTime> state) {
+          return InkWell(
+            borderRadius: BorderRadius.circular(16),
+            onTap: () async {
+              final nuevaFecha = await onTap();
+
+              if (nuevaFecha != null) {
+                state.didChange(nuevaFecha);
+              }
+            },
+            child: InputDecorator(
+              decoration: _decoracion(
+                titulo,
+              ).copyWith(errorText: state.errorText),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    _formatearFechaHora(fecha),
+                    style: TextStyle(color: _cs.onSurface),
+                  ),
+                  Icon(Icons.calendar_month, color: _cs.primary),
+                ],
               ),
-              Icon(Icons.calendar_month, color: _cs.primary),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -496,27 +620,49 @@ class _FormularioEventoState extends State<FormularioEvento> {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: _seleccionarImagen,
-        child: InputDecorator(
-          decoration: _decoracion('Imagen del evento'),
-          child: Row(
-            children: [
-              Icon(Icons.image, color: _cs.primary),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  nombreImagen,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: _cs.onSurface),
-                ),
+      child: FormField(
+        autovalidateMode: AutovalidateMode.onUserInteraction,
+        validator: (_) {
+          if (!widget.esEdicion && _imagenSeleccionada == null) {
+            return 'Selecciona una imagen';
+          }
+
+          return null;
+        },
+        builder: (FormFieldState state) {
+          return InkWell(
+            borderRadius: BorderRadius.circular(16),
+            onTap: () async {
+              await _seleccionarImagen();
+
+              state.didChange(_imagenSeleccionada);
+            },
+            child: InputDecorator(
+              decoration: _decoracion('Imagen del evento').copyWith(
+                errorText: state.errorText,
               ),
-              Icon(Icons.upload_file, color: _cs.primary),
-            ],
-          ),
-        ),
+              child: Row(
+                children: [
+                  Icon(Icons.image, color: _cs.primary),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      nombreImagen,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: _imagenSeleccionada == null && !widget.esEdicion
+                            ? _cs.onSurface.withOpacity(0.6)
+                            : _cs.onSurface,
+                      ),
+                    ),
+                  ),
+                  Icon(Icons.upload_file, color: _cs.primary),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -568,6 +714,7 @@ class _FormularioEventoState extends State<FormularioEvento> {
   Widget _buildFormulario() {
     return Form(
       key: _formKey,
+      autovalidateMode: AutovalidateMode.onUserInteractionIfError,
       child: Column(
         children: [
           _campoTexto(label: 'Título', controller: _tituloController),
@@ -622,6 +769,168 @@ class _FormularioEventoState extends State<FormularioEvento> {
           ),
         ],
       ),
+    );
+  }
+
+  Future<void> _buildModalSeleccionarCategoria() async {
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: _cs.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        side: BorderSide(color: _cs.primary.withValues(alpha: 0.4), width: 1.5),
+      ),
+
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return SizedBox(
+              height: MediaQuery.of(context).size.height * 0.5,
+              child: Padding(
+                padding: EdgeInsets.only(
+                  left: 24,
+                  right: 24,
+                  top: 20,
+                  bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+                ),
+                child: Column(
+                  children: [
+                    Container(
+                      width: 45,
+                      height: 5,
+                      margin: const EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                        color: _cs.onSurface.withValues(alpha: 0.25),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    Text(
+                      'Seleccione una categoría',
+                      style: TextStyle(
+                        color: _cs.primary,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    Expanded(
+                      child: RawScrollbar(
+                        controller: _categoriasScrollController,
+                        thumbVisibility: true,
+                        trackVisibility: false,
+                        interactive: true,
+                        thickness: 6,
+                        radius: const Radius.circular(20),
+                        mainAxisMargin: 0,
+                        crossAxisMargin: 4,
+                        thumbColor: _cs.primary,
+                        child: ListView.separated(
+                          controller: _categoriasScrollController,
+                          padding: const EdgeInsets.only(right: 14),
+                          itemCount: _categorias.length,
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(height: 6),
+                          itemBuilder: (context, index) {
+                            final categoria = _categorias[index];
+
+                            final seleccionada =
+                                _categoriaSeleccionada == categoria;
+
+                            return InkWell(
+                              borderRadius: BorderRadius.circular(12),
+                              onTap: () {
+                                setModalState(() {
+                                  _categoriaSeleccionada = categoria;
+                                });
+
+                                setState(() {});
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 12,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: seleccionada
+                                      ? _cs.primary.withOpacity(0.12)
+                                      : _cs.surface,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: seleccionada
+                                        ? _cs.primary
+                                        : _cs.outline.withOpacity(0.4),
+                                  ),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      seleccionada
+                                          ? Icons.radio_button_checked
+                                          : Icons.radio_button_unchecked,
+                                      color: seleccionada
+                                          ? _cs.primary
+                                          : _cs.onSurfaceVariant,
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: Text(
+                                        categoria.nombre,
+                                        style: TextStyle(
+                                          color: seleccionada
+                                              ? _cs.primary
+                                              : _cs.onSurface,
+                                          fontWeight: seleccionada
+                                              ? FontWeight.w600
+                                              : FontWeight.normal,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: const Text('Cancelar'),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: _cs.primary,
+                              foregroundColor: _cs.surface,
+                            ),
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: const Text('Seleccionar'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
