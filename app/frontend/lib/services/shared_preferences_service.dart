@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/usuario.dart';
+import 'secure_storage_service.dart';
 
 class SharedPreferencesService {
   SharedPreferencesService._();
@@ -52,6 +53,7 @@ class SharedPreferencesService {
     await prefs.remove(_usuarioKey);
     await prefs.remove(_autoLoginKey);
     await prefs.remove(_sessionCookieKey);
+    await SecureStorageService.borrarRefreshToken();
   }
 
   static Future<void> guardarSessionCookie(String cookie) async {
