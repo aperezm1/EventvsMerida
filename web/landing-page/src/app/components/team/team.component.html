@@ -54,9 +54,11 @@
     </div>
   </div>
 
-  <div class="team-photo" appReveal [revealDelay]="2">
-    <div class="team-photo-media" #teamPhoto>
-      <img src="assets/merida_letras.jpg" alt="Letras de Mérida" />
+  <div class="team-photo-wrap" appReveal revealDirection="right" [revealDelay]="2">
+    <div class="team-photo">
+      <div class="team-photo-media" #teamPhoto>
+        <img src="assets/merida_letras.jpg" alt="Letras de Mérida" />
+      </div>
     </div>
   </div>
 </section>

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:eventvsmerida/services/secure_storage_service.dart';
 import 'package:eventvsmerida/services/shared_preferences_service.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
@@ -14,6 +15,10 @@ import '../models/usuario.dart';
 import '../models/categoria.dart';
 
 class ApiService {
+  // ============================================================================
+  // VARIABLES
+  // ============================================================================
+
   static const String baseUrl = 'https://eventvsmerida-x2t1.onrender.com/api';
   static const Duration _tiempoLimite = Duration(seconds: 10);
 
@@ -21,8 +26,8 @@ class ApiService {
     'Content-Type': 'application/json',
   };
 
-  static const String _mensajeSinConexion =
-      'No hay conexión. Intenta de nuevo más tarde.';
+  static const String _mensajeSinConexion = 'No hay conexión. Intenta de nuevo más tarde.';
+  static const String _refreshTokenHeader = 'x-refresh-token';
 
   // ============================================================================
   // USUARIOS
@@ -82,7 +87,7 @@ class ApiService {
               email.isNotEmpty &&
               password != null &&
               password.isNotEmpty) {
-            final respuestaLogin = await iniciarSesion(email, password);
+            final respuestaLogin = await iniciarSesion(email, password, rememberMe: false);
             if (!respuestaLogin.exito) {
               return ApiResponse<Usuario>.error(
                 mensaje: 'Usuario registrado, pero no se pudo iniciar sesión automáticamente.',
@@ -149,14 +154,23 @@ class ApiService {
   }
 
   /// POST /api/auth/login
-  static Future<ApiResponse<Usuario>> iniciarSesion(
-      String email,
-      String password,
-      ) async {
+  static Future<ApiResponse<Usuario>> iniciarSesion(String email, String password, {bool rememberMe = false}) async {
     try {
-      final respuesta = await _post('/auth/login', {
-        'email': email,
-        'password': password,
+      final uri = Uri.parse('$baseUrl/auth/login').replace(
+        queryParameters: {
+          'rememberMe': rememberMe.toString(),
+        },
+      );
+
+      final respuesta = await _solicitud(() {
+        return http.post(
+          uri,
+          headers: _cabecerasJson,
+          body: jsonEncode({
+            'email': email,
+            'password': password,
+          }),
+        );
       });
 
       switch (respuesta.statusCode) {
@@ -166,6 +180,7 @@ class ApiService {
             final usuario = Usuario.fromJson(mapa);
 
             await _guardarCookieDesdeRespuesta(respuesta);
+            await _guardarRefreshTokenDesdeRespuesta(respuesta, rememberMe: rememberMe);
 
             return ApiResponse<Usuario>.exito(
               datos: usuario,
@@ -738,14 +753,6 @@ class ApiService {
   /// POST /api/eventos/add
   static Future<ApiResponse<Evento>> crearEventoConImagen(Map<String, dynamic> datosEvento, XFile imagen,) async {
     try {
-      final uri = Uri.parse('$baseUrl/eventos/add');
-      final request = http.MultipartRequest('POST', uri);
-
-      final cabeceras = await _cabecerasConSesion();
-      request.headers.addAll(cabeceras);
-
-      request.fields['evento'] = jsonEncode(datosEvento);
-
       final extension = p.extension(imagen.path).toLowerCase();
 
       late MediaType mediaType;
@@ -761,17 +768,29 @@ class ApiService {
         );
       }
 
-      request.files.add(
-        await http.MultipartFile.fromPath(
-          'imagen',
-          imagen.path,
-          contentType: mediaType,
-          filename: p.basename(imagen.path),
-        ),
-      );
+      Future<http.Response> enviar() async {
+        final uri = Uri.parse('$baseUrl/eventos/add');
+        final request = http.MultipartRequest('POST', uri);
 
-      final streamedResponse = await request.send().timeout(_tiempoLimite);
-      final response = await http.Response.fromStream(streamedResponse);
+        final cabeceras = await _cabecerasConSesion();
+        request.headers.addAll(cabeceras);
+
+        request.fields['evento'] = jsonEncode(datosEvento);
+
+        request.files.add(
+          await http.MultipartFile.fromPath(
+            'imagen',
+            imagen.path,
+            contentType: mediaType,
+            filename: p.basename(imagen.path),
+          ),
+        );
+
+        final streamedResponse = await request.send();
+        return http.Response.fromStream(streamedResponse);
+      }
+
+      final response = await _solicitudConRefresh(enviar);
 
       if (response.statusCode == 201) {
         try {
@@ -974,18 +993,10 @@ class ApiService {
   /// UPDATE /api/eventos/update/{id}
   static Future<ApiResponse<Evento>> actualizarEventoConImagen(int idEvento, Map<String, dynamic> datosEvento, XFile? imagen) async {
     try {
-      final uri = Uri.parse('$baseUrl/eventos/update/$idEvento');
-      final request = http.MultipartRequest('PUT', uri);
-
-      final cabeceras = await _cabecerasConSesion();
-      request.headers.addAll(cabeceras);
-
-      request.fields['evento'] = jsonEncode(datosEvento);
+      MediaType? mediaType;
 
       if (imagen != null) {
         final extension = p.extension(imagen.path).toLowerCase();
-
-        late MediaType mediaType;
 
         if (extension == '.png') {
           mediaType = MediaType('image', 'png');
@@ -997,19 +1008,33 @@ class ApiService {
             codigoEstado: 400,
           );
         }
-
-        request.files.add(
-          await http.MultipartFile.fromPath(
-            'imagen',
-            imagen.path,
-            contentType: mediaType,
-            filename: p.basename(imagen.path),
-          ),
-        );
       }
 
-      final streamedResponse = await request.send().timeout(_tiempoLimite);
-      final response = await http.Response.fromStream(streamedResponse);
+      Future<http.Response> enviar() async {
+        final uri = Uri.parse('$baseUrl/eventos/update/$idEvento');
+        final request = http.MultipartRequest('PUT', uri);
+
+        final cabeceras = await _cabecerasConSesion();
+        request.headers.addAll(cabeceras);
+
+        request.fields['evento'] = jsonEncode(datosEvento);
+
+        if (imagen != null && mediaType != null) {
+          request.files.add(
+            await http.MultipartFile.fromPath(
+              'imagen',
+              imagen.path,
+              contentType: mediaType,
+              filename: p.basename(imagen.path),
+            ),
+          );
+        }
+
+        final streamedResponse = await request.send();
+        return http.Response.fromStream(streamedResponse);
+      }
+
+      final response = await _solicitudConRefresh(enviar);
 
       if (response.statusCode == 200) {
         try {
@@ -1378,16 +1403,6 @@ class ApiService {
     });
   }
 
-  static Future<http.Response> _put(String ruta, Object cuerpo) {
-    return _solicitud(() {
-      return http.put(
-        Uri.parse('$baseUrl$ruta'),
-        headers: _cabecerasJson,
-        body: jsonEncode(cuerpo),
-      );
-    });
-  }
-
   static Future<http.Response> _delete(String ruta, Object cuerpo) {
     return _solicitud(() {
       return http.delete(
@@ -1404,10 +1419,9 @@ class ApiService {
     return await accion().timeout(_tiempoLimite);
   }
 
-  static Future<http.Response> _getConSesion(String ruta) async {
-    final cabeceras = await _cabecerasConSesion();
-
-    return _solicitud(() {
+  static Future<http.Response> _getConSesion(String ruta) {
+    return _solicitudConRefresh(() async {
+      final cabeceras = await _cabecerasConSesion();
       return http.get(
         Uri.parse('$baseUrl$ruta'),
         headers: cabeceras,
@@ -1416,9 +1430,8 @@ class ApiService {
   }
 
   static Future<http.Response> _deleteSinBodyConSesion(String ruta) async {
-    final cabeceras = await _cabecerasConSesion();
-
-    return _solicitud(() {
+    return _solicitudConRefresh(() async {
+      final cabeceras = await _cabecerasConSesion();
       return http.delete(
         Uri.parse('$baseUrl$ruta'),
         headers: cabeceras,
@@ -1426,29 +1439,72 @@ class ApiService {
     });
   }
 
-  // ============================================================================
-  // UTILIDADES
-  // ============================================================================
+  static Future<void> cerrarSesionRemota() async {
+    final cabeceras = await _cabecerasConSesion();
+    await _solicitud(() {
+      return http.post(
+        Uri.parse('$baseUrl/auth/logout'),
+        headers: cabeceras,
+      );
+    });
+  }
 
-  static String _leerMensajeError(String cuerpo) {
-    if (cuerpo.trim().isEmpty) return '';
+  static Future<http.Response> _solicitudConRefresh(
+      Future<http.Response> Function() accion,
+      ) async {
+    final response = await _solicitud(accion);
 
-    try {
-      final decodificado = jsonDecode(cuerpo);
-
-      if (decodificado is Map<String, dynamic>) {
-        final mensaje =
-            decodificado['mensaje'] ??
-                decodificado['message'] ??
-                decodificado['error'];
-
-        return mensaje?.toString() ?? '';
+    if (response.statusCode == 401 || response.statusCode == 403 || response.statusCode == 302) {
+      final refreshed = await _refrescarSesion();
+      if (refreshed) {
+        return _solicitud(accion);
       }
-    } catch (_) {
-      // Si no se puede leer el JSON del error, se usará el mensaje genérico.
     }
 
-    return '';
+    return response;
+  }
+
+  static Future<bool> _refrescarSesion() async {
+    final refreshToken = await SecureStorageService.cargarRefreshToken();
+
+    if (refreshToken == null || refreshToken.isEmpty) {
+      return false;
+    }
+
+    final respuesta = await _solicitud(() {
+      return http.post(
+        Uri.parse('$baseUrl/auth/refresh'),
+        headers: _cabecerasJson,
+        body: jsonEncode({'refreshToken': refreshToken}),
+      );
+    });
+
+    if (respuesta.statusCode == 200) {
+      await _guardarCookieDesdeRespuesta(respuesta);
+      await _guardarRefreshTokenDesdeRespuesta(respuesta, rememberMe: true);
+      return true;
+    }
+
+    if (respuesta.statusCode == 401 || respuesta.statusCode == 403 || respuesta.statusCode == 302) {
+      await SecureStorageService.borrarRefreshToken();
+    }
+
+    return false;
+  }
+
+  static Future<void> _guardarRefreshTokenDesdeRespuesta(
+      http.Response respuesta, {
+        required bool rememberMe,
+      }) async {
+    if (!rememberMe) return;
+
+    final refreshToken = respuesta.headers[_refreshTokenHeader];
+
+    if (refreshToken == null || refreshToken.isEmpty) {
+      return;
+    }
+
+    await SecureStorageService.guardarRefreshToken(refreshToken);
   }
 
   static Future<void> _guardarCookieDesdeRespuesta(http.Response respuesta) async {
@@ -1475,5 +1531,19 @@ class ApiService {
     return {
       'Cookie': cookie,
     };
+  }
+
+  static String _leerMensajeError(String body) {
+    if (body.trim().isEmpty) return '';
+    try {
+      final data = jsonDecode(body);
+      if (data is Map<String, dynamic>) {
+        final mensaje = data['mensaje'] ?? data['message'] ?? data['error'];
+        return mensaje?.toString().trim() ?? '';
+      }
+    } catch (_) {
+      // Ignora parseo inválido y devuelve vacío
+    }
+    return '';
   }
 }
