@@ -34,6 +34,7 @@ class _PerfilState extends State<Perfil> {
   GlobalKey keySecciones = GlobalKey();
   GlobalKey keyPreferencias = GlobalKey();
   GlobalKey keyinfoLegal = GlobalKey();
+  GlobalKey keyAdmin = GlobalKey();
   bool cargarTutorial = false;
 
   // ===========================================================================
@@ -284,7 +285,7 @@ class _PerfilState extends State<Perfil> {
         if (!cargarTutorial)
           _buildItem(
             Icons.help_outline,
-            'Volver a hacer el tutorial',
+            'Volver a hacer tutorial',
             onTap: () async {
               await SharedPreferencesService.resetearTutorial();
               Tutorial.resetearTutorial();
@@ -297,6 +298,7 @@ class _PerfilState extends State<Perfil> {
 
   Widget _buildAdministracion() {
     return Column(
+      key: keyAdmin,
       children: [
         _buildItem(
           Icons.event_available,
@@ -394,6 +396,21 @@ class _PerfilState extends State<Perfil> {
           forma: ShapeLightFocus.RRect,
         ),
       );
+
+      if (_usuario?.rol.toLowerCase() == 'organizador' || _usuario?.rol.toLowerCase() == 'administrador') {
+        Tutorial.pasosTutorial.add(
+          Tutorial.crearPaso(
+            context: context,
+            key: keyAdmin,
+            titulo: 'Administración',
+            descripcion: 'Aquí puedes gestionar todos los datos de tus eventos, tanto crear nuevos, como editar o eliminar los existentes.',
+            icon: Icons.admin_panel_settings,
+            siguiente: true,
+            onNext: () => Tutorial.tutorial.next(),
+            forma: ShapeLightFocus.RRect,
+          ),
+        );
+      }
 
       Tutorial.pasosTutorial.add(
         Tutorial.crearPaso(

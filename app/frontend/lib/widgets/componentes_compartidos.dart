@@ -1128,39 +1128,61 @@ class Tutorial {
 
 Future<XFile?> elegirImagen(BuildContext context) async {
   ImagePicker picker = ImagePicker();
+
   final fuente = await showModalBottomSheet<ImageSource>(
     context: context,
     backgroundColor: Theme.of(context).colorScheme.surface,
     shape: RoundedRectangleBorder(
       borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-      side: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
+      side: BorderSide(
+        color: Theme.of(context).colorScheme.primary,
+        width: 2,
+      ),
     ),
     builder: (context) {
       final cs = Theme.of(context).colorScheme;
+
       return SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.photo_library),
-              title: const Text('Galería'),
-              onTap: () => Navigator.pop(context, ImageSource.gallery),
-            ),
-            ListTile(
-              leading: const Icon(Icons.camera_alt),
-              title: const Text('Cámara'),
-              onTap: () => Navigator.pop(context, ImageSource.camera),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Tamaño máximo: 1,5 MB',
-              style: TextStyle(
-                fontSize: 12,
-                color: cs.onSurface.withValues(alpha: 0.6),
+        child: Padding(
+          padding: const EdgeInsets.only(top: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 45,
+                height: 5,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: cs.onSurface.withValues(alpha: 0.25),
+                  borderRadius: BorderRadius.circular(20),
+                ),
               ),
-            ),
-            const SizedBox(height: 12),
-          ],
+
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Galería'),
+                onTap: () => Navigator.pop(context, ImageSource.gallery),
+              ),
+
+              ListTile(
+                leading: const Icon(Icons.camera_alt),
+                title: const Text('Cámara'),
+                onTap: () => Navigator.pop(context, ImageSource.camera),
+              ),
+
+              const SizedBox(height: 8),
+
+              Text(
+                'Tamaño máximo: 1,5 MB',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: cs.onSurface.withValues(alpha: 0.6),
+                ),
+              ),
+
+              const SizedBox(height: 12),
+            ],
+          ),
         ),
       );
     },
@@ -1177,14 +1199,25 @@ Future<XFile?> elegirImagen(BuildContext context) async {
     if (imagen == null) return null;
 
     final ok = await ImageSize.validarTamanioImagen(imagen);
+
     if (!ok) {
-      Mensaje.mostrarSnackBar(context: context, mensaje: 'La imagen no puede superar 1,5 MB', icon: Icons.image_not_supported_outlined, color: Colors.red);
+      Mensaje.mostrarSnackBar(
+        context: context,
+        mensaje: 'La imagen no puede superar 1,5 MB',
+        icon: Icons.image_not_supported_outlined,
+        color: Colors.red,
+      );
       return null;
     }
 
     return imagen;
   } catch (e) {
-    Mensaje.mostrarSnackBar(context: context, mensaje: 'Error al seleccionar la imagen', icon: Icons.image_not_supported_outlined, color: Colors.red);
+    Mensaje.mostrarSnackBar(
+      context: context,
+      mensaje: 'Error al seleccionar la imagen',
+      icon: Icons.image_not_supported_outlined,
+      color: Colors.red,
+    );
     return null;
   }
 }
