@@ -66,6 +66,24 @@ class _LoginState extends State<Login> {
     );
   }
 
+  String? _validarEmail(String? value) {
+    final email = value?.trim() ?? '';
+
+    if (email.isEmpty) {
+      return 'Introduce tu correo';
+    }
+
+    final emailRegex = RegExp(
+      r'^[\w\.-]+@([\w-]+\.)+[\w-]{2,}$',
+    );
+
+    if (!emailRegex.hasMatch(email)) {
+      return 'Introduce un correo válido';
+    }
+
+    return null;
+  }
+
   String? _validarCamposVacios() {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
@@ -104,10 +122,7 @@ class _LoginState extends State<Login> {
     if (!mounted) return;
 
     if (!respuesta.exito) {
-      Mensaje.mostrarSnackBar(context: context,
-          mensaje: respuesta.mensaje,
-          icon: Icons.person,
-          color: _cs.error);
+      Mensaje.mostrarSnackBar(context: context, mensaje: respuesta.mensaje, icon: Icons.person, color: _cs.error);
       return;
     }
 
@@ -299,7 +314,6 @@ class _LoginState extends State<Login> {
           children: [
             GestureDetector(
               onTap: () {
-                //_mostrarModalCorreoEnviado();
                 _buildModalRecuperarContrasenia();
               },
               child: Text(
@@ -369,13 +383,15 @@ class _LoginState extends State<Login> {
                       TextFormField(
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
-                        // decoration: Cuenta.decoratio('Contraseña nueva', Icons.key),
-                        // validator: ,
+                        textInputAction: TextInputAction.done,
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                        decoration: _buildDecoration(
+                          labelText: 'Correo electrónico',
+                        ),
+                        validator: _validarEmail,
                       ),
 
                       const SizedBox(height: 20),
-
-
                       const SizedBox(height: 20),
 
                       Row(
@@ -429,7 +445,7 @@ class _LoginState extends State<Login> {
                                 minimumSize: const Size.fromHeight(48),
                               ),
                               child: Text(
-                                enviandoCorreo ? 'Enviando correo...' : 'Cambiar contraseña',
+                                enviandoCorreo ? 'Enviando...' : 'Enviar correo',
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(color: _cs.surface),
@@ -467,8 +483,8 @@ class _LoginState extends State<Login> {
             ],
           ),
           content: const Text(
-            'Te hemos enviado un correo si este está registrado para poder recuperar tu contraseña.\n\n'
-                'Revisa tu bandeja de entrada o la carpeta de SPAM.',
+            'Si la dirección de correo electrónico está registrada, te hemos enviado un mensaje con las instrucciones para restablecer tu contraseña.\n\n'
+                'Por favor, revisa tu bandeja de entrada y, si no lo encuentras, comprueba la carpeta de correo no deseado o SPAM.',
           ),
           actions: [
             TextButton(

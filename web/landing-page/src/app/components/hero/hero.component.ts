@@ -1,10 +1,11 @@
 import { Component, OnInit, OnDestroy, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RevealDirective } from '../../directives/reveal.directive';
 
 @Component({
   selector: 'app-hero',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RevealDirective],
   templateUrl: './hero.component.html',
   styleUrl: './hero.component.scss'
 })
