@@ -652,7 +652,7 @@ class _FormularioEventoState extends State<FormularioEvento> {
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: _imagenSeleccionada == null && !widget.esEdicion
-                            ? _cs.onSurface.withOpacity(0.6)
+                            ? _cs.onSurface.withValues(alpha: 0.6)
                             : _cs.onSurface,
                       ),
                     ),
@@ -711,18 +711,57 @@ class _FormularioEventoState extends State<FormularioEvento> {
     );
   }
 
+  Widget _seccionFormulario({
+    required String titulo,
+    required List<Widget> children,
+  }) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 20),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              titulo,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: _cs.primary,
+              ),
+            ),
+            const SizedBox(height: 12),
+            ...children,
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildFormulario() {
     return Form(
       key: _formKey,
       autovalidateMode: AutovalidateMode.onUserInteractionIfError,
       child: Column(
         children: [
-          _campoTexto(label: 'Título', controller: _tituloController),
-          _campoTexto(
-            label: 'Descripción',
-            controller: _descripcionController,
-            maxLines: 4,
+
+          _seccionFormulario(
+            titulo: 'Información del evento',
+            children: [
+              _campoTexto(label: 'Título', controller: _tituloController),
+              _campoTexto(
+                label: 'Descripción',
+                controller: _descripcionController,
+                maxLines: 4,
+              ),
+              _selectorCategoria(),
+            ],
           ),
+
           _selectorFechaHora(
             titulo: 'Fecha y hora de inicio',
             fecha: _fechaInicio,
