@@ -455,10 +455,26 @@ class _CuentaState extends State<Cuenta> {
                       minimumSize: const Size.fromHeight(48),
                     ),
                     onPressed: () async {
+                      final confirmar = await SalidaApp.mostrarModalConfirmacion(
+                        context: context,
+                        titulo: 'Cerrar sesión',
+                        mensaje: '¿Seguro que quieres cerrar sesión?',
+                        icono: Icons.logout,
+                        textoConfirmar: 'Cerrar sesión',
+                        colorConfirmar: _cs.error,
+                      );
+
+                      if (!confirmar) return;
+
                       await SharedPreferencesService.cerrarSesion();
                       if (!mounted) return;
                       context.go(AppRoutes.eventos);
-                      Mensaje.mostrarSnackBar(context: context, mensaje: "Has cerrado sesión...", icon: Icons.person, color: _cs.error);
+                      Mensaje.mostrarSnackBar(
+                        context: context,
+                        mensaje: "Has cerrado sesión...",
+                        icon: Icons.person,
+                        color: _cs.error,
+                      );
                     },
                   ),
                 ),

@@ -736,10 +736,12 @@ class SalidaApp {
     IconData icono = Icons.open_in_new,
     LaunchMode launchMode = LaunchMode.externalApplication,
   }) async {
-    final confirmado = await _mostrarModalConfirmacionSalida(
+    final confirmado = await SalidaApp.mostrarModalConfirmacion(
       context: context,
-      destino: destino,
+      titulo: 'Salir de la aplicación',
+      mensaje: 'Estás a punto de abrir $destino fuera de Eventvs Mérida.',
       icono: icono,
+      textoConfirmar: 'Continuar',
     );
 
     if (!confirmado) return;
@@ -767,10 +769,14 @@ class SalidaApp {
     }
   }
 
-  static Future<bool> _mostrarModalConfirmacionSalida({
+  static Future<bool> mostrarModalConfirmacion({
     required BuildContext context,
-    required String destino,
+    required String titulo,
+    required String mensaje,
     required IconData icono,
+    String textoCancelar = 'Cancelar',
+    String textoConfirmar = 'Continuar',
+    Color? colorConfirmar,
   }) async {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
@@ -797,7 +803,6 @@ class SalidaApp {
                 ),
               ),
             ),
-
             Center(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -824,9 +829,6 @@ class SalidaApp {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            // ─────────────────────────────
-                            // CABECERA
-                            // ─────────────────────────────
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -837,27 +839,19 @@ class SalidaApp {
                                     color: cs.primary.withValues(alpha: 0.14),
                                     shape: BoxShape.circle,
                                   ),
-                                  child: Icon(
-                                    icono,
-                                    color: cs.primary,
-                                    size: 24,
-                                  ),
+                                  child: Icon(icono, color: cs.primary, size: 24),
                                 ),
-
                                 const SizedBox(width: 12),
-
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      // TÍTULO + CERRAR
                                       Row(
-                                        crossAxisAlignment:
-                                        CrossAxisAlignment.center,
+                                        crossAxisAlignment: CrossAxisAlignment.center,
                                         children: [
                                           Expanded(
                                             child: Text(
-                                              'Salir de la aplicación',
+                                              titulo,
                                               style: tt.titleMedium?.copyWith(
                                                 fontWeight: FontWeight.bold,
                                                 color: cs.onSurface,
@@ -865,31 +859,22 @@ class SalidaApp {
                                             ),
                                           ),
                                           IconButton(
-                                            visualDensity:
-                                            VisualDensity.compact,
+                                            visualDensity: VisualDensity.compact,
                                             padding: EdgeInsets.zero,
                                             constraints: const BoxConstraints(
                                               minWidth: 32,
                                               minHeight: 32,
                                             ),
-                                            icon: Icon(
-                                              Icons.close,
-                                              color: cs.onSurface,
-                                            ),
+                                            icon: Icon(Icons.close, color: cs.onSurface),
                                             onPressed: () {
-                                              Navigator.of(
-                                                dialogContext,
-                                                rootNavigator: true,
-                                              ).pop(false);
+                                              Navigator.of(dialogContext, rootNavigator: true).pop(false);
                                             },
                                           ),
                                         ],
                                       ),
-
                                       const SizedBox(height: 8),
-
                                       Text(
-                                        'Estás a punto de abrir $destino fuera de Eventvs Mérida.',
+                                        mensaje,
                                         style: tt.bodyMedium?.copyWith(
                                           color: cs.onSurface,
                                           height: 1.35,
@@ -900,58 +885,33 @@ class SalidaApp {
                                 ),
                               ],
                             ),
-
                             const SizedBox(height: 20),
-
-                            // ─────────────────────────────
-                            // ACCIONES
-                            // ─────────────────────────────
                             Row(
                               children: [
                                 Expanded(
                                   child: OutlinedButton(
                                     onPressed: () {
-                                      Navigator.of(
-                                        dialogContext,
-                                        rootNavigator: true,
-                                      ).pop(false);
+                                      Navigator.of(dialogContext, rootNavigator: true).pop(false);
                                     },
                                     style: OutlinedButton.styleFrom(
                                       foregroundColor: cs.primary,
                                       side: BorderSide(color: cs.primary),
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 12,
-                                      ),
+                                      padding: const EdgeInsets.symmetric(vertical: 12),
                                     ),
-                                    child: const Text('Cancelar'),
+                                    child: Text(textoCancelar),
                                   ),
                                 ),
-
                                 const SizedBox(width: 10),
-
                                 Expanded(
                                   child: FilledButton.icon(
                                     onPressed: () {
-                                      Navigator.of(
-                                        dialogContext,
-                                        rootNavigator: true,
-                                      ).pop(true);
+                                      Navigator.of(dialogContext, rootNavigator: true).pop(true);
                                     },
-                                    icon: Icon(
-                                      Icons.open_in_new,
-                                      size: 18,
-                                      color: cs.surface,
-                                    ),
-                                    label: Text(
-                                      'Continuar',
-                                      style:
-                                      TextStyle(color: cs.surface),
-                                    ),
+                                    icon: Icon(icono, size: 18, color: cs.surface),
+                                    label: Text(textoConfirmar, style: TextStyle(color: cs.surface)),
                                     style: FilledButton.styleFrom(
-                                      backgroundColor: cs.primary,
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 12,
-                                      ),
+                                      backgroundColor: colorConfirmar ?? cs.primary,
+                                      padding: const EdgeInsets.symmetric(vertical: 12),
                                     ),
                                   ),
                                 ),
