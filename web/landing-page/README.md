@@ -14,13 +14,10 @@ Landing page oficial de la aplicación **Eventvs Mérida**, desarrollada con **A
 # 1. Instalar dependencias
 npm install
 
-# 2. Copiar el logo al directorio public
-# Coloca el archivo logo.jpeg en: public/assets/logo.jpeg
-
-# 3. Arrancar en desarrollo
+# 2. Arrancar en desarrollo
 npm start
 
-# 4. Build de producción
+# 3. Build de producción
 npm run build
 ```
 
@@ -55,7 +52,7 @@ src/
 
 ## 🎨 Diseño
 
-- **Colores**: Dorado `#F5A623` + Azul `#2B6CB0` (del logo)
+- **Colores**: Dorado `#F5A623` + Azul `#2B6CB0`
 - **Tipografías**: Bebas Neue (títulos) + Barlow (cuerpo) + Barlow Condensed (UI)
 - **Tema**: Dark con efectos cinematográficos
 
