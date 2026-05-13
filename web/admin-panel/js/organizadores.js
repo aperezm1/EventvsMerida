@@ -76,6 +76,8 @@ window.addEventListener("DOMContentLoaded", async () => {
   const formEditar = document.getElementById("formEditarOrganizador");
   const fechaNacimientoEditarInput = document.getElementById("fechaNacimientoEditar");
   let contrasenia = "";
+  let archivoEditado = false;
+  let pasandoAContrasenia = false;
 
   if (fechaNacimientoEditarInput) {
     fechaNacimientoEditarInput.addEventListener("input", function () {
@@ -154,22 +156,24 @@ window.addEventListener("DOMContentLoaded", async () => {
         ).hide();
 
         mostrarAlerta("info", "Contraseña actualizada pendiente de guardar");
-
-        const modalEditarContrasenia = document.getElementById(
-          "modalEditarContrasenia",
-        );
-
-        modalEditarContrasenia.addEventListener("hidden.bs.modal", function () {
-          const modalEditarOrganizador = new bootstrap.Modal(
-            document.getElementById("modalEditarOrganizador"),
-          );
-          modalEditarOrganizador.show();
-        });
       }
       formEditarContrasenia.classList.add("was-validated");
     },
     false,
   );
+
+  const modalEditarContrasenia = document.getElementById("modalEditarContrasenia");
+  if (modalEditarContrasenia) {
+    modalEditarContrasenia.addEventListener("show.bs.modal", function () {
+      pasandoAContrasenia = true;
+    });
+    modalEditarContrasenia.addEventListener("hidden.bs.modal", function () {
+      const modalEditarOrganizador = document.getElementById("modalEditarOrganizador");
+      if (modalEditarOrganizador) {
+        bootstrap.Modal.getOrCreateInstance(modalEditarOrganizador).show();
+      }
+    });
+  }
 
   const modalOrganizador = document.getElementById("modalCrearOrganizador");
   if (modalOrganizador) {
@@ -185,18 +189,22 @@ window.addEventListener("DOMContentLoaded", async () => {
   const modalEditarOrganizador = document.getElementById("modalEditarOrganizador");
   if (modalEditarOrganizador) {
     modalEditarOrganizador.addEventListener("hidden.bs.modal", function () {
+      if (pasandoAContrasenia) {
+        pasandoAContrasenia = false;
+        return;
+      }
       const form = document.getElementById("formEditarOrganizador");
       if (form) {
         form.classList.remove("was-validated");
       }
-    });
-  }
-
-  if (modalEditarOrganizador) {
-    modalEditarOrganizador.addEventListener("hidden.bs.modal", function () {
       const inputImagen = document.getElementById("formFileEditar");
-      if (inputImagen) inputImagen.value = "";
-      formEditar.classList.remove("was-validated");
+      if (inputImagen && archivoEditado) {
+        inputImagen.value = "";
+        archivoEditado = false;
+      }
+      if (formEditar) {
+        formEditar.classList.remove("was-validated");
+      }
     });
   }
 
@@ -208,13 +216,17 @@ window.addEventListener("DOMContentLoaded", async () => {
       }
     });
 
-  document
-    .getElementById("formFileEditar")
-    .addEventListener("change", function () {
+  const inputImagenEditar = document.getElementById("formFileEditar");
+  if (inputImagenEditar) {
+    inputImagenEditar.addEventListener("change", function () {
       if (!validarImagen(this.files[0])) {
         this.value = "";
+        archivoEditado = false;
+        return;
       }
+      archivoEditado = this.files && this.files.length > 0;
     });
+  }
 
   configurarMostrarContraseniasFormulario(
     ["contrasenia", "confirmarContrasenia"],
@@ -261,7 +273,7 @@ async function cargarOrganizadores() {
       body.classList.add("loading");
     }
 
-    const resp = await fetch(URL_BASE + "usuarios/organizers", {
+    const resp = await fetchConAuth(URL_BASE + "usuarios/organizers", {
       method: "GET",
       credentials: "include",
       headers: {
@@ -414,7 +426,7 @@ async function crearOrganizador(datosFormulario) {
       credentials: "include",
       body: datosFormulario,
     };
-    const resp = await fetch(URL_BASE + "usuarios/add", options);
+    const resp = await fetchConAuth(URL_BASE + "usuarios/add", options);
     const respuesta = await resp.json();
     if (resp.status === 201) {
       mostrarAlerta("success", "Organizador creado correctamente");
@@ -444,7 +456,7 @@ async function editarOrganizador(id, datosFormulario) {
       credentials: "include",
       body: datosFormulario,
     };
-    const resp = await fetch(URL_BASE + "usuarios/update/" + id, options);
+    const resp = await fetchConAuth(URL_BASE + "usuarios/update/" + id, options);
     const respuesta = await resp.json();
     if (resp.status === 200) {
       mostrarAlerta("success", "Usuario editado correctamente");
@@ -481,7 +493,7 @@ async function eliminarOrganizador(id, nombre, apellidos) {
           method: "DELETE",
         };
 
-        const resp = await fetch(URL_BASE + "usuarios/delete/" + id, options);
+        const resp = await fetchConAuth(URL_BASE + "usuarios/delete/" + id, options);
         if (resp.status === 204) {
           mostrarAlerta("success", "Organizador eliminado correctamente");
         } else {
@@ -500,7 +512,7 @@ async function eliminarOrganizador(id, nombre, apellidos) {
 // Función que obtiene los detalles de un organizador por su ID
 async function obtenerOrganizadorPorId(id) {
   try {
-    const resp = await fetch(URL_BASE + "usuarios/" + id, {
+    const resp = await fetchConAuth(URL_BASE + "usuarios/" + id, {
       method: "GET",
       credentials: "include",
       headers: {

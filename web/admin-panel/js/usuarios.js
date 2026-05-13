@@ -76,6 +76,8 @@ window.addEventListener("DOMContentLoaded", async () => {
   const formEditar = document.getElementById("formEditarUsuario");
   const fechaNacimientoEditarInput = document.getElementById("fechaNacimientoEditar");
   let contrasenia = "";
+  let archivoEditado = false;
+  let pasandoAContrasenia = false;
 
   if (fechaNacimientoEditarInput) {
     fechaNacimientoEditarInput.addEventListener("input", function () {
@@ -171,23 +173,24 @@ window.addEventListener("DOMContentLoaded", async () => {
         ).hide();
 
         mostrarAlerta("info", "Contraseña actualizada pendiente de guardar");
-
-        const modalEditarContrasenia = document.getElementById(
-          "modalEditarContrasenia",
-        );
-
-        modalEditarContrasenia.addEventListener("hidden.bs.modal", function () {
-          const modalEditarUsuario = new bootstrap.Modal(
-            document.getElementById("modalEditarUsuario"),
-          );
-
-          modalEditarUsuario.show();
-        });
       }
       formEditarContrasenia.classList.add("was-validated");
     },
     false,
   );
+
+  const modalEditarContrasenia = document.getElementById("modalEditarContrasenia");
+  if (modalEditarContrasenia) {
+    modalEditarContrasenia.addEventListener("show.bs.modal", function () {
+      pasandoAContrasenia = true;
+    });
+    modalEditarContrasenia.addEventListener("hidden.bs.modal", function () {
+      const modalEditarUsuario = document.getElementById("modalEditarUsuario");
+      if (modalEditarUsuario) {
+        bootstrap.Modal.getOrCreateInstance(modalEditarUsuario).show();
+      }
+    });
+  }
 
   const modalUsuario = document.getElementById("modalCrearUsuario");
   if (modalUsuario) {
@@ -204,19 +207,23 @@ window.addEventListener("DOMContentLoaded", async () => {
   const modalEditarUsuario = document.getElementById("modalEditarUsuario");
   if (modalEditarUsuario) {
     modalEditarUsuario.addEventListener("hidden.bs.modal", function () {
+      if (pasandoAContrasenia) {
+        pasandoAContrasenia = false;
+        return;
+      }
       const form = document.getElementById("formEditarUsuario");
       if (form) {
         form.classList.remove("was-validated");
         contraseniaModificada = false;
       }
-    });
-  }
-
-  if (modalEditarUsuario) {
-    modalEditarUsuario.addEventListener("hidden.bs.modal", function () {
       const inputImagen = document.getElementById("formFileEditar");
-      if (inputImagen) inputImagen.value = "";
-      formEditar.classList.remove("was-validated");
+      if (inputImagen && archivoEditado) {
+        inputImagen.value = "";
+        archivoEditado = false;
+      }
+      if (formEditar) {
+        formEditar.classList.remove("was-validated");
+      }
     });
   }
 
@@ -228,13 +235,17 @@ window.addEventListener("DOMContentLoaded", async () => {
       }
     });
 
-  document
-    .getElementById("formFileEditar")
-    .addEventListener("change", function () {
+  const inputImagenEditar = document.getElementById("formFileEditar");
+  if (inputImagenEditar) {
+    inputImagenEditar.addEventListener("change", function () {
       if (!validarImagen(this.files[0])) {
         this.value = "";
+        archivoEditado = false;
+        return;
       }
+      archivoEditado = this.files && this.files.length > 0;
     });
+  }
 
   configurarMostrarContraseniasFormulario(
     ["contrasena", "confirmarContrasena"],
@@ -279,7 +290,7 @@ async function cargarUsuarios() {
     loader.style.display = "flex";
     body.classList.add("loading");
 
-    const resp = await fetch(URL_BASE + "usuarios/registered", {
+    const resp = await fetchConAuth(URL_BASE + "usuarios/registered", {
       method: "GET",
       credentials: "include",
       headers: {
@@ -438,7 +449,7 @@ async function crearUsuario(datosFormulario) {
       credentials: "include",
       body: datosFormulario,
     };
-    const resp = await fetch(URL_BASE + "usuarios/add", options);
+    const resp = await fetchConAuth(URL_BASE + "usuarios/add", options);
     const respuesta = await resp.json();
     if (resp.status === 201) {
       mostrarAlerta("success", "Usuario creado correctamente");
@@ -465,7 +476,7 @@ async function editarUsuario(id, datosFormulario) {
       credentials: "include",
       body: datosFormulario,
     };
-    const resp = await fetch(URL_BASE + "usuarios/update/" + id, options);
+    const resp = await fetchConAuth(URL_BASE + "usuarios/update/" + id, options);
     const respuesta = await resp.json();
     if (resp.status === 200) {
       mostrarAlerta("success", "Usuario editado correctamente");
@@ -506,7 +517,7 @@ async function eliminarUsuario(id, nombre, apellidos) {
         const options = {
           method: "DELETE",
         };
-        const resp = await fetch(URL_BASE + "usuarios/delete/" + id, options);
+        const resp = await fetchConAuth(URL_BASE + "usuarios/delete/" + id, options);
         if (resp.status === 204) {
           mostrarAlerta("success", "Usuario eliminado correctamente");
         } else {
@@ -525,7 +536,7 @@ async function eliminarUsuario(id, nombre, apellidos) {
 // Función para obtener los detalles de un organizador por su ID
 async function obtenerOrganizadorPorId(id) {
   try {
-    const resp = await fetch(URL_BASE + "usuarios/" + id, {
+    const resp = await fetchConAuth(URL_BASE + "usuarios/" + id, {
       method: "GET",
       credentials: "include",
       headers: {

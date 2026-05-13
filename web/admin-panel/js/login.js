@@ -40,7 +40,7 @@ async function login(datos) {
         btnLogin.textContent = 'Iniciando sesión...';
         btnLogin.classList.add("loading");
 
-        const respuesta = await fetch(URL, {
+        const respuesta = await fetchConAuth(URL, {
             method: "POST",
             credentials: "include",
             body: JSON.stringify(datos),

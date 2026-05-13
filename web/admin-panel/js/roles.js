@@ -73,7 +73,7 @@ async function cargarRoles() {
     loader.style.display = "flex";
     body.classList.add("loading");
 
-    const resp = await fetch(URL_BASE + "roles/all", {
+    const resp = await fetchConAuth(URL_BASE + "roles/all", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -167,7 +167,7 @@ async function crearRol(datosRol) {
       credentials: "include",
       body: JSON.stringify(datosRol),
     };
-    const resp = await fetch(URL_BASE + "roles/add", options);
+    const resp = await fetchConAuth(URL_BASE + "roles/add", options);
     const respuesta = await resp.json();
     if (resp.status === 201) {
       mostrarAlerta("success", "Rol creado correctamente");
@@ -197,7 +197,7 @@ async function editarRol(id, datosRol) {
       credentials: "include",
       body: JSON.stringify(datosRol),
     };
-    const resp = await fetch(URL_BASE + "roles/update/" + id, options);
+    const resp = await fetchConAuth(URL_BASE + "roles/update/" + id, options);
     const respuesta = await resp.json();
     if (resp.status === 200) {
       mostrarAlerta("success", "Rol actualizado correctamente");
@@ -237,7 +237,7 @@ async function eliminarRol(id, rol) {
           method: "DELETE",
           credentials: "include"
         };
-        const resp = await fetch(URL_BASE + "roles/delete/" + id, options);
+        const resp = await fetchConAuth(URL_BASE + "roles/delete/" + id, options);
         const respuesta = await resp.text();
         if (resp.status === 204) {
           mostrarAlerta("success", "Rol eliminado correctamente");

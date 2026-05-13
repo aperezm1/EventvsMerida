@@ -34,11 +34,11 @@ async function cargarDashboard(URL_BASE) {
       categorias,
       roles
     ] = await Promise.all([
-      fetch(URL_BASE + "usuarios/count/registered", { credentials: "include" }).then(r => r.text()),
-      fetch(URL_BASE + "eventos/count").then(r => r.text()),
-      fetch(URL_BASE + "usuarios/count/organizers", { credentials: "include" }).then(r => r.text()),
-      fetch(URL_BASE + "categorias/count").then(r => r.text()),
-      fetch(URL_BASE + "roles/count", { credentials: "include" }).then(r => r.text()),
+      fetchConAuth(URL_BASE + "usuarios/count/registered", { credentials: "include" }).then(r => r.text()),
+      fetchConAuth(URL_BASE + "eventos/count").then(r => r.text()),
+      fetchConAuth(URL_BASE + "usuarios/count/organizers", { credentials: "include" }).then(r => r.text()),
+      fetchConAuth(URL_BASE + "categorias/count").then(r => r.text()),
+      fetchConAuth(URL_BASE + "roles/count", { credentials: "include" }).then(r => r.text()),
     ]);
 
     animarContador(document.getElementById("numUsuarios"), Number(usuarios));

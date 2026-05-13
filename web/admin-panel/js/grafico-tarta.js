@@ -60,7 +60,7 @@ async function cargarGraficoTarta() {
   const URL = `${URL_BASE}eventos/eventos-por-categoria`;
 
   try {
-    const respuesta = await fetch(URL, {
+    const respuesta = await fetchConAuth(URL, {
       method: "GET",
       credentials: "include",
     });

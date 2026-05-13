@@ -77,7 +77,7 @@ async function cargarGraficoBarras() {
   const URL = `${URL_BASE}eventos/eventos-por-mes`;
 
   try {
-    const respuesta = await fetch(URL, {
+    const respuesta = await fetchConAuth(URL, {
       method: "GET",
       credentials: "include"
     });

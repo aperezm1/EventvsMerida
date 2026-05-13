@@ -43,19 +43,28 @@ window.addEventListener("DOMContentLoaded", async () => {
         form.classList.add("was-validated");
       } else {
         event.preventDefault();
+        const fechaInicioVal = document.getElementById("fechaInicio").value;
+        const horaInicioVal = document.getElementById("horaInicio").value;
+        const fechaFinVal = document.getElementById("fechaFin").value;
+        const horaFinVal = document.getElementById("horaFin").value;
+        const fechaInicio = new Date(`${fechaInicioVal}T${horaInicioVal}:00`);
+        const fechaFin = new Date(`${fechaFinVal}T${horaFinVal}:00`);
+
+        if (fechaFin < fechaInicio) {
+          event.stopPropagation();
+          mostrarAlerta(
+            "error",
+            "La fecha de fin no puede ser anterior a la fecha de inicio",
+          );
+          form.classList.add("was-validated");
+          return;
+        }
+
         const evento = {
           titulo: document.getElementById("titulo").value,
           descripcion: document.getElementById("descripcion").value,
-          fechaInicio:
-            document.getElementById("fechaInicio").value +
-            "T" +
-            document.getElementById("horaInicio").value +
-            ":00.000",
-          fechaFin:
-            document.getElementById("fechaFin").value +
-            "T" +
-            document.getElementById("horaFin").value +
-            ":00.000",
+          fechaInicio: `${fechaInicioVal}T${horaInicioVal}:00.000`,
+          fechaFin: `${fechaFinVal}T${horaFinVal}:00.000`,
           localizacion: document.getElementById("localizacion").value,
           foto: null,
           idUsuario: document.getElementById("organizadores").value,
@@ -63,7 +72,10 @@ window.addEventListener("DOMContentLoaded", async () => {
         };
         const formData = new FormData();
         formData.append("evento", JSON.stringify(evento));
-        formData.append("imagen", document.getElementById("fotoEvento").files[0]);
+        formData.append(
+          "imagen",
+          document.getElementById("fotoEvento").files[0],
+        );
         crearEvento(formData, true);
       }
       form.classList.add("was-validated");
@@ -74,56 +86,88 @@ window.addEventListener("DOMContentLoaded", async () => {
   // Formulario editar evento
   const formEditar = document.getElementById("formEditarEvento");
 
-  formEditar.addEventListener("submit", function (event) {
-    if (!formEditar.checkValidity()) {
+  formEditar.addEventListener(
+    "submit",
+    function (event) {
+      if (!formEditar.checkValidity()) {
+        event.preventDefault();
+        event.stopPropagation();
+        formEditar.classList.add("was-validated");
+        return;
+      }
       event.preventDefault();
-      event.stopPropagation();
+
+      const titulo = document.getElementById("tituloEventoEditar").value.trim();
+      const descripcion = document
+        .getElementById("descripcionEventoEditar")
+        .value.trim();
+      const fechaInicioVal = document.getElementById("fechaInicioEditar").value;
+      const horaInicioVal = document.getElementById("horaInicioEditar").value;
+      const fechaFinVal = document.getElementById("fechaFinEditar").value;
+      const horaFinVal = document.getElementById("horaFinEditar").value;
+      const fechaInicio =
+        fechaInicioVal && horaInicioVal
+          ? `${fechaInicioVal}T${horaInicioVal}:00.000`
+          : null;
+      const fechaFin =
+        fechaFinVal && horaFinVal
+          ? `${fechaFinVal}T${horaFinVal}:00.000`
+          : null;
+
+      if (
+        fechaInicio &&
+        fechaFin &&
+        new Date(fechaFin) < new Date(fechaInicio)
+      ) {
+        event.stopPropagation();
+        mostrarAlerta(
+          "error",
+          "La fecha de fin no puede ser anterior a la fecha de inicio",
+        );
+        formEditar.classList.add("was-validated");
+        return;
+      }
+
+      const evento = {
+        titulo,
+        descripcion,
+        fechaInicio,
+        fechaFin,
+        localizacion: document
+          .getElementById("localizacionEditar")
+          .value.trim(),
+        foto: null,
+        idUsuario:
+          Number(document.getElementById("organizadoresEditar").value) || null,
+        idCategoria:
+          Number(document.getElementById("categoriasEditar").value) || null,
+      };
+
+      const formData = new FormData();
+      formData.append("evento", JSON.stringify(evento));
+      const file = document.getElementById("formFileEditar")?.files?.[0];
+      if (file && !validarImagen(file)) return;
+      if (file) formData.append("imagen", file);
+
+      editarEvento(formEditar.dataset.id, formData);
       formEditar.classList.add("was-validated");
-      return;
-    }
-    event.preventDefault();
-
-    const titulo = document.getElementById("tituloEventoEditar").value.trim();
-    const descripcion = document.getElementById("descripcionEventoEditar").value.trim();
-    const fechaInicioVal = document.getElementById("fechaInicioEditar").value;
-    const horaInicioVal = document.getElementById("horaInicioEditar").value;
-    const fechaFinVal = document.getElementById("fechaFinEditar").value;
-    const horaFinVal = document.getElementById("horaFinEditar").value;
-    const fechaInicio = fechaInicioVal && horaInicioVal ? `${fechaInicioVal}T${horaInicioVal}:00.000` : null;
-    const fechaFin = fechaFinVal && horaFinVal ? `${fechaFinVal}T${horaFinVal}:00.000` : null;
-
-    const evento = {
-      titulo,
-      descripcion,
-      fechaInicio,
-      fechaFin,
-      localizacion: document.getElementById("localizacionEditar").value.trim(),
-      foto: null,
-      idUsuario: Number(document.getElementById("organizadoresEditar").value) || null,
-      idCategoria: Number(document.getElementById("categoriasEditar").value) || null
-    };
-
-    const formData = new FormData();
-    formData.append("evento", JSON.stringify(evento));
-    const file = document.getElementById("formFileEditar")?.files?.[0];
-    if (file && !validarImagen(file)) return;
-    if (file) formData.append("imagen", file);
-
-    editarEvento(formEditar.dataset.id, formData);
-    formEditar.classList.add("was-validated");
-  }, false);
+    },
+    false,
+  );
 
   document.getElementById("fotoEvento").addEventListener("change", function () {
-    if(!validarImagen(this.files[0])){
+    if (!validarImagen(this.files[0])) {
       this.value = "";
     }
   });
 
-  document.getElementById("formFileEditar").addEventListener("change", function () {
-    if(!validarImagen(this.files[0])){
-      this.value = "";
-    }
-  });
+  document
+    .getElementById("formFileEditar")
+    .addEventListener("change", function () {
+      if (!validarImagen(this.files[0])) {
+        this.value = "";
+      }
+    });
 });
 
 // ==========================================================================
@@ -144,7 +188,7 @@ async function cargarEventos() {
     loader.style.display = "flex";
     body.classList.add("loading");
 
-    const resp = await fetch(
+    const resp = await fetchConAuth(
       URL_BASE + `eventos/paginated?page=${paginaActual}&size=10`,
       {
         method: "GET",
@@ -173,7 +217,7 @@ async function buscarEvento(textoBusqueda) {
     loader.style.display = "flex";
     body.classList.add("loading");
 
-    const resp = await fetch(
+    const resp = await fetchConAuth(
       URL_BASE + `eventos/search?q=${textoBusqueda}&limit=10`,
       {
         method: "GET",
@@ -201,7 +245,7 @@ async function buscarEvento(textoBusqueda) {
 // Mostrar eventos en la tabla
 function mostrarEventos(data, numeroPaginas = 0) {
   const tabla = document.getElementById("listadoEventos");
-  cantidadPaginacion = numeroPaginas
+  cantidadPaginacion = numeroPaginas;
 
   // Mostrar mensaje si no hay eventos y limpiar tabla
   const eventosVacio = document.getElementById("eventos-vacio");
@@ -267,9 +311,10 @@ function mostrarEventos(data, numeroPaginas = 0) {
       document.getElementById("contenidoModalEvento").innerHTML = `
         <h4 class="text-light mb-0 text-center mb-2">${evento.titulo || "-"}</h4>
         <div class="text-center mb-4">
-          ${evento.foto
-            ? `<img src="${evento.foto}" alt="${evento.titulo}" class="img-fluid img-thumbnail img-evento-modal mb-2" />`
-            : `<div class="avatar-placeholder mx-auto mb-2"><i class="fas fa-calendar-days"></i></div>`
+          ${
+            evento.foto
+              ? `<img src="${evento.foto}" alt="${evento.titulo}" class="img-fluid img-thumbnail img-evento-modal mb-2" />`
+              : `<div class="avatar-placeholder mx-auto mb-2"><i class="fas fa-calendar-days"></i></div>`
           }
         </div>
 
@@ -379,6 +424,18 @@ function mostrarEventos(data, numeroPaginas = 0) {
         evento.fechaFin.substring(0, 10);
       document.getElementById("horaFinEditar").value =
         evento.fechaFin.substring(11, 16);
+      const selectOrganizadoresEditar = document.getElementById(
+        "organizadoresEditar",
+      );
+      const opcionOrganizador = Array.from(
+        selectOrganizadoresEditar.options,
+      ).find((opt) => opt.dataset.email === evento.emailUsuario);
+
+      if (opcionOrganizador) {
+        selectOrganizadoresEditar.value = opcionOrganizador.value;
+      } else {
+        selectOrganizadoresEditar.value = "";
+      }
       document.getElementById("localizacionEditar").value = evento.localizacion;
       const selectCategoriasEditar =
         document.getElementById("categoriasEditar");
@@ -508,7 +565,6 @@ function actualizarBotones() {
   );
 }
 
-
 // Función para avanzar a página específica
 function avanzarPagina(indice) {
   paginaActual = indice;
@@ -522,7 +578,7 @@ async function obtenerCategorias() {
   const selectEditar = document.getElementById("categoriasEditar");
 
   try {
-    const resp = await fetch(URL_BASE + "categorias/all", {
+    const resp = await fetchConAuth(URL_BASE + "categorias/all", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -563,7 +619,7 @@ async function obtenerOrganizadores() {
   const selectEditar = document.getElementById("organizadoresEditar");
 
   try {
-    const resp = await fetch(URL_BASE + "usuarios/organizers", {
+    const resp = await fetchConAuth(URL_BASE + "usuarios/organizers", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -590,6 +646,7 @@ async function obtenerOrganizadores() {
         const opt = document.createElement("option");
         opt.value = organizador.id;
         opt.textContent = organizador.nombre + " " + organizador.apellidos;
+        opt.dataset.email = organizador.email;
         select.appendChild(opt);
       });
     });
@@ -607,7 +664,7 @@ async function crearEvento(datosFormulario) {
       body: datosFormulario,
     };
 
-    const resp = await fetch(URL_BASE + "eventos/add", options);
+    const resp = await fetchConAuth(URL_BASE + "eventos/add", options);
     const respuesta = await resp.json();
 
     if (resp.status === 201) {
@@ -638,7 +695,7 @@ async function editarEvento(id, datosFormulario) {
       body: datosFormulario,
     };
 
-    const resp = await fetch(URL_BASE + "eventos/update/" + id, options);
+    const resp = await fetchConAuth(URL_BASE + "eventos/update/" + id, options);
     const respuesta = await resp.json();
 
     if (resp.status === 200) {
@@ -679,7 +736,7 @@ async function eliminarEvento(id, nombre) {
           credentials: "include",
         };
 
-        const resp = await fetch(URL_BASE + "eventos/delete/" + id, options);
+        const resp = await fetchConAuth(URL_BASE + "eventos/delete/" + id, options);
 
         if (resp.status === 204) {
           mostrarAlerta("success", "Evento eliminado correctamente");
