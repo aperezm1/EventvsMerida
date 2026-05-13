@@ -31,6 +31,13 @@ class _AdministrarEventosState extends State<AdministrarEventos> {
   bool _cargandoMas = false;
   static const int _tamanoPagina = 15;
   FechaUtils fu = FechaUtils();
+  final TextEditingController controllerBusqueda = TextEditingController();
+  final ScrollController _listaScrollController = ScrollController();
+  String textoBusqueda = '';
+  List<Evento> eventosEncontrados = [];
+  bool eventosBuscados = false;
+  bool _cargandoBusqueda = false;
+  String _criterioBusquedaActual = '';
 
   ColorScheme get _cs => Theme.of(context).colorScheme;
 
@@ -42,6 +49,14 @@ class _AdministrarEventosState extends State<AdministrarEventos> {
   void initState() {
     super.initState();
     _cargarDatos();
+    _listaScrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _listaScrollController.dispose();
+    controllerBusqueda.dispose();
+    super.dispose();
   }
 
   // ===========================================================================
@@ -67,7 +82,12 @@ class _AdministrarEventosState extends State<AdministrarEventos> {
         _cargando = false;
       });
 
-      Mensaje.mostrarSnackBar(context: context, mensaje: 'No hay usuario logueado', icon: Icons.person, color: _cs.error);
+      Mensaje.mostrarSnackBar(
+        context: context,
+        mensaje: 'No hay usuario logueado',
+        icon: Icons.person,
+        color: _cs.error,
+      );
       return;
     }
 
@@ -80,16 +100,21 @@ class _AdministrarEventosState extends State<AdministrarEventos> {
         fechaFinDesde: null,
       );
 
-      if(!mounted) return;
+      if (!mounted) return;
 
-      if(resultado == null || resultado['error'] != null) {
+      if (resultado == null || resultado['error'] != null) {
         setState(() {
           _usuario = usuario;
           _eventos = [];
           _cargando = false;
         });
 
-        Mensaje.mostrarSnackBar(context: context, mensaje: resultado?['error'] ?? 'No se pudieron cargar los eventos', icon: Icons.event_busy_outlined, color: _cs.error);
+        Mensaje.mostrarSnackBar(
+          context: context,
+          mensaje: resultado?['error'] ?? 'No se pudieron cargar los eventos',
+          icon: Icons.event_busy_outlined,
+          color: _cs.error,
+        );
         return;
       }
 
@@ -101,11 +126,17 @@ class _AdministrarEventosState extends State<AdministrarEventos> {
         _cargando = false;
       });
 
+      if (textoBusqueda.trim().isNotEmpty) {
+        buscarEventos(textoBusqueda);
+      }
+
       return;
     }
 
     if (rol == 'organizador') {
-      final respuesta = await ApiService.obtenerEventosPorOrganizador(usuario.id);
+      final respuesta = await ApiService.obtenerEventosPorOrganizador(
+        usuario.id,
+      );
 
       if (!mounted) return;
 
@@ -115,8 +146,17 @@ class _AdministrarEventosState extends State<AdministrarEventos> {
         _cargando = false;
       });
 
+      if (textoBusqueda.trim().isNotEmpty) {
+        buscarEventos(textoBusqueda);
+      }
+
       if (!respuesta.exito) {
-        Mensaje.mostrarSnackBar(context: context, mensaje: respuesta.mensaje, icon: Icons.close, color: _cs.error);
+        Mensaje.mostrarSnackBar(
+          context: context,
+          mensaje: respuesta.mensaje,
+          icon: Icons.close,
+          color: _cs.error,
+        );
       }
 
       return;
@@ -128,7 +168,12 @@ class _AdministrarEventosState extends State<AdministrarEventos> {
       _cargando = false;
     });
 
-    Mensaje.mostrarSnackBar(context: context, mensaje: 'No tienes permisos para administrar eventos', icon: Icons.event_busy_outlined, color: _cs.error);
+    Mensaje.mostrarSnackBar(
+      context: context,
+      mensaje: 'No tienes permisos para administrar eventos',
+      icon: Icons.event_busy_outlined,
+      color: _cs.error,
+    );
   }
 
   // ===========================================================================
@@ -138,6 +183,17 @@ class _AdministrarEventosState extends State<AdministrarEventos> {
   bool get _puedeAdministrar {
     final rol = _usuario?.rol.trim().toLowerCase();
     return rol == 'administrador' || rol == 'organizador';
+  }
+
+  void _onScroll() {
+    if (!_listaScrollController.hasClients || _cargandoMas || _ultimaPagina) {
+      return;
+    }
+
+    final posicion = _listaScrollController.position;
+    if (posicion.pixels >= posicion.maxScrollExtent - 200) {
+      _cargarMasEventos();
+    }
   }
 
   Future<void> _cargarMasEventos() async {
@@ -169,7 +225,12 @@ class _AdministrarEventosState extends State<AdministrarEventos> {
         _cargandoMas = false;
       });
 
-      Mensaje.mostrarSnackBar(context: context, mensaje: resultado?['error'] ?? 'No se pudieron cargar más eventos', icon: Icons.event_busy_outlined, color: _cs.error);
+      Mensaje.mostrarSnackBar(
+        context: context,
+        mensaje: resultado?['error'] ?? 'No se pudieron cargar más eventos',
+        icon: Icons.event_busy_outlined,
+        color: _cs.error,
+      );
       return;
     }
 
@@ -207,12 +268,77 @@ class _AdministrarEventosState extends State<AdministrarEventos> {
 
     if (!mounted) return;
 
-    Mensaje.mostrarSnackBar(context: context, mensaje: respuesta.mensaje, icon: Icons.delete, color: _cs.error);
+    Mensaje.mostrarSnackBar(
+      context: context,
+      mensaje: respuesta.mensaje,
+      icon: Icons.delete,
+      color: respuesta.exito ? Colors.green : _cs.error,
+    );
 
     if (respuesta.exito) {
       setState(() {
         _eventos.removeWhere((e) => e.id == evento.id);
       });
+    }
+  }
+
+  Future<void> buscarEventos(String texto) async {
+    final criterio = texto.trim().toLowerCase();
+    _criterioBusquedaActual = criterio;
+
+    if (criterio.isEmpty) {
+      if (mounted) {
+        setState(() {
+          eventosEncontrados = [];
+          eventosBuscados = false;
+        });
+      }
+      return;
+    }
+
+    if (_cargandoBusqueda) {
+      return;
+    }
+
+    setState(() {
+      _cargandoBusqueda = true;
+    });
+
+    try {
+      await _cargarTodosEventos();
+
+      if (!mounted) return;
+
+      _filtrarEventos(_criterioBusquedaActual);
+    } finally {
+      if (mounted) {
+        setState(() {
+          _cargandoBusqueda = false;
+        });
+      }
+    }
+  }
+
+  void _filtrarEventos(String criterio) {
+    setState(() {
+      eventosEncontrados = _eventos.where((evento) {
+        return evento.titulo.toLowerCase().contains(criterio) ||
+            evento.localizacion.toLowerCase().contains(criterio) ||
+            evento.nombreCategoria.toLowerCase().contains(criterio);
+      }).toList();
+      eventosBuscados = true;
+    });
+  }
+
+  Future<void> _cargarTodosEventos() async {
+    final usuario = _usuario;
+    if (usuario == null) return;
+
+    final rol = usuario.rol.trim().toLowerCase();
+    if (rol != 'administrador') return;
+
+    while (!_ultimaPagina && mounted) {
+      await _cargarMasEventos();
     }
   }
 
@@ -237,9 +363,7 @@ class _AdministrarEventosState extends State<AdministrarEventos> {
                 },
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-                  child: Container(
-                    color: Colors.black.withValues(alpha: 0.08),
-                  ),
+                  child: Container(color: Colors.black.withValues(alpha: 0.08)),
                 ),
               ),
             ),
@@ -288,11 +412,12 @@ class _AdministrarEventosState extends State<AdministrarEventos> {
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Row(
                                         crossAxisAlignment:
-                                        CrossAxisAlignment.center,
+                                            CrossAxisAlignment.center,
                                         children: [
                                           Expanded(
                                             child: Text(
@@ -304,7 +429,8 @@ class _AdministrarEventosState extends State<AdministrarEventos> {
                                             ),
                                           ),
                                           IconButton(
-                                            visualDensity: VisualDensity.compact,
+                                            visualDensity:
+                                                VisualDensity.compact,
                                             padding: EdgeInsets.zero,
                                             constraints: const BoxConstraints(
                                               minWidth: 32,
@@ -426,6 +552,63 @@ class _AdministrarEventosState extends State<AdministrarEventos> {
     );
   }
 
+  Widget _contenidoVacio() {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.event_busy, size: 64, color: _cs.primary),
+          const SizedBox(height: 16),
+          Text(
+            'Aún no hay eventos creados.\n¡Añade el primero!',
+            style: TextStyle(color: _cs.onSurface, fontSize: 16),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBuscador({
+    required String label,
+    required TextEditingController controller,
+    TextInputType? keyboardType,
+    int maxLines = 1,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 0, left: 16, right: 16, bottom: 12),
+      child: TextFormField(
+        controller: controller,
+        keyboardType: keyboardType,
+        maxLines: maxLines,
+        decoration: InputDecoration(
+          focusColor: _cs.primary,
+          suffixIcon: textoBusqueda.isEmpty
+              ? const Icon(Icons.search_rounded)
+              : IconButton(
+                  icon: Icon(Icons.close_rounded, color: _cs.primary),
+                  onPressed: () {
+                    controller.clear();
+                    textoBusqueda = '';
+                    buscarEventos('');
+                  },
+                ),
+          suffixIconColor: _cs.primary,
+          label: Text('Buscar'),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide(color: _cs.primary, width: 2),
+          ),
+        ),
+        onChanged: (String valor) {
+          textoBusqueda = valor;
+          buscarEventos(valor);
+        },
+      ),
+    );
+  }
+
   Widget _buildEventoCard(Evento evento) {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -439,19 +622,14 @@ class _AdministrarEventosState extends State<AdministrarEventos> {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
-              child: Image.network(
-                evento.foto,
+              child: FadeInImage.assetNetwork(
+                placeholder: 'assets/images/icono.gif',
+                image: evento.foto,
                 width: 90,
-                height: 90,
+                height: 110,
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    width: 90,
-                    height: 90,
-                    color: _cs.secondary.withValues(alpha: 0.3),
-                    child: Icon(Icons.image_not_supported, color: _cs.primary),
-                  );
-                },
+                alignment: Alignment.topCenter,
+                placeholderFit: BoxFit.cover,
               ),
             ),
             const SizedBox(width: 12),
@@ -529,11 +707,7 @@ class _AdministrarEventosState extends State<AdministrarEventos> {
       return Column(
         children: [
           _buildBotonAnadir(),
-          const Expanded(
-            child: Center(
-              child: Text('No hay eventos disponibles'),
-            ),
-          ),
+          Expanded(child: _contenidoVacio()),
         ],
       );
     }
@@ -541,36 +715,77 @@ class _AdministrarEventosState extends State<AdministrarEventos> {
     return Column(
       children: [
         _buildBotonAnadir(),
+        _buildBuscador(label: 'Buscar', controller: controllerBusqueda),
         Expanded(
-          child: RefreshIndicator(
-            onRefresh: _cargarDatos,
-            child: ListView.builder(
-              itemCount: _eventos.length + 1,
-              itemBuilder: (context, index) {
-                if(index < _eventos.length) {
-                  return _buildEventoCard(_eventos[index]);
-                }
-                final rol = _usuario?.rol.trim().toLowerCase();
-                if (rol != 'administrador') {
-                  return const SizedBox(height: 16);
-                }
-                if (_ultimaPagina) {
-                  return const Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Center(
-                      child: Text('No hay más eventos'),
+          child: Stack(
+            children: [
+              RefreshIndicator(
+                onRefresh: _cargarDatos,
+                child: ListView.builder(
+                  controller: _listaScrollController,
+                  itemCount: eventosBuscados
+                      ? eventosEncontrados.length + 1
+                      : _eventos.length + 1,
+                  itemBuilder: (context, index) {
+                    final lista = eventosBuscados ? eventosEncontrados : _eventos;
+                    if (index < lista.length) {
+                      return _buildEventoCard(lista[index]);
+                    }
+                    if (eventosBuscados && lista.isEmpty) {
+                      return Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Center(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 24),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.search_off,
+                                  size: 42,
+                                  color: _cs.primary,
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  'No se han encontrado eventos para "$textoBusqueda"',
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    }
+                    final rol = _usuario?.rol.trim().toLowerCase();
+                    if (rol != 'administrador') {
+                      return const SizedBox(height: 16);
+                    }
+                    if (_cargandoMas || _cargandoBusqueda) {
+                      return const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        child: Center(child: CircularProgressIndicator()),
+                      );
+                    }
+                    return const SizedBox(height: 16);
+                  },
+                ),
+              ),
+              if (_cargandoBusqueda)
+                Positioned.fill(
+                  child: IgnorePointer(
+                    child: Container(
+                      color: _cs.surface.withValues(alpha: 0.65),
+                      child: Center(
+                        child: SizedBox(
+                          width: 36,
+                          height: 36,
+                          child: CircularProgressIndicator(color: _cs.primary),
+                        ),
+                      ),
                     ),
-                  );
-                }
-                return Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: ElevatedButton(
-                    onPressed: _cargandoMas ? null : _cargarMasEventos,
-                    child: Text(_cargandoMas ? 'Cargando...' : 'Cargar más eventos'),
                   ),
-                );
-              },
-            ),
+                ),
+            ],
           ),
         ),
       ],

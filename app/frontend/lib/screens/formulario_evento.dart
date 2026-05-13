@@ -11,6 +11,7 @@ import '../models/usuario.dart';
 import '../services/api_service.dart';
 import '../services/geocoding_service.dart';
 import '../services/shared_preferences_service.dart';
+import '../utils/validation_utils.dart';
 import '../widgets/componentes_compartidos.dart';
 
 class FormularioEvento extends StatefulWidget {
@@ -35,6 +36,7 @@ class _FormularioEventoState extends State<FormularioEvento> {
   final TextEditingController _descripcionController = TextEditingController();
   final TextEditingController _localizacionController = TextEditingController();
   final ScrollController _categoriasScrollController = ScrollController();
+  final ScrollController _formularioScrollController = ScrollController();
 
   Usuario? _usuario;
   bool _guardando = false;
@@ -47,6 +49,7 @@ class _FormularioEventoState extends State<FormularioEvento> {
 
   double? _latitudSeleccionada;
   double? _longitudSeleccionada;
+  int _peticionTextoUbicacion = 0;
   String _ultimaLocalizacionBuscada = '';
 
   List<Categoria> _categorias = [];
@@ -74,6 +77,7 @@ class _FormularioEventoState extends State<FormularioEvento> {
     _tituloController.dispose();
     _descripcionController.dispose();
     _localizacionController.dispose();
+    _formularioScrollController.dispose();
     super.dispose();
   }
 
@@ -125,6 +129,7 @@ class _FormularioEventoState extends State<FormularioEvento> {
 
     setState(() {
       _categorias = categorias;
+      _categoriaSeleccionada ??= categoriaDelEvento;
       _cargandoCategorias = false;
     });
   }
@@ -147,6 +152,86 @@ class _FormularioEventoState extends State<FormularioEvento> {
     _longitudSeleccionada = evento.longitud;
 
     _ultimaLocalizacionBuscada = evento.localizacion.trim();
+  }
+
+  Future<void> _actualizarTextoUbicacion(LatLng punto) async {
+    final idPeticion = ++_peticionTextoUbicacion;
+
+    final textoManual = _localizacionController.text.trim();
+
+    final texto = await GeocodingService.buscarDireccionDesdeCoordenadas(
+      punto.latitude,
+      punto.longitude,
+    );
+
+    if (!mounted || idPeticion != _peticionTextoUbicacion) {
+      return;
+    }
+
+    setState(() {
+      if (texto != null && texto.trim().isNotEmpty) {
+        final direccion = texto.trim();
+        final combinado =
+            textoManual.isNotEmpty &&
+                !direccion.toLowerCase().contains(textoManual.toLowerCase())
+            ? '$textoManual, $direccion'
+            : direccion;
+        final normalizado = _normalizarLocalizacion(combinado);
+        _localizacionController.text = normalizado;
+        _ultimaLocalizacionBuscada = normalizado;
+      }
+    });
+  }
+
+  String _normalizarLocalizacion(String texto) {
+    final limpio = texto.trim();
+    if (limpio.isEmpty) return limpio;
+
+    final palabras = limpio.split(RegExp(r'\s+'));
+    final resultado = <String>[];
+    String? anteriorNormalizada;
+
+    for (final palabra in palabras) {
+      final normalizada = palabra.toLowerCase().replaceAll(
+        RegExp(r'[\.,;:]+'),
+        '',
+      );
+      if (normalizada.isEmpty) {
+        continue;
+      }
+      if (normalizada == anteriorNormalizada) {
+        continue;
+      }
+      resultado.add(palabra);
+      anteriorNormalizada = normalizada;
+    }
+
+    var combinado = resultado.join(' ').replaceAll(RegExp(r'\s+'), ' ').trim();
+    final partes = combinado
+        .split(',')
+        .map((parte) => parte.trim())
+        .where((parte) => parte.isNotEmpty)
+        .toList();
+    final partesLimpias = <String>[];
+    String? anteriorParte;
+    for (final parte in partes) {
+      final normalizada = parte.toLowerCase();
+      if (normalizada == anteriorParte) {
+        continue;
+      }
+      partesLimpias.add(parte);
+      anteriorParte = normalizada;
+    }
+    if (partesLimpias.length > 2) {
+      partesLimpias.removeRange(2, partesLimpias.length);
+    }
+    combinado = partesLimpias.join(', ').trim();
+    final lower = combinado.toLowerCase();
+    final contieneMerida = lower.contains('mérida') || lower.contains('merida');
+    if (!contieneMerida) {
+      combinado = '$combinado, Mérida';
+    }
+    return combinado;
   }
 
   Future<DateTime?> _seleccionarFechaHora({required bool esInicio}) async {
@@ -205,6 +290,18 @@ class _FormularioEventoState extends State<FormularioEvento> {
 
     if (imagen == null || !mounted) return;
 
+    final ok = await ImageSize.validarTamanioImagen(imagen);
+
+    if (!ok) {
+      Mensaje.mostrarSnackBar(
+        context: context,
+        mensaje: 'La imagen no puede superar 1,5 MB',
+        icon: Icons.image_not_supported_outlined,
+        color: Colors.red,
+      );
+      return null;
+    }
+
     final extension = imagen.path.toLowerCase();
 
     if (!extension.endsWith('.png') &&
@@ -234,6 +331,8 @@ class _FormularioEventoState extends State<FormularioEvento> {
       _longitudSeleccionada = punto.longitude;
       _ultimaLocalizacionBuscada = _localizacionController.text.trim();
     });
+
+    await _actualizarTextoUbicacion(punto);
   }
 
   Future<void> _buscarUbicacionEnMapa() async {
@@ -275,6 +374,8 @@ class _FormularioEventoState extends State<FormularioEvento> {
         _ultimaLocalizacionBuscada = _localizacionController.text.trim();
       });
 
+      await _actualizarTextoUbicacion(puntoManual);
+
       return;
     }
 
@@ -290,6 +391,8 @@ class _FormularioEventoState extends State<FormularioEvento> {
       _longitudSeleccionada = puntoConfirmado.longitude;
       _ultimaLocalizacionBuscada = _localizacionController.text.trim();
     });
+
+    await _actualizarTextoUbicacion(puntoConfirmado);
   }
 
   String? _validarObligatorio(String? value) {
@@ -455,7 +558,7 @@ class _FormularioEventoState extends State<FormularioEvento> {
       context: context,
       mensaje: respuesta.mensaje,
       icon: Icons.event_available,
-      color: _cs.error,
+      color: respuesta.exito ? Colors.green : _cs.error,
     );
 
     if (respuesta.exito) {
@@ -467,13 +570,32 @@ class _FormularioEventoState extends State<FormularioEvento> {
   // INTERFAZ
   // ===========================================================================
 
-  InputDecoration _decoracion(String label) {
+  InputDecoration _decoracion(String label, {Widget? labelWidget}) {
     return InputDecoration(
-      labelText: label,
+      label: labelWidget,
+      labelText: labelWidget == null ? label : null,
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
         borderSide: BorderSide(color: _cs.primary, width: 2),
+      ),
+    );
+  }
+
+  Widget _etiquetaCampo(String label, {required bool obligatorio}) {
+    if (!obligatorio) {
+      return Text(label);
+    }
+
+    return Text.rich(
+      TextSpan(
+        text: label,
+        children: const [
+          TextSpan(
+            text: ' *',
+            style: TextStyle(color: Colors.red),
+          ),
+        ],
       ),
     );
   }
@@ -522,6 +644,7 @@ class _FormularioEventoState extends State<FormularioEvento> {
             child: InputDecorator(
               decoration: _decoracion(
                 'Categoría',
+                labelWidget: _etiquetaCampo('Categoría', obligatorio: true),
               ).copyWith(errorText: state.errorText),
               child: Row(
                 children: [
@@ -575,6 +698,7 @@ class _FormularioEventoState extends State<FormularioEvento> {
             child: InputDecorator(
               decoration: _decoracion(
                 titulo,
+                labelWidget: _etiquetaCampo(titulo, obligatorio: true),
               ).copyWith(errorText: state.errorText),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -598,6 +722,7 @@ class _FormularioEventoState extends State<FormularioEvento> {
     required TextEditingController controller,
     TextInputType? keyboardType,
     int maxLines = 1,
+    bool obligatorio = true,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
@@ -605,8 +730,11 @@ class _FormularioEventoState extends State<FormularioEvento> {
         controller: controller,
         keyboardType: keyboardType,
         maxLines: maxLines,
-        validator: _validarObligatorio,
-        decoration: _decoracion(label),
+        validator: obligatorio ? _validarObligatorio : null,
+        decoration: _decoracion(
+          label,
+          labelWidget: _etiquetaCampo(label, obligatorio: obligatorio),
+        ),
       ),
     );
   }
@@ -638,9 +766,13 @@ class _FormularioEventoState extends State<FormularioEvento> {
               state.didChange(_imagenSeleccionada);
             },
             child: InputDecorator(
-              decoration: _decoracion('Imagen del evento').copyWith(
-                errorText: state.errorText,
-              ),
+              decoration: _decoracion(
+                'Imagen del evento',
+                labelWidget: _etiquetaCampo(
+                  'Imagen del evento',
+                  obligatorio: true,
+                ),
+              ).copyWith(errorText: state.errorText),
               child: Row(
                 children: [
                   Icon(Icons.image, color: _cs.primary),
@@ -670,8 +802,7 @@ class _FormularioEventoState extends State<FormularioEvento> {
   Widget _selectorUbicacionMapa() {
     final texto = _latitudSeleccionada == null || _longitudSeleccionada == null
         ? 'Seleccionar ubicación en el mapa'
-        : 'Ubicación seleccionada\n'
-              'Lat: ${_latitudSeleccionada!.toStringAsFixed(6)} · '
+        : 'Lat: ${_latitudSeleccionada!.toStringAsFixed(6)} · '
               'Lng: ${_longitudSeleccionada!.toStringAsFixed(6)}';
 
     return Padding(
@@ -680,7 +811,10 @@ class _FormularioEventoState extends State<FormularioEvento> {
         borderRadius: BorderRadius.circular(16),
         onTap: _abrirSelectorUbicacion,
         child: InputDecorator(
-          decoration: _decoracion('Punto en el mapa'),
+          decoration: _decoracion(
+            'Punto en el mapa',
+            labelWidget: _etiquetaCampo('Punto en el mapa', obligatorio: true),
+          ),
           child: Row(
             children: [
               Icon(Icons.map, color: _cs.primary),
@@ -715,29 +849,21 @@ class _FormularioEventoState extends State<FormularioEvento> {
     required String titulo,
     required List<Widget> children,
   }) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 20),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              titulo,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: _cs.primary,
-              ),
+    return Padding(
+      padding: const EdgeInsets.all(3),
+      child: Column(
+        children: [
+          Text(
+            titulo,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: _cs.primary,
             ),
-            const SizedBox(height: 12),
-            ...children,
-          ],
-        ),
+          ),
+          const SizedBox(height: 12),
+          ...children,
+        ],
       ),
     );
   }
@@ -748,11 +874,14 @@ class _FormularioEventoState extends State<FormularioEvento> {
       autovalidateMode: AutovalidateMode.onUserInteractionIfError,
       child: Column(
         children: [
-
           _seccionFormulario(
             titulo: 'Información del evento',
             children: [
-              _campoTexto(label: 'Título', controller: _tituloController),
+              _campoTexto(
+                label: 'Título',
+                controller: _tituloController,
+                obligatorio: true,
+              ),
               _campoTexto(
                 label: 'Descripción',
                 controller: _descripcionController,
@@ -762,24 +891,46 @@ class _FormularioEventoState extends State<FormularioEvento> {
             ],
           ),
 
-          _selectorFechaHora(
-            titulo: 'Fecha y hora de inicio',
-            fecha: _fechaInicio,
-            onTap: () => _seleccionarFechaHora(esInicio: true),
+          _seccionFormulario(
+            titulo: 'Fecha del evento',
+            children: [
+              _selectorFechaHora(
+                titulo: 'Fecha y hora de inicio',
+                fecha: _fechaInicio,
+                onTap: () => _seleccionarFechaHora(esInicio: true),
+              ),
+              _selectorFechaHora(
+                titulo: 'Fecha y hora de fin',
+                fecha: _fechaFin,
+                onTap: () => _seleccionarFechaHora(esInicio: false),
+              ),
+            ],
           ),
-          _selectorFechaHora(
-            titulo: 'Fecha y hora de fin',
-            fecha: _fechaFin,
-            onTap: () => _seleccionarFechaHora(esInicio: false),
+          _seccionFormulario(
+            titulo: 'Ubicación del evento',
+            children: [
+              _campoTexto(
+                label: 'Localización',
+                controller: _localizacionController,
+              ),
+              _botonBuscarUbicacion(),
+              _selectorUbicacionMapa(),
+            ],
           ),
-          _campoTexto(
-            label: 'Localización',
-            controller: _localizacionController,
+          _seccionFormulario(
+            titulo: 'Imagen del evento',
+            children: [
+              _selectorImagen(),
+              Text(
+                'Tamaño máximo: 1,5 MB',
+                style: TextStyle(
+                  color: _cs.onSurface.withValues(alpha: 0.6),
+                  fontSize: 12,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
           ),
-          _botonBuscarUbicacion(),
-          _selectorUbicacionMapa(),
-          _selectorImagen(),
-          _selectorCategoria(),
           const SizedBox(height: 16),
           SizedBox(
             width: double.infinity,
@@ -795,10 +946,12 @@ class _FormularioEventoState extends State<FormularioEvento> {
                   : const Icon(Icons.save),
               label: Text(
                 _guardando
-                    ? 'Guardando...'
+                    ? widget.esEdicion
+                          ? 'Actualizando...'
+                          : 'Guardando...'
                     : widget.esEdicion
                     ? 'Actualizar evento'
-                    : 'Guardar evento',
+                    : 'Añadir evento',
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: _cs.primary,
@@ -894,13 +1047,13 @@ class _FormularioEventoState extends State<FormularioEvento> {
                                 ),
                                 decoration: BoxDecoration(
                                   color: seleccionada
-                                      ? _cs.primary.withOpacity(0.12)
+                                      ? _cs.primary.withValues(alpha: 0.12)
                                       : _cs.surface,
                                   borderRadius: BorderRadius.circular(12),
                                   border: Border.all(
                                     color: seleccionada
                                         ? _cs.primary
-                                        : _cs.outline.withOpacity(0.4),
+                                        : _cs.outline.withValues(alpha: 0.4),
                                   ),
                                 ),
                                 child: Row(
@@ -987,9 +1140,21 @@ class _FormularioEventoState extends State<FormularioEvento> {
         foregroundColor: _cs.surface,
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: _buildFormulario(),
+      body: RawScrollbar(
+        controller: _formularioScrollController,
+        thumbVisibility: true,
+        trackVisibility: false,
+        interactive: true,
+        thickness: 6,
+        radius: const Radius.circular(20),
+        mainAxisMargin: 24,
+        crossAxisMargin: 4,
+        thumbColor: _cs.primary,
+        child: SingleChildScrollView(
+          controller: _formularioScrollController,
+          padding: const EdgeInsets.all(24),
+          child: _buildFormulario(),
+        ),
       ),
     );
   }
