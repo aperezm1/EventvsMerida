@@ -124,6 +124,22 @@ function validarEdad(input, edadMinima, edadMaxima, fechaObligatoria) {
     return true;
   }
 
+  const hoy = new Date();
+  const year = hoy.getFullYear();
+  const month = String(hoy.getMonth() + 1).padStart(2, "0");
+  const day = String(hoy.getDate()).padStart(2, "0");
+  const fechaHoy = `${year}-${month}-${day}`;
+
+  if (fechaNacimiento > fechaHoy) {
+    input.setCustomValidity("Fecha inválida");
+
+    if (feedback) {
+      feedback.textContent = "La fecha de nacimiento no puede ser una fecha futura.";
+    }
+
+    return false;
+  }
+
   const fechaMinimaPermitida = calcularFechaPorEdad(edadMaxima);
   const fechaMaximaPermitida = calcularFechaPorEdad(edadMinima);
 

@@ -12,20 +12,30 @@ window.addEventListener("DOMContentLoaded", async () => {
   const ok = await requireAuth();
   if (!ok) return;
 
-  cargarOrganizadores();
+  await cargarOrganizadores();
 
-  // Formulario agregar organizador
+  // Formulario de creación de organizador
   const form = document.getElementById("formAgregarOrganizador");
+  const fechaNacimientoInput = document.getElementById("fechaNacimiento");
+
+  if (fechaNacimientoInput) {
+    fechaNacimientoInput.addEventListener("input", function () {
+      validarEdad(this, 14, 100, true);
+    });
+  }
+
   if (form) {
     form.addEventListener(
       "submit",
       function (event) {
         event.preventDefault();
 
-        const contrasenia = document.getElementById("contrasena").value;
-        const confirmarContrasenia = document.getElementById("confirmarContrasena").value;
+        validarEdad(fechaNacimientoInput, 14, 100, true);
 
-        validarEdad(document.getElementById("fechaNacimiento"), 14, 100, true);
+        const contrasenia = document.getElementById("contrasenia").value;
+        const confirmarContrasenia = document.getElementById(
+          "confirmarContrasenia",
+        ).value;
 
         if (!form.checkValidity()) {
           event.stopPropagation();
@@ -62,55 +72,60 @@ window.addEventListener("DOMContentLoaded", async () => {
     );
   }
 
-  // Formulario editar organizador
+  // Formulario de edición de organizador
   const formEditar = document.getElementById("formEditarOrganizador");
+  const fechaNacimientoEditarInput = document.getElementById("fechaNacimientoEditar");
   let contrasenia = "";
 
-  formEditar.addEventListener(
-    "submit",
-    function (event) {
-      event.preventDefault();
+  if (fechaNacimientoEditarInput) {
+    fechaNacimientoEditarInput.addEventListener("input", function () {
+      validarEdad(this, 14, 100, false);
+    });
+  }
 
-      validarEdad(document.getElementById("fechaNacimiento"), 14, 100, false);
-      if (!formEditar.checkValidity()) {
+  if (formEditar) {
+    formEditar.addEventListener(
+      "submit",
+      function (event) {
         event.preventDefault();
-        event.stopPropagation();
-        formEditar.classList.add("was-validated");
-      } else {
-        event.preventDefault();
-        const organizador = {
-          nombre: document.getElementById("nombreEditar").value,
-          apellidos: document.getElementById("apellidosEditar").value,
-          fechaNacimiento: formatearFecha(
-            document.getElementById("fechaNacimientoEditar").value,
-          ),
-          email: document.getElementById("correoEditar").value,
-          telefono: document.getElementById("telefonoEditar").value,
-          password: contraseniaModificada ? contrasenia : null,
-          idRol: 2,
-        };
 
-        const formData = new FormData();
-        formData.append("usuario", JSON.stringify(organizador));
+        validarEdad(fechaNacimientoEditarInput, 14, 100, false);
 
-        const fotoFile = document.getElementById("formFileEditar")?.files?.[0];
-        if (fotoFile) {
-          formData.append("foto", fotoFile);
+        if (!formEditar.checkValidity()) {
+          event.stopPropagation();
+        } else {
+          const organizador = {
+            nombre: document.getElementById("nombreEditar").value,
+            apellidos: document.getElementById("apellidosEditar").value,
+            fechaNacimiento: formatearFecha(
+              document.getElementById("fechaNacimientoEditar").value,
+            ),
+            email: document.getElementById("correoEditar").value,
+            telefono: document.getElementById("telefonoEditar").value,
+            password: contraseniaModificada ? contrasenia : null,
+            idRol: 2,
+          };
+
+          const formData = new FormData();
+          formData.append("usuario", JSON.stringify(organizador));
+
+          const fotoFile = document.getElementById("formFileEditar")?.files?.[0];
+          if (fotoFile) {
+            formData.append("foto", fotoFile);
+          }
+
+          editarOrganizador(formEditar.dataset.id, formData);
         }
 
-        editarOrganizador(formEditar.dataset.id, formData);
-      }
-      formEditar.classList.add("was-validated");
-    },
-    false,
-  );
+        formEditar.classList.add("was-validated");
+      },
+      false,
+    );
+  }
 
-  // Formulario editar contraseña organizador
+  // Formulario de edición de contraseña
   let contraseniaModificada = false;
-
-  const formEditarContrasenia = document.getElementById(
-    "formEditarContrasenia",
-  );
+  const formEditarContrasenia = document.getElementById("formEditarContrasenia");
 
   formEditarContrasenia.addEventListener(
     "submit",
@@ -140,7 +155,9 @@ window.addEventListener("DOMContentLoaded", async () => {
 
         mostrarAlerta("info", "Contraseña actualizada pendiente de guardar");
 
-        const modalEditarContrasenia = document.getElementById("modalEditarContrasenia");
+        const modalEditarContrasenia = document.getElementById(
+          "modalEditarContrasenia",
+        );
 
         modalEditarContrasenia.addEventListener("hidden.bs.modal", function () {
           const modalEditarOrganizador = new bootstrap.Modal(
@@ -154,7 +171,6 @@ window.addEventListener("DOMContentLoaded", async () => {
     false,
   );
 
-  // Limpia validaciones y campos al cerrar el modal de usuario
   const modalOrganizador = document.getElementById("modalCrearOrganizador");
   if (modalOrganizador) {
     modalOrganizador.addEventListener("hidden.bs.modal", function () {
@@ -166,9 +182,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  const modalEditarOrganizador = document.getElementById(
-    "modalEditarOrganizador",
-  );
+  const modalEditarOrganizador = document.getElementById("modalEditarOrganizador");
   if (modalEditarOrganizador) {
     modalEditarOrganizador.addEventListener("hidden.bs.modal", function () {
       const form = document.getElementById("formEditarOrganizador");
@@ -186,17 +200,21 @@ window.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  document.getElementById("fotoOrganizador").addEventListener("change", function () {
-    if(!validarImagen(this.files[0])){
-      this.value = "";
-    }
-  });
+  document
+    .getElementById("fotoOrganizador")
+    .addEventListener("change", function () {
+      if (!validarImagen(this.files[0])) {
+        this.value = "";
+      }
+    });
 
-  document.getElementById("formFileEditar").addEventListener("change", function () {
-    if(!validarImagen(this.files[0])){
-      this.value = "";
-    }
-  });
+  document
+    .getElementById("formFileEditar")
+    .addEventListener("change", function () {
+      if (!validarImagen(this.files[0])) {
+        this.value = "";
+      }
+    });
 
   configurarMostrarContraseniasFormulario(
     ["contrasenia", "confirmarContrasenia"],
@@ -221,7 +239,7 @@ window.addEventListener("DOMContentLoaded", async () => {
       },
       {
         idBoton: "toggleConfirmarContraseniaEditar",
-        idIcono: "iconoConfirmarContrasenaEditar",
+        idIcono: "iconoConfirmarContraseniaEditar",
       },
     ],
   );

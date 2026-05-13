@@ -202,7 +202,7 @@
       </div>
     </div>
 
-    <!-- Modal -->
+    <!-- Modal Crear Evento -->
     <div
       class="modal fade"
       id="modalCrearEvento"
@@ -249,7 +249,7 @@
                         minlength="2"
                         maxlength="50"
                       />
-                      <div class="invalid-feedback">Introduce un título</div>
+                      <div class="invalid-feedback">Introduce un título (mínimo 2 caracteres).</div>
                     </div>
                     <div class="col-md-6">
                       <label for="localizacionEvento" class="form-label">
@@ -263,7 +263,7 @@
                         minlength="2"
                         maxlength="50"
                       />
-                      <div class="invalid-feedback">Introduce una localización.</div>
+                      <div class="invalid-feedback">Introduce una localización (mínimo 2 caracteres).</div>
                     </div>
                     <div class="col-md-12">
                       <label for="descripcion" class="form-label">
@@ -351,10 +351,10 @@
                   <div class="row g-3">
                     <div class="col-md-6">
                       <label for="organizadores" class="form-label">Organizador</label>
-                      <select class="form-select" id="organizadores">
+                      <select class="form-select" id="organizadores" required>
                         <option value="">Selecciona un organizador</option>
                       </select>
-                      <div class="invalid-feedback">Selecciona un rol.</div>
+                      <div class="invalid-feedback">Selecciona un organizador.</div>
                     </div>
                     <div class="col-md-6">
                       <label for="categorias" class="form-label">
@@ -363,7 +363,7 @@
                       <select class="form-select" id="categorias" required>
                         <option value="">Selecciona una categoría</option>
                       </select>
-                      <div class="invalid-feedback">Selecciona un rol.</div>
+                      <div class="invalid-feedback">Selecciona una categoría.</div>
                     </div>
                   </div>
                 </div>
@@ -442,6 +442,7 @@
       </div>
     </div>
 
+    <!-- Modal Editar Evento -->
     <div
       class="modal fade"
       id="modalEditarEvento"
@@ -486,7 +487,7 @@
                         minlength="2"
                         maxlength="50"
                       />
-                      <div class="invalid-feedback">Introduce un título</div>
+                      <div class="invalid-feedback">Introduce un título (mínimo 2 caracteres).</div>
                     </div>
                     <div class="col-md-6">
                       <label for="localizacionEditar" class="form-label">Localización</label>
@@ -499,7 +500,7 @@
                         maxlength="50"
                         title="Solo letras y espacios"
                       />
-                      <div class="invalid-feedback">Introduce una localización</div>
+                      <div class="invalid-feedback">Introduce una localización (mínimo 2 caracteres).</div>
                     </div>
                     <div class="col-md-12">
                       <label for="descripcionEventoEditar" class="form-label">Descripción</label>
@@ -577,7 +578,7 @@
                   <div class="row g-3">
                     <div class="col-md-6">
                       <label for="idRol" class="form-label">Organizador</label>
-                      <select class="form-select" id="organizadoresEditar">
+                      <select class="form-select" id="organizadoresEditar" required>
                         <option value="">Selecciona un organizador</option>
                       </select>
                       <div class="invalid-feedback">Selecciona un organizador.</div>

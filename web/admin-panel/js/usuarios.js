@@ -16,18 +16,26 @@ window.addEventListener("DOMContentLoaded", async () => {
 
   // Formulario de creación de usuario
   const form = document.getElementById("formAgregarUsuario");
+  const fechaNacimientoInput = document.getElementById("fechaNacimiento");
+
+  if (fechaNacimientoInput) {
+    fechaNacimientoInput.addEventListener("input", function () {
+      validarEdad(this, 14, 100, true);
+    });
+  }
+
   if (form) {
     form.addEventListener(
       "submit",
       function (event) {
         event.preventDefault();
 
+        validarEdad(fechaNacimientoInput, 14, 100, true);
+
         const contrasenia = document.getElementById("contrasena").value;
         const confirmarContrasenia = document.getElementById(
           "confirmarContrasena",
         ).value;
-
-        validarEdad(document.getElementById("fechaNacimiento"), 14, 100, true);
 
         if (!form.checkValidity()) {
           event.stopPropagation();
@@ -38,7 +46,9 @@ window.addEventListener("DOMContentLoaded", async () => {
           const usuario = {
             nombre: document.getElementById("nombre").value,
             apellidos: document.getElementById("apellidos").value,
-            fechaNacimiento: formatearFecha(document.getElementById("fechaNacimiento").value),
+            fechaNacimiento: formatearFecha(
+              document.getElementById("fechaNacimiento").value,
+            ),
             email: document.getElementById("correo").value,
             telefono: document.getElementById("telefono").value,
             password: contrasenia,
@@ -64,74 +74,76 @@ window.addEventListener("DOMContentLoaded", async () => {
 
   // Formulario de edición de usuario
   const formEditar = document.getElementById("formEditarUsuario");
+  const fechaNacimientoEditarInput = document.getElementById("fechaNacimientoEditar");
   let contrasenia = "";
 
-  formEditar.addEventListener(
-    "submit",
-    function (event) {
-      validarEdad(
-        document.getElementById("fechaNacimientoEditar"),
-        14,
-        100,
-        false,
-      );
+  if (fechaNacimientoEditarInput) {
+    fechaNacimientoEditarInput.addEventListener("input", function () {
+      validarEdad(this, 14, 100, false);
+    });
+  }
 
-      if (!formEditar.checkValidity()) {
+  if (formEditar) {
+    formEditar.addEventListener(
+      "submit",
+      function (event) {
         event.preventDefault();
-        event.stopPropagation();
-        formEditar.classList.add("was-validated");
-      } else {
-        event.preventDefault();
-        contraseniaModificada = true
-        const usuario = {
-          nombre:
-            document.getElementById("nombreEditar").value === ""
-              ? null
-              : document.getElementById("nombreEditar").value,
-          apellidos:
-            document.getElementById("apellidosEditar").value === ""
-              ? null
-              : document.getElementById("apellidosEditar").value,
-          fechaNacimiento:
-            formatearFecha(
-              document.getElementById("fechaNacimientoEditar").value,
-            ) === ""
-              ? null
-              : formatearFecha(
-                  document.getElementById("fechaNacimientoEditar").value,
-                ),
-          email:
-            document.getElementById("correoEditar").value === ""
-              ? null
-              : document.getElementById("correoEditar").value,
-          telefono:
-            document.getElementById("telefonoEditar").value === ""
-              ? null
-              : document.getElementById("telefonoEditar").value,
-          password: contraseniaModificada ? contrasenia : null,
-          idRol: 1,
-        };
-        const formData = new FormData();
-        formData.append("usuario", JSON.stringify(usuario));
 
-        const fotoFile = document.getElementById("formFileEditar")?.files?.[0];
-        if (fotoFile) {
-          formData.append("foto", fotoFile);
+        validarEdad(fechaNacimientoEditarInput, 14, 100, false);
+
+        if (!formEditar.checkValidity()) {
+          event.stopPropagation();
+          formEditar.classList.add("was-validated");
+        } else {
+          const usuario = {
+            nombre:
+              document.getElementById("nombreEditar").value === ""
+                ? null
+                : document.getElementById("nombreEditar").value,
+            apellidos:
+              document.getElementById("apellidosEditar").value === ""
+                ? null
+                : document.getElementById("apellidosEditar").value,
+            fechaNacimiento:
+              formatearFecha(
+                document.getElementById("fechaNacimientoEditar").value,
+              ) === ""
+                ? null
+                : formatearFecha(
+                    document.getElementById("fechaNacimientoEditar").value,
+                  ),
+            email:
+              document.getElementById("correoEditar").value === ""
+                ? null
+                : document.getElementById("correoEditar").value,
+            telefono:
+              document.getElementById("telefonoEditar").value === ""
+                ? null
+                : document.getElementById("telefonoEditar").value,
+            password: contraseniaModificada ? contrasenia : null,
+            idRol: 1,
+          };
+
+          const formData = new FormData();
+          formData.append("usuario", JSON.stringify(usuario));
+
+          const fotoFile = document.getElementById("formFileEditar")?.files?.[0];
+          if (fotoFile) {
+            formData.append("foto", fotoFile);
+          }
+
+          editarUsuario(formEditar.dataset.id, formData);
         }
 
-        editarUsuario(formEditar.dataset.id, formData);
-      }
-      formEditar.classList.add("was-validated");
-    },
-    false,
-  );
+        formEditar.classList.add("was-validated");
+      },
+      false,
+    );
+  }
 
   // Formulario de edición de contraseña
   let contraseniaModificada = false;
-
-  const formEditarContrasenia = document.getElementById(
-    "formEditarContrasenia",
-  );
+  const formEditarContrasenia = document.getElementById("formEditarContrasenia");
 
   formEditarContrasenia.addEventListener(
     "submit",
@@ -177,7 +189,6 @@ window.addEventListener("DOMContentLoaded", async () => {
     false,
   );
 
-  // Limpia validaciones y campos al cerrar el modal de crear usuario
   const modalUsuario = document.getElementById("modalCrearUsuario");
   if (modalUsuario) {
     modalUsuario.addEventListener("hidden.bs.modal", function () {
@@ -190,7 +201,6 @@ window.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // Limpia validaciones y campos al cerrar el modal de editar usuario
   const modalEditarUsuario = document.getElementById("modalEditarUsuario");
   if (modalEditarUsuario) {
     modalEditarUsuario.addEventListener("hidden.bs.modal", function () {
@@ -210,17 +220,21 @@ window.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  document.getElementById("fotoUsuario").addEventListener("change", function () {
-    if (!validarImagen(this.files[0])) {
-      this.value = "";
-    }
-  });
+  document
+    .getElementById("fotoUsuario")
+    .addEventListener("change", function () {
+      if (!validarImagen(this.files[0])) {
+        this.value = "";
+      }
+    });
 
-  document.getElementById("formFileEditar").addEventListener("change", function () {
-    if (!validarImagen(this.files[0])) {
-      this.value = "";
-    }
-  });
+  document
+    .getElementById("formFileEditar")
+    .addEventListener("change", function () {
+      if (!validarImagen(this.files[0])) {
+        this.value = "";
+      }
+    });
 
   configurarMostrarContraseniasFormulario(
     ["contrasena", "confirmarContrasena"],
@@ -347,7 +361,7 @@ async function cargarUsuarios() {
       btnVer.setAttribute("data-bs-toggle", "modal");
       btnVer.setAttribute("data-bs-target", "#modalVerUsuario");
       btnVer.addEventListener("click", async function () {
-        const detalle = await obtenerOrganizadorPorId(URL_BASE, usuario.id);
+        const detalle = await obtenerOrganizadorPorId(usuario.id);
         if (detalle) {
           verOrganizador(detalle);
         }
@@ -362,7 +376,7 @@ async function cargarUsuarios() {
       btnEditar.setAttribute("data-bs-toggle", "modal");
       btnEditar.setAttribute("data-bs-target", "#modalEditarUsuario");
       btnEditar.addEventListener("click", async function () {
-        const detalle = await obtenerOrganizadorPorId(URL_BASE, usuario.id);
+        const detalle = await obtenerOrganizadorPorId(usuario.id);
         const data = detalle || usuario;
         document.getElementById("formEditarUsuario").dataset.id = data.id;
         document.getElementById("nombreEditar").value = data.nombre;
