@@ -736,10 +736,12 @@ class SalidaApp {
     IconData icono = Icons.open_in_new,
     LaunchMode launchMode = LaunchMode.externalApplication,
   }) async {
-    final confirmado = await _mostrarModalConfirmacionSalida(
+    final confirmado = await SalidaApp.mostrarModalConfirmacion(
       context: context,
-      destino: destino,
+      titulo: 'Salir de la aplicación',
+      mensaje: 'Estás a punto de abrir $destino fuera de Eventvs Mérida.',
       icono: icono,
+      textoConfirmar: 'Continuar',
     );
 
     if (!confirmado) return;
@@ -767,10 +769,14 @@ class SalidaApp {
     }
   }
 
-  static Future<bool> _mostrarModalConfirmacionSalida({
+  static Future<bool> mostrarModalConfirmacion({
     required BuildContext context,
-    required String destino,
+    required String titulo,
+    required String mensaje,
     required IconData icono,
+    String textoCancelar = 'Cancelar',
+    String textoConfirmar = 'Continuar',
+    Color? colorConfirmar,
   }) async {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
@@ -797,7 +803,6 @@ class SalidaApp {
                 ),
               ),
             ),
-
             Center(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -824,9 +829,6 @@ class SalidaApp {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            // ─────────────────────────────
-                            // CABECERA
-                            // ─────────────────────────────
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -837,27 +839,19 @@ class SalidaApp {
                                     color: cs.primary.withValues(alpha: 0.14),
                                     shape: BoxShape.circle,
                                   ),
-                                  child: Icon(
-                                    icono,
-                                    color: cs.primary,
-                                    size: 24,
-                                  ),
+                                  child: Icon(icono, color: cs.primary, size: 24),
                                 ),
-
                                 const SizedBox(width: 12),
-
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      // TÍTULO + CERRAR
                                       Row(
-                                        crossAxisAlignment:
-                                        CrossAxisAlignment.center,
+                                        crossAxisAlignment: CrossAxisAlignment.center,
                                         children: [
                                           Expanded(
                                             child: Text(
-                                              'Salir de la aplicación',
+                                              titulo,
                                               style: tt.titleMedium?.copyWith(
                                                 fontWeight: FontWeight.bold,
                                                 color: cs.onSurface,
@@ -865,31 +859,22 @@ class SalidaApp {
                                             ),
                                           ),
                                           IconButton(
-                                            visualDensity:
-                                            VisualDensity.compact,
+                                            visualDensity: VisualDensity.compact,
                                             padding: EdgeInsets.zero,
                                             constraints: const BoxConstraints(
                                               minWidth: 32,
                                               minHeight: 32,
                                             ),
-                                            icon: Icon(
-                                              Icons.close,
-                                              color: cs.onSurface,
-                                            ),
+                                            icon: Icon(Icons.close, color: cs.onSurface),
                                             onPressed: () {
-                                              Navigator.of(
-                                                dialogContext,
-                                                rootNavigator: true,
-                                              ).pop(false);
+                                              Navigator.of(dialogContext, rootNavigator: true).pop(false);
                                             },
                                           ),
                                         ],
                                       ),
-
                                       const SizedBox(height: 8),
-
                                       Text(
-                                        'Estás a punto de abrir $destino fuera de Eventvs Mérida.',
+                                        mensaje,
                                         style: tt.bodyMedium?.copyWith(
                                           color: cs.onSurface,
                                           height: 1.35,
@@ -900,58 +885,33 @@ class SalidaApp {
                                 ),
                               ],
                             ),
-
                             const SizedBox(height: 20),
-
-                            // ─────────────────────────────
-                            // ACCIONES
-                            // ─────────────────────────────
                             Row(
                               children: [
                                 Expanded(
                                   child: OutlinedButton(
                                     onPressed: () {
-                                      Navigator.of(
-                                        dialogContext,
-                                        rootNavigator: true,
-                                      ).pop(false);
+                                      Navigator.of(dialogContext, rootNavigator: true).pop(false);
                                     },
                                     style: OutlinedButton.styleFrom(
                                       foregroundColor: cs.primary,
                                       side: BorderSide(color: cs.primary),
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 12,
-                                      ),
+                                      padding: const EdgeInsets.symmetric(vertical: 12),
                                     ),
-                                    child: const Text('Cancelar'),
+                                    child: Text(textoCancelar),
                                   ),
                                 ),
-
                                 const SizedBox(width: 10),
-
                                 Expanded(
                                   child: FilledButton.icon(
                                     onPressed: () {
-                                      Navigator.of(
-                                        dialogContext,
-                                        rootNavigator: true,
-                                      ).pop(true);
+                                      Navigator.of(dialogContext, rootNavigator: true).pop(true);
                                     },
-                                    icon: Icon(
-                                      Icons.open_in_new,
-                                      size: 18,
-                                      color: cs.surface,
-                                    ),
-                                    label: Text(
-                                      'Continuar',
-                                      style:
-                                      TextStyle(color: cs.surface),
-                                    ),
+                                    icon: Icon(icono, size: 18, color: cs.surface),
+                                    label: Text(textoConfirmar, style: TextStyle(color: cs.surface)),
                                     style: FilledButton.styleFrom(
-                                      backgroundColor: cs.primary,
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 12,
-                                      ),
+                                      backgroundColor: colorConfirmar ?? cs.primary,
+                                      padding: const EdgeInsets.symmetric(vertical: 12),
                                     ),
                                   ),
                                 ),
@@ -1128,39 +1088,61 @@ class Tutorial {
 
 Future<XFile?> elegirImagen(BuildContext context) async {
   ImagePicker picker = ImagePicker();
+
   final fuente = await showModalBottomSheet<ImageSource>(
     context: context,
     backgroundColor: Theme.of(context).colorScheme.surface,
     shape: RoundedRectangleBorder(
       borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-      side: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
+      side: BorderSide(
+        color: Theme.of(context).colorScheme.primary,
+        width: 2,
+      ),
     ),
     builder: (context) {
       final cs = Theme.of(context).colorScheme;
+
       return SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.photo_library),
-              title: const Text('Galería'),
-              onTap: () => Navigator.pop(context, ImageSource.gallery),
-            ),
-            ListTile(
-              leading: const Icon(Icons.camera_alt),
-              title: const Text('Cámara'),
-              onTap: () => Navigator.pop(context, ImageSource.camera),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Tamaño máximo: 1,5 MB',
-              style: TextStyle(
-                fontSize: 12,
-                color: cs.onSurface.withValues(alpha: 0.6),
+        child: Padding(
+          padding: const EdgeInsets.only(top: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 45,
+                height: 5,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: cs.onSurface.withValues(alpha: 0.25),
+                  borderRadius: BorderRadius.circular(20),
+                ),
               ),
-            ),
-            const SizedBox(height: 12),
-          ],
+
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Galería'),
+                onTap: () => Navigator.pop(context, ImageSource.gallery),
+              ),
+
+              ListTile(
+                leading: const Icon(Icons.camera_alt),
+                title: const Text('Cámara'),
+                onTap: () => Navigator.pop(context, ImageSource.camera),
+              ),
+
+              const SizedBox(height: 8),
+
+              Text(
+                'Tamaño máximo: 1,5 MB',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: cs.onSurface.withValues(alpha: 0.6),
+                ),
+              ),
+
+              const SizedBox(height: 12),
+            ],
+          ),
         ),
       );
     },
@@ -1177,14 +1159,25 @@ Future<XFile?> elegirImagen(BuildContext context) async {
     if (imagen == null) return null;
 
     final ok = await ImageSize.validarTamanioImagen(imagen);
+
     if (!ok) {
-      Mensaje.mostrarSnackBar(context: context, mensaje: 'La imagen no puede superar 1,5 MB', icon: Icons.image_not_supported_outlined, color: Colors.red);
+      Mensaje.mostrarSnackBar(
+        context: context,
+        mensaje: 'La imagen no puede superar 1,5 MB',
+        icon: Icons.image_not_supported_outlined,
+        color: Colors.red,
+      );
       return null;
     }
 
     return imagen;
   } catch (e) {
-    Mensaje.mostrarSnackBar(context: context, mensaje: 'Error al seleccionar la imagen', icon: Icons.image_not_supported_outlined, color: Colors.red);
+    Mensaje.mostrarSnackBar(
+      context: context,
+      mensaje: 'Error al seleccionar la imagen',
+      icon: Icons.image_not_supported_outlined,
+      color: Colors.red,
+    );
     return null;
   }
 }

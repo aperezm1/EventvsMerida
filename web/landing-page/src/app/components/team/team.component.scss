@@ -44,16 +44,20 @@
   }
 }
 
-.team-photo {
+.team-photo-wrap {
   position: absolute;
   top: 5.5rem;
   right: -2vw;
   width: clamp(340px, 30vw, 820px);
+  z-index: 0;
+}
+
+.team-photo {
+  width: 100%;
   overflow: hidden;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
   clip-path: polygon(0 6%, 94% 0, 100% 10%, 100% 86%, 96% 100%, 6% 96%, 0 86%);
   transform: rotate(34deg);
-  z-index: 0;
 }
 
 .team-photo::after {
