@@ -447,7 +447,7 @@ class _RegistroState extends State<Registro> {
   Widget _buildFormulario() {
     return Form(
       key: _formKey,
-      autovalidateMode: AutovalidateMode.onUserInteraction,
+      autovalidateMode: AutovalidateMode.onUserInteractionIfError,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
