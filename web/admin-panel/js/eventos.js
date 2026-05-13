@@ -1,17 +1,20 @@
-const URL_BASE = "https://eventvsmerida-x2t1.onrender.com/api/";
+// ==========================================================================
+// VARIABLES
+// ==========================================================================
+
+const URL_BASE = window.APP_CONFIG.API_BASE;
+
+let paginaActual = 0;
+let cantidadPaginacion = 1;
+
+// ==========================================================================
+// CONTENIDO DEL DOM
+// ==========================================================================
 
 window.addEventListener("DOMContentLoaded", async () => {
-  const sesion = await logeado();
+  const ok = await requireAuth();
+  if (!ok) return;
 
-  if (sesion === 401) {
-    window.location.href = `${window.location.origin}/html/login.html`;
-    return;
-  } else if (sesion === 200) {
-    document.body.classList.remove("auth-pending");
-  }
-
-  paginaActual = 0;
-  cantidadPaginacion = 1;
   cargarEventos();
   obtenerOrganizadores();
   obtenerCategorias();
@@ -28,6 +31,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
+  // Formulario agregar evento
   const form = document.getElementById("formAgregarEvento");
 
   form.addEventListener(
@@ -67,7 +71,9 @@ window.addEventListener("DOMContentLoaded", async () => {
     false,
   );
 
+  // Formulario editar evento
   const formEditar = document.getElementById("formEditarEvento");
+
   formEditar.addEventListener("submit", function (event) {
     if (!formEditar.checkValidity()) {
       event.preventDefault();
@@ -99,10 +105,9 @@ window.addEventListener("DOMContentLoaded", async () => {
 
     const formData = new FormData();
     formData.append("evento", JSON.stringify(evento));
-    const file = document.getElementById("formFile")?.files?.[0];
+    const file = document.getElementById("formFileEditar")?.files?.[0];
+    if (file && !validarImagen(file)) return;
     if (file) formData.append("imagen", file);
-    if (!validarImagen(fotoCrear)) return;
-        formData.append("imagen", fotoCrear);
 
     editarEvento(formEditar.dataset.id, formData);
     formEditar.classList.add("was-validated");
@@ -121,26 +126,16 @@ window.addEventListener("DOMContentLoaded", async () => {
   });
 });
 
-function validarImagen(imagen) {
-  const formatosPermitidos = ["image/jpeg", "image/jpg", "image/png"];
-  const maxSize = 1.5 * 1024 * 1024; // 1.5MB en bytes
-  if (!imagen) return true;
+// ==========================================================================
+// FUNCIONES
+// ==========================================================================
 
-  if (!formatosPermitidos.includes(imagen.type)) {
-    mostrarAlerta("error", "Solo se permiten imágenes en formato JPG, JPEG o PNG");
-    return false;
-  }
-  if (imagen.size > maxSize) {
-    mostrarAlerta("error", "La imagen no puede superar los 1.5MB");
-    return false;
-  }
-  return true;
-}
-
+// Limpiar buscador al crear/editar/eliminar evento para mostrar cambios
 function limpiarBuscador() {
   document.getElementById("buscador").value = "";
 }
 
+// Cargar eventos con paginación
 async function cargarEventos() {
   const loader = document.getElementById("loader");
   const body = document.querySelector("body");
@@ -169,6 +164,7 @@ async function cargarEventos() {
   }
 }
 
+// Buscar eventos
 async function buscarEvento(textoBusqueda) {
   const loader = document.getElementById("loader");
   const body = document.querySelector("body");
@@ -202,6 +198,7 @@ async function buscarEvento(textoBusqueda) {
   }
 }
 
+// Mostrar eventos en la tabla
 function mostrarEventos(data, numeroPaginas = 0) {
   const tabla = document.getElementById("listadoEventos");
   cantidadPaginacion = numeroPaginas
@@ -345,11 +342,18 @@ function mostrarEventos(data, numeroPaginas = 0) {
         lon + delta, // este
         lat + delta, // norte
       ].join(",");
-      mapa = `<div style="width:100%;max-width:320px;margin:auto">
-                            <iframe width="400" height="280" style="border-radius:10px;border:0;" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"
-                                src="https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat},${lon}">
-                            </iframe>
-                        </div>`;
+      mapa = `
+        <div style="max-width:320px;margin:0 auto;">
+          <iframe
+            style="width:100%;height:280px;border-radius:10px;border:0;display:block"
+            frameborder="0"
+            scrolling="no"
+            marginheight="0"
+            marginwidth="0"
+            src="https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat},${lon}">
+          </iframe>
+        </div>
+      `;
     } else {
       mapa =
         '<div class="text-center text-warning">No hay coordenadas para este evento.</div>';
@@ -412,6 +416,7 @@ function mostrarEventos(data, numeroPaginas = 0) {
   cargarPaginacion(numeroPaginas, paginaActual);
 }
 
+// Función para cargar paginación
 function cargarPaginacion(totalPaginas, paginaActual) {
   const lista = document.getElementById("paginacion");
   const btnAnterior = document.getElementById("btnAnterior");
@@ -457,6 +462,7 @@ function cargarPaginacion(totalPaginas, paginaActual) {
   btnSiguiente.classList.toggle("disabled", paginaActual === totalPaginas - 1);
 }
 
+// Función para insertar página nueva
 function insertarPagina(lista, indice, paginaActual) {
   const li = document.createElement("li");
   li.classList.add("page-item", "pagina-numero");
@@ -477,6 +483,7 @@ function insertarPagina(lista, indice, paginaActual) {
   lista.insertBefore(li, document.getElementById("btnSiguiente"));
 }
 
+// Función para insertar puntos suspensivos
 function insertarPuntos(lista) {
   const li = document.createElement("li");
   li.classList.add("page-item", "ellipsis");
@@ -489,6 +496,7 @@ function insertarPuntos(lista) {
   lista.insertBefore(li, document.getElementById("btnSiguiente"));
 }
 
+// Función para actualizar estado de botones anterior/siguiente
 function actualizarBotones() {
   const btnAnterior = document.getElementById("btnAnterior");
   const btnSiguiente = document.getElementById("btnSiguiente");
@@ -500,28 +508,15 @@ function actualizarBotones() {
   );
 }
 
-document.getElementById("btnAnterior").addEventListener("click", (e) => {
-  e.preventDefault();
-  if (paginaActual > 0) {
-    paginaActual--;
-    cargarEventos();
-  }
-});
 
-document.getElementById("btnSiguiente").addEventListener("click", (e) => {
-  e.preventDefault();
-  if (paginaActual < cantidadPaginacion - 1) {
-    paginaActual++;
-    cargarEventos();
-  }
-});
-
+// Función para avanzar a página específica
 function avanzarPagina(indice) {
   paginaActual = indice;
   cargarEventos();
   actualizarBotones();
 }
 
+// Funciones para obtener categorías
 async function obtenerCategorias() {
   const selectCrear = document.getElementById("categorias");
   const selectEditar = document.getElementById("categoriasEditar");
@@ -545,9 +540,11 @@ async function obtenerCategorias() {
     selects.forEach((select) => {
       const placeholder = select.querySelector("option[value='']");
       select.innerHTML = "";
+
       if (placeholder) {
         select.appendChild(placeholder);
       }
+
       data.forEach((categoria) => {
         const opt = document.createElement("option");
         opt.value = categoria.id;
@@ -560,6 +557,7 @@ async function obtenerCategorias() {
   }
 }
 
+// Función para obtener organizadores
 async function obtenerOrganizadores() {
   const selectCrear = document.getElementById("organizadores");
   const selectEditar = document.getElementById("organizadoresEditar");
@@ -583,9 +581,11 @@ async function obtenerOrganizadores() {
     selects.forEach((select) => {
       const placeholder = select.querySelector("option[value='']");
       select.innerHTML = "";
+
       if (placeholder) {
         select.appendChild(placeholder);
       }
+
       data.forEach((organizador) => {
         const opt = document.createElement("option");
         opt.value = organizador.id;
@@ -598,6 +598,7 @@ async function obtenerOrganizadores() {
   }
 }
 
+// Función para crear evento
 async function crearEvento(datosFormulario) {
   try {
     const options = {
@@ -605,14 +606,17 @@ async function crearEvento(datosFormulario) {
       credentials: "include",
       body: datosFormulario,
     };
+
     const resp = await fetch(URL_BASE + "eventos/add", options);
     const respuesta = await resp.json();
+
     if (resp.status === 201) {
       mostrarAlerta("success", "Evento creado correctamente");
 
       const modal = bootstrap.Modal.getInstance(
         document.getElementById("modalCrearEvento"),
       );
+
       modal.hide();
     } else {
       mostrarAlerta("error", "Error al crear el evento: " + respuesta.error);
@@ -625,6 +629,7 @@ async function crearEvento(datosFormulario) {
   }
 }
 
+// Función para editar evento
 async function editarEvento(id, datosFormulario) {
   try {
     const options = {
@@ -632,14 +637,17 @@ async function editarEvento(id, datosFormulario) {
       credentials: "include",
       body: datosFormulario,
     };
+
     const resp = await fetch(URL_BASE + "eventos/update/" + id, options);
     const respuesta = await resp.json();
+
     if (resp.status === 200) {
       mostrarAlerta("success", "Evento editado correctamente");
 
       const modal = bootstrap.Modal.getInstance(
         document.getElementById("modalEditarEvento"),
       );
+
       modal.hide();
     } else {
       mostrarAlerta("error", "Error al editar el evento: " + respuesta.error);
@@ -652,6 +660,7 @@ async function editarEvento(id, datosFormulario) {
   }
 }
 
+// Función para eliminar evento
 async function eliminarEvento(id, nombre) {
   Swal.fire({
     title: `¿Estás seguro que deseas eliminar el evento \"` + nombre + `\"?`,
@@ -669,7 +678,9 @@ async function eliminarEvento(id, nombre) {
           method: "DELETE",
           credentials: "include",
         };
+
         const resp = await fetch(URL_BASE + "eventos/delete/" + id, options);
+
         if (resp.status === 204) {
           mostrarAlerta("success", "Evento eliminado correctamente");
         } else {
@@ -686,6 +697,7 @@ async function eliminarEvento(id, nombre) {
   });
 }
 
+// Función para formatear fecha en formato dd/mm/yyyy - hh:mm
 function formatearFecha(fechaISO) {
   const fecha = new Date(fechaISO);
   const dia = fecha.getDate().toString().padStart(2, "0");
@@ -695,3 +707,20 @@ function formatearFecha(fechaISO) {
   const minutos = fecha.getMinutes().toString().padStart(2, "0");
   return `${dia}/${mes}/${anio} - ${hora}:${minutos}`;
 }
+
+// Botones paginación
+document.getElementById("btnAnterior").addEventListener("click", (e) => {
+  e.preventDefault();
+  if (paginaActual > 0) {
+    paginaActual--;
+    cargarEventos();
+  }
+});
+
+document.getElementById("btnSiguiente").addEventListener("click", (e) => {
+  e.preventDefault();
+  if (paginaActual < cantidadPaginacion - 1) {
+    paginaActual++;
+    cargarEventos();
+  }
+});

@@ -4,6 +4,8 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../services/geocoding_service.dart';
+
 class SeleccionarUbicacion extends StatefulWidget {
   final LatLng? puntoInicial;
 
@@ -21,6 +23,9 @@ class _SeleccionarUbicacionState extends State<SeleccionarUbicacion> {
   static const LatLng _merida = LatLng(38.9161, -6.3437);
 
   LatLng? _puntoSeleccionado;
+  String? _direccionSeleccionada;
+  bool _cargandoDireccion = false;
+  int _peticionDireccion = 0;
 
   ColorScheme get _cs => Theme.of(context).colorScheme;
 
@@ -33,6 +38,10 @@ class _SeleccionarUbicacionState extends State<SeleccionarUbicacion> {
     super.initState();
 
     _puntoSeleccionado = widget.puntoInicial;
+
+    if (_puntoSeleccionado != null) {
+      _resolverDireccion(_puntoSeleccionado!);
+    }
   }
 
   LatLng get _centroInicial => widget.puntoInicial ?? _merida;
@@ -48,6 +57,29 @@ class _SeleccionarUbicacionState extends State<SeleccionarUbicacion> {
     }
 
     context.pop(_puntoSeleccionado);
+  }
+
+  Future<void> _resolverDireccion(LatLng punto) async {
+    final idPeticion = ++_peticionDireccion;
+
+    setState(() {
+      _cargandoDireccion = true;
+      _direccionSeleccionada = null;
+    });
+
+    final direccion = await GeocodingService.buscarDireccionDesdeCoordenadas(
+      punto.latitude,
+      punto.longitude,
+    );
+
+    if (!mounted || idPeticion != _peticionDireccion) {
+      return;
+    }
+
+    setState(() {
+      _cargandoDireccion = false;
+      _direccionSeleccionada = direccion;
+    });
   }
 
   // ===========================================================================
@@ -80,6 +112,8 @@ class _SeleccionarUbicacionState extends State<SeleccionarUbicacion> {
                 setState(() {
                   _puntoSeleccionado = point;
                 });
+
+                _resolverDireccion(point);
               },
             ),
             children: [
@@ -112,12 +146,48 @@ class _SeleccionarUbicacionState extends State<SeleccionarUbicacion> {
             child: Card(
               child: Padding(
                 padding: const EdgeInsets.all(12),
-                child: Text(
-                  _puntoSeleccionado == null
-                      ? 'Pulsa en el mapa para seleccionar la ubicación exacta'
-                      : 'Latitud: ${_puntoSeleccionado!.latitude.toStringAsFixed(6)}\n'
-                      'Longitud: ${_puntoSeleccionado!.longitude.toStringAsFixed(6)}',
-                  textAlign: TextAlign.center,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      _puntoSeleccionado == null
+                          ? 'Pulsa en el mapa para seleccionar la ubicación exacta'
+                          : _direccionSeleccionada != null
+                          ? _direccionSeleccionada!
+                          : _cargandoDireccion
+                          ? 'Buscando el nombre de la calle...'
+                          : 'No se ha podido obtener el nombre de la ubicación',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontWeight: _puntoSeleccionado == null
+                            ? FontWeight.normal
+                            : FontWeight.w600,
+                      ),
+                    ),
+                    if (_puntoSeleccionado != null) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        'Latitud: ${_puntoSeleccionado!.latitude.toStringAsFixed(6)} · '
+                        'Longitud: ${_puntoSeleccionado!.longitude.toStringAsFixed(6)}',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: _cs.onSurface.withValues(alpha: 0.75),
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                    if (_cargandoDireccion) ...[
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: _cs.primary,
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
             ),

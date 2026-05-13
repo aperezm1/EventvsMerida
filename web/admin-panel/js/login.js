@@ -1,6 +1,15 @@
+// ==========================================================================
+// VARIABLES
+// ==========================================================================
+
+const URL_BASE = window.APP_CONFIG.API_BASE;
+
+// ==========================================================================
+// CONTENIDO DEL DOM
+// ==========================================================================
+
 window.addEventListener("DOMContentLoaded", async (event) => {
     const form = document.querySelector(".needs-validation");
-
 
     form.addEventListener("submit", function (event) {
         if (!form.checkValidity()) {
@@ -18,8 +27,12 @@ window.addEventListener("DOMContentLoaded", async (event) => {
     }, false);
 });
 
+// ==========================================================================
+// FUNCIONES
+// ==========================================================================
+
 async function login(datos) {
-    const URL = "https://eventvsmerida-x2t1.onrender.com/api/auth/login?admin=true";
+    const URL = `${URL_BASE}auth/login?admin=true`;
     const btnLogin = document.getElementById("btnLogin");
 
     try {
@@ -55,29 +68,11 @@ async function login(datos) {
         if (error.name === "TypeError") {
             return { éxito: false, mensaje: "Problema de red o CORS" };
         }
+
         return { éxito: false, mensaje: error.message };
     } finally {
         btnLogin.removeAttribute("disabled");
         btnLogin.textContent = 'Iniciar sesión';
         btnLogin.classList.remove("loading");
     }
-}
-
-function mostrarAlerta(tipo, mensaje) {
-  const Toast = Swal.mixin({
-    toast: true,
-    position: "top-end",
-    iconColor: "white",
-    customClass: {
-      popup: "colored-toast",
-    },
-    showConfirmButton: false,
-    timer: 2000,
-    timerProgressBar: true,
-  });
-
-  Toast.fire({
-    icon: tipo,
-    title: mensaje,
-  });
 }

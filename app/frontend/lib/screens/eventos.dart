@@ -1459,7 +1459,7 @@ class _EventosState extends State<Eventos> {
         key: Tutorial.keyNavMapa,
         titulo: 'Mapa',
         descripcion:
-        'A continuación, pasemos al mapa. Pulsa el botón de continuar para ir al mapa.',
+        'A continuación, pasemos al mapa. Pulsa el botón de siguiente para ir al mapa.',
         icon: Icons.map,
         siguiente: true,
         onNext: () async {

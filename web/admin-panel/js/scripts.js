@@ -1,11 +1,19 @@
+// ==========================================================================
+// VARIABLES
+// ==========================================================================
+
+window.APP_CONFIG = {
+  API_BASE: "https://eventvsmerida-x2t1.onrender.com/api/",
+};
+
+// ==========================================================================
+// CONTENIDO DEL DOM
+// ==========================================================================
+
 window.addEventListener("DOMContentLoaded", async (event) => {
-  // Toggle the side navigation
   const sidebarToggle = document.body.querySelector("#sidebarToggle");
+
   if (sidebarToggle) {
-    // Uncomment Below to persist sidebar toggle between refreshes
-    // if (localStorage.getItem('sb|sidebar-toggle') === 'true') {
-    //     document.body.classList.toggle('sb-sidenav-toggled');
-    // }
     sidebarToggle.addEventListener("click", (event) => {
       event.preventDefault();
       document.body.classList.toggle("sb-sidenav-toggled");
@@ -19,6 +27,11 @@ window.addEventListener("DOMContentLoaded", async (event) => {
   document.getElementById("nombreUsuario").innerText = obtenerNombreUsuario();
 });
 
+// ==========================================================================
+// FUNCIONES
+// ==========================================================================
+
+// Función para mostrar alertas usando SweetAlert2
 function mostrarAlerta(tipo, mensaje) {
   const Toast = Swal.mixin({
     toast: true,
@@ -38,27 +51,9 @@ function mostrarAlerta(tipo, mensaje) {
   });
 }
 
-// Validación Bootstrap para formularios
-(() => {
-  "use strict";
-  const forms = document.querySelectorAll(".needs-validation");
-  Array.from(forms).forEach((form) => {
-    form.addEventListener(
-      "submit",
-      (event) => {
-        if (!form.checkValidity()) {
-          event.preventDefault();
-          event.stopPropagation();
-        }
-        form.classList.add("was-validated");
-      },
-      false,
-    );
-  });
-})();
-
+// Función para cerrar sesión
 async function cerrarSesion() {
-  const URL = "https://eventvsmerida-x2t1.onrender.com/api/auth/logout";
+  const URL = `${window.APP_CONFIG.API_BASE}auth/logout`;
 
   try {
     const respuesta = await fetch(URL, {
@@ -81,12 +76,14 @@ async function cerrarSesion() {
   }
 }
 
+// Función para obtener el nombre de usuario almacenado en localStorage
 function obtenerNombreUsuario() {
   return localStorage.getItem("nombreUsuario");
 }
 
+// Función que valida si el usuario está logeado
 async function logeado() {
-  const URL = "https://eventvsmerida-x2t1.onrender.com/api/auth/session";
+  const URL = `${window.APP_CONFIG.API_BASE}auth/session`;
 
   try {
     const respuesta = await fetch(URL, {
@@ -102,6 +99,7 @@ async function logeado() {
   }
 }
 
+// Función para validar la edad ingresada en un formulario
 function validarEdad(input, edadMinima, edadMaxima, fechaObligatoria) {
   const feedback = input.parentElement.querySelector(".invalid-feedback");
   const fechaNacimiento = input.value;
@@ -124,6 +122,22 @@ function validarEdad(input, edadMinima, edadMaxima, fechaObligatoria) {
     }
 
     return true;
+  }
+
+  const hoy = new Date();
+  const year = hoy.getFullYear();
+  const month = String(hoy.getMonth() + 1).padStart(2, "0");
+  const day = String(hoy.getDate()).padStart(2, "0");
+  const fechaHoy = `${year}-${month}-${day}`;
+
+  if (fechaNacimiento > fechaHoy) {
+    input.setCustomValidity("Fecha inválida");
+
+    if (feedback) {
+      feedback.textContent = "La fecha de nacimiento no puede ser una fecha futura.";
+    }
+
+    return false;
   }
 
   const fechaMinimaPermitida = calcularFechaPorEdad(edadMaxima);
@@ -158,6 +172,7 @@ function validarEdad(input, edadMinima, edadMaxima, fechaObligatoria) {
   return true;
 }
 
+// Función para calcular la fecha mínima o máxima permitida según la edad
 function calcularFechaPorEdad(edad) {
   const hoy = new Date();
 
@@ -174,6 +189,7 @@ function calcularFechaPorEdad(edad) {
   return `${year}-${month}-${day}`;
 }
 
+// Función para formatear una fecha en formato ISO a "dd/mm/yyyy"
 function formatearFecha(fechaISO) {
   if (!fechaISO) {
     return "";
@@ -192,6 +208,7 @@ function formatearFecha(fechaISO) {
   return `${dia}/${mes}/${anio}`;
 }
 
+// Función para configurar el comportamiento de mostrar/ocultar contraseñas en formularios
 function configurarMostrarContraseniasFormulario(idsInputs, controles) {
   const inputs = idsInputs
     .map((id) => document.getElementById(id))
@@ -231,3 +248,55 @@ function configurarMostrarContraseniasFormulario(idsInputs, controles) {
     });
   });
 }
+
+// Función para requerir autenticación antes de cargar el contenido de la página
+async function requireAuth() {
+  const sesion = await logeado();
+
+  if (sesion === 401) {
+    window.location.href = `${window.location.origin}/html/login.html`;
+    return false;
+  }
+
+  if (sesion === 200) {
+    document.body.classList.remove("auth-pending");
+  }
+
+  return true;
+}
+
+// Función para validar una imagen antes de subirla (formato y tamaño)
+function validarImagen(imagen) {
+  const formatosPermitidos = ["image/jpeg", "image/jpg", "image/png"];
+  const maxSize = 1.5 * 1024 * 1024;
+  if (!imagen) return true;
+
+  if (!formatosPermitidos.includes(imagen.type)) {
+    mostrarAlerta("error", "Solo se permiten imágenes en formato JPG, JPEG o PNG");
+    return false;
+  }
+  if (imagen.size > maxSize) {
+    mostrarAlerta("error", "La imagen no puede superar los 1.5MB");
+    return false;
+  }
+  return true;
+}
+
+// Validación Bootstrap para formularios
+(() => {
+  "use strict";
+  const forms = document.querySelectorAll(".needs-validation");
+  Array.from(forms).forEach((form) => {
+    form.addEventListener(
+      "submit",
+      (event) => {
+        if (!form.checkValidity()) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+        form.classList.add("was-validated");
+      },
+      false,
+    );
+  });
+})();

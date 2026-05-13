@@ -1,16 +1,20 @@
+// ==========================================================================
+// VARIABLES
+// ==========================================================================
+
+const URL_BASE = window.APP_CONFIG.API_BASE;
+
+// ==========================================================================
+// CONTENIDO DEL DOM
+// ==========================================================================
+
 window.addEventListener("DOMContentLoaded", async () => {
-  const sesion = await logeado();
+  const ok = await requireAuth();
+  if (!ok) return;
 
-  if (sesion === 401) {
-    window.location.href = `${window.location.origin}/html/login.html`;
-    return;
-  } else if (sesion === 200){
-    document.body.classList.remove("auth-pending");
-  }
+  await cargarRoles();
 
-  const URL_BASE = "https://eventvsmerida-x2t1.onrender.com/api/";
-  cargarRoles(URL_BASE);
-
+  // Formulario de creación de rol
   const form = document.getElementById("formAgregarRol");
 
   form.addEventListener(
@@ -25,13 +29,14 @@ window.addEventListener("DOMContentLoaded", async () => {
         const rol = {
           nombre: document.getElementById("nombreRol").value,
         };
-        crearRol(URL_BASE, rol);
+        crearRol(rol);
       }
       form.classList.add("was-validated");
     },
     false,
   );
 
+  // Formulario de edición de rol
   const formEditar = document.getElementById("formEditarRol");
 
   formEditar.addEventListener(
@@ -46,7 +51,7 @@ window.addEventListener("DOMContentLoaded", async () => {
         const rol = {
           nombre: document.getElementById("nombreRolEditar").value,
         };
-        editarRol(URL_BASE, formEditar.dataset.id, rol);
+        editarRol(formEditar.dataset.id, rol);
       }
       formEditar.classList.add("was-validated");
     },
@@ -54,7 +59,12 @@ window.addEventListener("DOMContentLoaded", async () => {
   );
 });
 
-async function cargarRoles(URL_BASE) {
+// ==========================================================================
+// FUNCIONES
+// ==========================================================================
+
+// Función para cargar los roles y mostrarlos en la tabla
+async function cargarRoles() {
   const tabla = document.getElementById("listadoRoles");
   const loader = document.getElementById("loader");
   const body = document.querySelector("body");
@@ -127,7 +137,7 @@ async function cargarRoles(URL_BASE) {
       btnEliminar.setAttribute("data-id", rol.id);
       btnEliminar.setAttribute("data-nombre", rol.nombre);
       btnEliminar.addEventListener("click", function () {
-        eliminarRol(URL_BASE, this.dataset.id, this.dataset.nombre);
+        eliminarRol(this.dataset.id, this.dataset.nombre);
       });
 
       divGrupo.appendChild(btnEditar);
@@ -146,7 +156,8 @@ async function cargarRoles(URL_BASE) {
   }
 }
 
-async function crearRol(URL_BASE, datosRol) {
+// Función para crear un nuevo rol
+async function crearRol(datosRol) {
   try {
     const options = {
       method: "POST",
@@ -171,11 +182,12 @@ async function crearRol(URL_BASE, datosRol) {
   } catch (error) {
     console.error("Error al subir el rol:", error);
   } finally {
-    cargarRoles(URL_BASE);
+    await cargarRoles();
   }
 }
 
-async function editarRol(URL_BASE, id, datosRol) {
+// Función para editar un rol existente
+async function editarRol(id, datosRol) {
   try {
     const options = {
       method: "PUT",
@@ -203,11 +215,12 @@ async function editarRol(URL_BASE, id, datosRol) {
   } catch (error) {
     console.error("Error al editar el rol:", error);
   } finally {
-    cargarRoles(URL_BASE);
+    await cargarRoles();
   }
 }
 
-async function eliminarRol(URL_BASE, id, rol) {
+// Función para eliminar un rol
+async function eliminarRol(id, rol) {
   Swal.fire({
     title: "¿Estás seguro que deseas eliminar el rol \"" + rol +"\"?",
     text: "Esta acción no puede revertirse",
@@ -237,7 +250,7 @@ async function eliminarRol(URL_BASE, id, rol) {
       } catch (error) {
         console.error("Error al eliminar el rol:", error);
       } finally {
-        cargarRoles(URL_BASE);
+        await cargarRoles();
       }
     }
   });

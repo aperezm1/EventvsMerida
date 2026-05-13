@@ -1,16 +1,20 @@
+// ==========================================================================
+// VARIABLES
+// ==========================================================================
+
+const URL_BASE = window.APP_CONFIG.API_BASE;
+
+// ==========================================================================
+// CONTENIDO DEL DOM
+// ==========================================================================
+
 window.addEventListener("DOMContentLoaded", async () => {
-  const sesion = await logeado();
+  const ok = await requireAuth();
+  if (!ok) return;
 
-  if (sesion === 401) {
-    window.location.href = `${window.location.origin}/html/login.html`;
-    return;
-  } else if (sesion === 200) {
-    document.body.classList.remove("auth-pending");
-  }
+  await cargarCategorias();
 
-  const URL_BASE = "https://eventvsmerida-x2t1.onrender.com/api/";
-  cargarCategorias(URL_BASE);
-
+  // Formulario agregar categoría
   const form = document.getElementById("formAgregarCategoria");
 
   form.addEventListener(
@@ -25,13 +29,14 @@ window.addEventListener("DOMContentLoaded", async () => {
         const categoria = {
           nombre: document.getElementById("nombreCategoria").value,
         };
-        crearCategoria(URL_BASE, categoria);
+        crearCategoria(categoria);
       }
       form.classList.add("was-validated");
     },
     false,
   );
 
+  // Formulario editar categoría
   const formEditar = document.getElementById("formEditarCategoria");
 
   formEditar.addEventListener(
@@ -46,13 +51,14 @@ window.addEventListener("DOMContentLoaded", async () => {
         const categoria = {
           nombre: document.getElementById("nombreCategoriaEditar").value,
         };
-        editarCategoria(URL_BASE, formEditar.dataset.id, categoria);
+        editarCategoria(formEditar.dataset.id, categoria);
       }
       formEditar.classList.add("was-validated");
     },
     false,
   );
 
+  // Modal agregar categoría: limpiar validación y formulario al cerrar
   const modalCategoria = document.getElementById("modalCrearCategoria");
 
   if (modalCategoria) {
@@ -67,7 +73,12 @@ window.addEventListener("DOMContentLoaded", async () => {
   }
 });
 
-async function cargarCategorias(URL_BASE) {
+// ==========================================================================
+// FUNCIONES
+// ==========================================================================
+
+// Función para cargar las categorías y mostrarlas en la tabla
+async function cargarCategorias() {
   const tabla = document.getElementById("listadoCategorias");
   const loader = document.getElementById("loader");
   const body = document.querySelector("body");
@@ -142,7 +153,7 @@ async function cargarCategorias(URL_BASE) {
       btnEliminar.setAttribute("data-id", categoria.id);
       btnEliminar.setAttribute("data-nombre", categoria.nombre);
       btnEliminar.addEventListener("click", function () {
-        eliminarRol(URL_BASE, this.dataset.id, this.dataset.nombre);
+        eliminarCategoria(this.dataset.id, this.dataset.nombre);
       });
 
       divGrupo.appendChild(btnEditar);
@@ -161,7 +172,8 @@ async function cargarCategorias(URL_BASE) {
   }
 }
 
-async function crearCategoria(URL_BASE, datosCategoria) {
+
+async function crearCategoria(datosCategoria) {
   try {
     const options = {
       method: "POST",
@@ -186,11 +198,11 @@ async function crearCategoria(URL_BASE, datosCategoria) {
   } catch (error) {
     console.error("Error al subir la categoría:", error);
   } finally {
-    cargarCategorias(URL_BASE);
+    cargarCategorias();
   }
 }
 
-async function editarCategoria(URL_BASE, id, datosCategoria) {
+async function editarCategoria(id, datosCategoria) {
   try {
     const options = {
       method: "PUT",
@@ -218,11 +230,11 @@ async function editarCategoria(URL_BASE, id, datosCategoria) {
   } catch (error) {
     console.error("Error al editar la categoría:", error);
   } finally {
-    cargarCategorias(URL_BASE);
+    cargarCategorias();
   }
 }
 
-async function eliminarRol(URL_BASE, id, categoria) {
+async function eliminarCategoria(id, categoria) {
   Swal.fire({
     title:
       '¿Estás seguro que deseas eliminar la categoría "' + categoria + '"?',
@@ -247,13 +259,13 @@ async function eliminarRol(URL_BASE, id, categoria) {
         } else {
           mostrarAlerta(
             "error",
-            "Error al eliminar la categoria: " + respuesta,
+            "Error al eliminar la categoría: " + respuesta,
           );
         }
       } catch (error) {
-        console.error("Error al eliminar la cataegoría:", error);
+        console.error("Error al eliminar la categoría:", error);
       } finally {
-        cargarCategorias(URL_BASE);
+        cargarCategorias();
       }
     }
   });
