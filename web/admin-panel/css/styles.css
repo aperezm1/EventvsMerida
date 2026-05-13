@@ -11968,3 +11968,7 @@ body.auth-pending {
   justify-content: center;
   font-size: 42px;
 }
+
+.card {
+  border-radius: 6px !important;
+}

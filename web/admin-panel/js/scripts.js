@@ -56,7 +56,7 @@ async function cerrarSesion() {
   const URL = `${window.APP_CONFIG.API_BASE}auth/logout`;
 
   try {
-    const respuesta = await fetch(URL, {
+    const respuesta = await fetchConAuth(URL, {
       method: "POST",
       credentials: "include",
       headers: {
@@ -86,7 +86,7 @@ async function logeado() {
   const URL = `${window.APP_CONFIG.API_BASE}auth/session`;
 
   try {
-    const respuesta = await fetch(URL, {
+    const respuesta = await fetchConAuth(URL, {
       method: "GET",
       credentials: "include",
       cache: "no-store",
@@ -264,6 +264,28 @@ async function requireAuth() {
 
   return true;
 }
+
+const fetchConAuth = async (url, options = {}) => {
+  const resp = await fetch(url, options);
+
+  if (resp.redirected && resp.url.includes("login")) {
+    mostrarAlerta("error", "Sesion caducada. Por favor, inicia sesion nuevamente.");
+    setTimeout(() => {
+      window.location.href = `${window.location.origin}/html/login.html`;
+    }, 800);
+    return resp;
+  }
+
+  if (resp.status === 401) {
+    mostrarAlerta("error", "Sesion caducada. Por favor, inicia sesion nuevamente.");
+    setTimeout(() => {
+      window.location.href = `${window.location.origin}/html/login.html`;
+    }, 800);
+    return resp;
+  }
+
+  return resp;
+};
 
 // Función para validar una imagen antes de subirla (formato y tamaño)
 function validarImagen(imagen) {

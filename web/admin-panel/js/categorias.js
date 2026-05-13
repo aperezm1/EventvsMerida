@@ -87,7 +87,7 @@ async function cargarCategorias() {
     loader.style.display = "flex";
     body.classList.add("loading");
 
-    const resp = await fetch(URL_BASE + "categorias/all", {
+    const resp = await fetchConAuth(URL_BASE + "categorias/all", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -183,7 +183,7 @@ async function crearCategoria(datosCategoria) {
       credentials: "include",
       body: JSON.stringify(datosCategoria),
     };
-    const resp = await fetch(URL_BASE + "categorias/add", options);
+    const resp = await fetchConAuth(URL_BASE + "categorias/add", options);
     const respuesta = await resp.json();
     if (resp.status === 201) {
       mostrarAlerta("success", "Categoría creada correctamente");
@@ -212,7 +212,7 @@ async function editarCategoria(id, datosCategoria) {
       credentials: "include",
       body: JSON.stringify(datosCategoria),
     };
-    const resp = await fetch(URL_BASE + "categorias/update/" + id, options);
+    const resp = await fetchConAuth(URL_BASE + "categorias/update/" + id, options);
     const respuesta = await resp.json();
     if (resp.status === 200) {
       mostrarAlerta("success", "Categoría editada correctamente");
@@ -252,7 +252,7 @@ async function eliminarCategoria(id, categoria) {
           method: "DELETE",
           credentials: "include",
         };
-        const resp = await fetch(URL_BASE + "categorias/delete/" + id, options);
+        const resp = await fetchConAuth(URL_BASE + "categorias/delete/" + id, options);
         const respuesta = await resp.text();
         if (resp.status === 204) {
           mostrarAlerta("success", "Categoría eliminada correctamente");
