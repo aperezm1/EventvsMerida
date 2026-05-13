@@ -1,15 +1,26 @@
-Chart.defaults.global.defaultFontFamily =
-  '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
+// ==========================================================================
+// VARIABLES
+// ==========================================================================
 
+Chart.defaults.global.defaultFontFamily ='-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
 Chart.defaults.global.defaultFontColor = "#292b2c";
 
 let graficoBarras;
+
+// ==========================================================================
+// CONTENIDO DEL DOM
+// ==========================================================================
 
 document.addEventListener("DOMContentLoaded", () => {
   crearGraficoBarrasVacio();
   cargarGraficoBarras();
 });
 
+// ==========================================================================
+// FUNCIONES
+// ==========================================================================
+
+// Función para crear un gráfico de barras vacío
 function crearGraficoBarrasVacio() {
   const ctx = document.getElementById("graficoEventoMes");
 
@@ -61,8 +72,9 @@ function crearGraficoBarrasVacio() {
   });
 }
 
+// Función para cargar los datos de eventos por mes y actualizar el gráfico
 async function cargarGraficoBarras() {
-  const URL = "https://eventvsmerida-x2t1.onrender.com/api/eventos/eventos-por-mes";
+  const URL = `${URL_BASE}eventos/eventos-por-mes`;
 
   try {
     const respuesta = await fetch(URL, {
@@ -75,11 +87,7 @@ async function cargarGraficoBarras() {
     }
 
     const eventos = await respuesta.json();
-
-    console.log("Eventos por mes:", eventos);
-
     const eventosPorMes = convertirEventosAMeses(eventos);
-
     actualizarGraficoBarras(eventosPorMes);
 
   } catch (error) {
@@ -87,6 +95,7 @@ async function cargarGraficoBarras() {
   }
 }
 
+// Función para convertir el array de eventos por mes a un formato que el gráfico de barras pueda usar
 function convertirEventosAMeses(eventos) {
   const contadorMeses = Array(12).fill(0);
 
@@ -102,6 +111,7 @@ function convertirEventosAMeses(eventos) {
   return contadorMeses;
 }
 
+// Función para actualizar el gráfico de barras con los nuevos datos
 function actualizarGraficoBarras(eventosPorMes) {
   if (!graficoBarras) {
     console.warn("El gráfico de barras todavía no está creado");

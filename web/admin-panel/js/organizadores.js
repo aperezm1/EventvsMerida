@@ -1,29 +1,41 @@
-window.addEventListener("DOMContentLoaded", async () => {
-  const sesion = await logeado();
+// ==========================================================================
+// VARIABLES
+// ==========================================================================
 
-  if (sesion === 401) {
-    window.location.href = `${window.location.origin}/html/login.html`;
-    return;
-  } else if (sesion === 200) {
-    document.body.classList.remove("auth-pending");
+const URL_BASE = window.APP_CONFIG.API_BASE;
+
+// ==========================================================================
+// CONTENIDO DEL DOM
+// ==========================================================================
+
+window.addEventListener("DOMContentLoaded", async () => {
+  const ok = await requireAuth();
+  if (!ok) return;
+
+  await cargarOrganizadores();
+
+  // Formulario de creación de organizador
+  const form = document.getElementById("formAgregarOrganizador");
+  const fechaNacimientoInput = document.getElementById("fechaNacimiento");
+
+  if (fechaNacimientoInput) {
+    fechaNacimientoInput.addEventListener("input", function () {
+      validarEdad(this, 14, 100, true);
+    });
   }
 
-  const URL_BASE = "https://eventvsmerida-x2t1.onrender.com/api/";
-  cargarOrganizadores(URL_BASE);
-
-  const form = document.getElementById("formAgregarOrganizador");
   if (form) {
     form.addEventListener(
       "submit",
       function (event) {
         event.preventDefault();
 
-        const contrasenia = document.getElementById("contrasena").value;
-        const confirmarContrasenia = document.getElementById(
-          "confirmarContrasena",
-        ).value;
+        validarEdad(fechaNacimientoInput, 14, 100, true);
 
-        validarEdad(document.getElementById("fechaNacimiento"), 14, 100, true);
+        const contrasenia = document.getElementById("contrasenia").value;
+        const confirmarContrasenia = document.getElementById(
+          "confirmarContrasenia",
+        ).value;
 
         if (!form.checkValidity()) {
           event.stopPropagation();
@@ -42,13 +54,16 @@ window.addEventListener("DOMContentLoaded", async () => {
             password: contrasenia,
             idRol: 2,
           };
+
           const formData = new FormData();
           formData.append("usuario", JSON.stringify(organizador));
+
           const fotoFile = document.getElementById("fotoOrganizador").files[0];
           if (fotoFile) {
             formData.append("foto", fotoFile);
           }
-          crearOrganizador(URL_BASE, formData);
+
+          crearOrganizador(formData);
         }
 
         form.classList.add("was-validated");
@@ -57,50 +72,60 @@ window.addEventListener("DOMContentLoaded", async () => {
     );
   }
 
+  // Formulario de edición de organizador
   const formEditar = document.getElementById("formEditarOrganizador");
+  const fechaNacimientoEditarInput = document.getElementById("fechaNacimientoEditar");
   let contrasenia = "";
 
-  formEditar.addEventListener(
-    "submit",
-    function (event) {
-      event.preventDefault();
+  if (fechaNacimientoEditarInput) {
+    fechaNacimientoEditarInput.addEventListener("input", function () {
+      validarEdad(this, 14, 100, false);
+    });
+  }
 
-      validarEdad(document.getElementById("fechaNacimiento"), 14, 100, false);
-      if (!formEditar.checkValidity()) {
+  if (formEditar) {
+    formEditar.addEventListener(
+      "submit",
+      function (event) {
         event.preventDefault();
-        event.stopPropagation();
-        formEditar.classList.add("was-validated");
-      } else {
-        event.preventDefault();
-        const organizador = {
-          nombre: document.getElementById("nombreEditar").value,
-          apellidos: document.getElementById("apellidosEditar").value,
-          fechaNacimiento: formatearFecha(
-            document.getElementById("fechaNacimientoEditar").value,
-          ),
-          email: document.getElementById("correoEditar").value,
-          telefono: document.getElementById("telefonoEditar").value,
-          password: contraseniaModificada ? contrasenia : null,
-          idRol: 2,
-        };
-        const formData = new FormData();
-        formData.append("usuario", JSON.stringify(organizador));
-        const fotoFile = document.getElementById("formFileEditar")?.files?.[0];
-        if (fotoFile) {
-          formData.append("foto", fotoFile);
+
+        validarEdad(fechaNacimientoEditarInput, 14, 100, false);
+
+        if (!formEditar.checkValidity()) {
+          event.stopPropagation();
+        } else {
+          const organizador = {
+            nombre: document.getElementById("nombreEditar").value,
+            apellidos: document.getElementById("apellidosEditar").value,
+            fechaNacimiento: formatearFecha(
+              document.getElementById("fechaNacimientoEditar").value,
+            ),
+            email: document.getElementById("correoEditar").value,
+            telefono: document.getElementById("telefonoEditar").value,
+            password: contraseniaModificada ? contrasenia : null,
+            idRol: 2,
+          };
+
+          const formData = new FormData();
+          formData.append("usuario", JSON.stringify(organizador));
+
+          const fotoFile = document.getElementById("formFileEditar")?.files?.[0];
+          if (fotoFile) {
+            formData.append("foto", fotoFile);
+          }
+
+          editarOrganizador(formEditar.dataset.id, formData);
         }
-        editarOrganizador(URL_BASE, formEditar.dataset.id, formData);
-      }
-      formEditar.classList.add("was-validated");
-    },
-    false,
-  );
 
+        formEditar.classList.add("was-validated");
+      },
+      false,
+    );
+  }
+
+  // Formulario de edición de contraseña
   let contraseniaModificada = false;
-
-  const formEditarContrasenia = document.getElementById(
-    "formEditarContrasenia",
-  );
+  const formEditarContrasenia = document.getElementById("formEditarContrasenia");
 
   formEditarContrasenia.addEventListener(
     "submit",
@@ -146,7 +171,6 @@ window.addEventListener("DOMContentLoaded", async () => {
     false,
   );
 
-  // Limpia validaciones y campos al cerrar el modal de usuario
   const modalOrganizador = document.getElementById("modalCrearOrganizador");
   if (modalOrganizador) {
     modalOrganizador.addEventListener("hidden.bs.modal", function () {
@@ -158,9 +182,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  const modalEditarOrganizador = document.getElementById(
-    "modalEditarOrganizador",
-  );
+  const modalEditarOrganizador = document.getElementById("modalEditarOrganizador");
   if (modalEditarOrganizador) {
     modalEditarOrganizador.addEventListener("hidden.bs.modal", function () {
       const form = document.getElementById("formEditarOrganizador");
@@ -178,17 +200,21 @@ window.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  document.getElementById("fotoOrganizador").addEventListener("change", function () {
-    if(!validarImagen(this.files[0])){
-      this.value = "";
-    }
-  });
+  document
+    .getElementById("fotoOrganizador")
+    .addEventListener("change", function () {
+      if (!validarImagen(this.files[0])) {
+        this.value = "";
+      }
+    });
 
-  document.getElementById("formFileEditar").addEventListener("change", function () {
-    if(!validarImagen(this.files[0])){
-      this.value = "";
-    }
-  });
+  document
+    .getElementById("formFileEditar")
+    .addEventListener("change", function () {
+      if (!validarImagen(this.files[0])) {
+        this.value = "";
+      }
+    });
 
   configurarMostrarContraseniasFormulario(
     ["contrasenia", "confirmarContrasenia"],
@@ -213,30 +239,18 @@ window.addEventListener("DOMContentLoaded", async () => {
       },
       {
         idBoton: "toggleConfirmarContraseniaEditar",
-        idIcono: "iconoConfirmarContrasenaEditar",
+        idIcono: "iconoConfirmarContraseniaEditar",
       },
     ],
   );
 });
 
-function validarImagen(file) {
-  const formatosPermitidos = ["image/jpeg", "image/jpg", "image/png"];
-  const maxSize = 1.5 * 1024 * 1024; // 1.5MB en bytes
-  if (!file) return true;
+// ==========================================================================
+// FUNCIONES
+// ==========================================================================
 
-  if (!formatosPermitidos.includes(file.type)) {
-    mostrarAlerta("error", "Solo se permiten imágenes en formato JPG, JPEG o PNG");
-    return false;
-  }
-  if (file.size > maxSize) {
-    mostrarAlerta("error", "La imagen no puede superar los 1.5MB");
-    return false;
-  }
-  return true;
-}
-
-
-async function cargarOrganizadores(URL_BASE) {
+// Función que carga los organizadores desde la API y los muestra en la tabla
+async function cargarOrganizadores() {
   const tabla = document.getElementById("listadoOrganizadores");
   const loader = document.getElementById("loader");
   const body = document.querySelector("body");
@@ -323,7 +337,7 @@ async function cargarOrganizadores(URL_BASE) {
       btnVer.setAttribute("data-bs-toggle", "modal");
       btnVer.setAttribute("data-bs-target", "#modalVerOrganizador");
       btnVer.addEventListener("click", async function () {
-        const detalle = await obtenerOrganizadorPorId(URL_BASE, organizador.id);
+        const detalle = await obtenerOrganizadorPorId(organizador.id);
         if (detalle) {
           verOrganizador(detalle);
         }
@@ -337,14 +351,13 @@ async function cargarOrganizadores(URL_BASE) {
       btnEditar.setAttribute("data-bs-toggle", "modal");
       btnEditar.setAttribute("data-bs-target", "#modalEditarOrganizador");
       btnEditar.addEventListener("click", async function () {
-        const detalle = await obtenerOrganizadorPorId(URL_BASE, organizador.id);
+        const detalle = await obtenerOrganizadorPorId(organizador.id);
         const data = detalle || organizador;
 
         document.getElementById("formEditarOrganizador").dataset.id = data.id;
         document.getElementById("nombreEditar").value = data.nombre || "";
         document.getElementById("apellidosEditar").value = data.apellidos || "";
-        document.getElementById("fechaNacimientoEditar").value =
-          data.fechaNacimiento || "";
+        document.getElementById("fechaNacimientoEditar").value = data.fechaNacimiento || "";
         document.getElementById("correoEditar").value = data.email || "";
         document.getElementById("telefonoEditar").value = data.telefono || "";
 
@@ -371,7 +384,7 @@ async function cargarOrganizadores(URL_BASE) {
       btnEliminar.setAttribute("data-nombre", organizador.nombre);
       btnEliminar.setAttribute("data-apellidos", organizador.apellidos);
       btnEliminar.addEventListener("click", function () {
-        eliminarOrganizador(URL_BASE, this.dataset.id, this.dataset.nombre, this.dataset.apellidos);
+        eliminarOrganizador(this.dataset.id, this.dataset.nombre, this.dataset.apellidos);
       });
 
       divGrupo.appendChild(btnVer);
@@ -393,7 +406,8 @@ async function cargarOrganizadores(URL_BASE) {
   }
 }
 
-async function crearOrganizador(URL_BASE, datosFormulario) {
+// Función que crea un nuevo organizador
+async function crearOrganizador(datosFormulario) {
   try {
     const options = {
       method: "POST",
@@ -418,11 +432,12 @@ async function crearOrganizador(URL_BASE, datosFormulario) {
   } catch (error) {
     console.error("Error al crear el organizador:", error);
   } finally {
-    cargarOrganizadores(URL_BASE);
+    await cargarOrganizadores();
   }
 }
 
-async function editarOrganizador(URL_BASE, id, datosFormulario) {
+// Función que edita un organizador existente
+async function editarOrganizador(id, datosFormulario) {
   try {
     const options = {
       method: "PUT",
@@ -444,14 +459,14 @@ async function editarOrganizador(URL_BASE, id, datosFormulario) {
   } catch (error) {
     console.error("Error al editar el evento:", error);
   } finally {
-    cargarOrganizadores(URL_BASE);
+    await cargarOrganizadores();
   }
 }
 
-async function eliminarOrganizador(URL_BASE, id, nombre, apellidos) {
+// Función que elimina un organizador
+async function eliminarOrganizador(id, nombre, apellidos) {
   Swal.fire({
-    title:
-      `¿Estás seguro que deseas eliminar el organizador \"` + nombre  + " " + apellidos + `\"?`,
+    title: `¿Estás seguro que deseas eliminar el organizador \"` + nombre  + " " + apellidos + `\"?`,
     text: "Esta acción no puede revertirse",
     icon: "warning",
     showCancelButton: true,
@@ -465,25 +480,25 @@ async function eliminarOrganizador(URL_BASE, id, nombre, apellidos) {
         const options = {
           method: "DELETE",
         };
+
         const resp = await fetch(URL_BASE + "usuarios/delete/" + id, options);
         if (resp.status === 204) {
           mostrarAlerta("success", "Organizador eliminado correctamente");
         } else {
-          mostrarAlerta(
-            "error",
-            "Error al eliminar el organizador: " + respuesta.error,
-          );
+          const errorTexto = await resp.text();
+          mostrarAlerta("error", "Error al eliminar el organizador: " + errorTexto);
         }
       } catch (error) {
         console.error("Error al eliminar el organizador:", error);
       } finally {
-        cargarOrganizadores(URL_BASE);
+        await cargarOrganizadores();
       }
     }
   });
 }
 
-async function obtenerOrganizadorPorId(URL_BASE, id) {
+// Función que obtiene los detalles de un organizador por su ID
+async function obtenerOrganizadorPorId(id) {
   try {
     const resp = await fetch(URL_BASE + "usuarios/" + id, {
       method: "GET",
@@ -505,6 +520,7 @@ async function obtenerOrganizadorPorId(URL_BASE, id) {
   }
 }
 
+// Función que muestra los detalles de un organizador en el modal de visualización
 function verOrganizador(organizador) {
   const tieneFoto =
     organizador.fotoUrl &&
