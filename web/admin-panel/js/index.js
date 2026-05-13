@@ -1,23 +1,30 @@
-window.addEventListener("DOMContentLoaded", async () => {
-  const sesion = await logeado();
+// ==========================================================================
+// VARIABLES
+// ==========================================================================
 
-  if (sesion === 401) {
-    window.location.href = `${window.location.origin}/html/login.html`;
-    return;
-  } else if (sesion === 200){
-    document.body.classList.remove("auth-pending");
-  }
+const URL_BASE = window.APP_CONFIG.API_BASE;
+
+// ==========================================================================
+// CONTENIDO DEL DOM
+// ==========================================================================
+
+window.addEventListener("DOMContentLoaded", async () => {
+  const ok = await requireAuth();
+  if (!ok) return;
 
   const nombreUsuario = obtenerNombreUsuario();
   if(document.referrer.includes("/html/login.html")) {
     mostrarAlerta("info", `Bievenid@ de nuevo ${nombreUsuario}`)
   }
 
-
-  const URL_BASE = "https://eventvsmerida-x2t1.onrender.com/api/";
   cargarDashboard(URL_BASE);
 });
 
+// ==========================================================================
+// FUNCIONES
+// ==========================================================================
+
+// Función para cargar los datos del dashboard y animar los contadores
 async function cargarDashboard(URL_BASE) {
   try {
     const [
@@ -45,6 +52,7 @@ async function cargarDashboard(URL_BASE) {
   }
 }
 
+// Función que anima un contador desde 0 hasta un valor final en un tiempo determinado
 function animarContador(elemento, valorFinal, duracion = 1300) {
   let inicio = 0;
   const incrementoTiempo = 20;

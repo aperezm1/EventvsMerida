@@ -1,15 +1,24 @@
-// Set new default font family and font color to mimic Bootstrap's default styling
-Chart.defaults.global.defaultFontFamily =
-  '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
+// ==========================================================================
+// VARIABLES
+// ==========================================================================
 
+Chart.defaults.global.defaultFontFamily ='-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
 Chart.defaults.global.defaultFontColor = "#292b2c";
 
-let grafico;
+let graficoTarta;
+
+// ==========================================================================
+// CONTENIDO DEL DOM
+// ==========================================================================
 
 document.addEventListener("DOMContentLoaded", () => {
   crearGraficoVacioTarta();
   cargarGraficoTarta();
 });
+
+// ==========================================================================
+// FUNCIONES
+// ==========================================================================
 
 function crearGraficoVacioTarta() {
   const ctx = document.getElementById("graficoEventosCategoria");
@@ -19,7 +28,7 @@ function crearGraficoVacioTarta() {
     return;
   }
 
-  grafico = new Chart(ctx, {
+  graficoTarta = new Chart(ctx, {
     type: "pie",
     data: {
       labels: [],
@@ -48,7 +57,7 @@ function crearGraficoVacioTarta() {
 }
 
 async function cargarGraficoTarta() {
-  const URL = "https://eventvsmerida-x2t1.onrender.com/api/eventos/eventos-por-categoria";
+  const URL = `${URL_BASE}eventos/eventos-por-categoria`;
 
   try {
     const respuesta = await fetch(URL, {
@@ -87,12 +96,12 @@ function agruparEventosPorCategoria(categorias) {
 }
 
 function actualizarGraficoTarta(eventosPorCategoria) {
-  if (!grafico) {
+  if (!graficoTarta) {
     console.warn("El gráfico todavía no está creado");
     return;
   }
 
-  grafico.data.labels = eventosPorCategoria.labels;
-  grafico.data.datasets[0].data = eventosPorCategoria.datos;
-  grafico.update();
+  graficoTarta.data.labels = eventosPorCategoria.labels;
+  graficoTarta.data.datasets[0].data = eventosPorCategoria.datos;
+  graficoTarta.update();
 }
