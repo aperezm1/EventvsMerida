@@ -63,7 +63,7 @@ public class EmailService {
                                                 "Name", nombreDestinatario
                                         )
                                 ),
-                                "Subject", "Recuperación de contraseña - EventvsMerida",
+                                "Subject", "Recuperación de contraseña - Eventvs Mérida",
                                 "TextPart", saludo + " Has solicitado restablecer tu contraseña. Abre este enlace: " + urlRecuperacion,
                                 "HTMLPart", """
                                          <!DOCTYPE html>
