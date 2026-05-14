@@ -20,6 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
 // FUNCIONES
 // ==========================================================================
 
+// Función para crear un gráfico de tarta vacío
 function crearGraficoVacioTarta() {
   const ctx = document.getElementById("graficoEventosCategoria");
 
@@ -56,6 +57,7 @@ function crearGraficoVacioTarta() {
   });
 }
 
+// Función para cargar los datos del gráfico de tarta desde la API
 async function cargarGraficoTarta() {
   const URL = `${URL_BASE}eventos/eventos-por-categoria`;
 
@@ -80,6 +82,7 @@ async function cargarGraficoTarta() {
   }
 }
 
+// Función para agrupar los eventos por categoría y preparar los datos para el gráfico
 function agruparEventosPorCategoria(categorias) {
   const labels = [];
   const datos = [];
@@ -95,6 +98,7 @@ function agruparEventosPorCategoria(categorias) {
   };
 }
 
+// Función para actualizar el gráfico de tarta con nuevos datos
 function actualizarGraficoTarta(eventosPorCategoria) {
   if (!graficoTarta) {
     console.warn("El gráfico todavía no está creado");

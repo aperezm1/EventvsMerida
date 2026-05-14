@@ -556,6 +556,7 @@ async function obtenerOrganizadorPorId(id) {
   }
 }
 
+// Función para mostrar los detalles de un organizador en el modal
 function verOrganizador(usuario) {
   const tieneFoto =
     usuario.fotoUrl &&
