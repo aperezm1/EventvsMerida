@@ -172,7 +172,7 @@ async function cargarCategorias() {
   }
 }
 
-
+// Función para crear una nueva categoría
 async function crearCategoria(datosCategoria) {
   try {
     const options = {
@@ -202,6 +202,7 @@ async function crearCategoria(datosCategoria) {
   }
 }
 
+// Función para editar una categoría existente
 async function editarCategoria(id, datosCategoria) {
   try {
     const options = {
@@ -234,6 +235,7 @@ async function editarCategoria(id, datosCategoria) {
   }
 }
 
+// Función para eliminar una categoría
 async function eliminarCategoria(id, categoria) {
   Swal.fire({
     title:

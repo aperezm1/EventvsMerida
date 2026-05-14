@@ -31,6 +31,7 @@ window.addEventListener("DOMContentLoaded", async (event) => {
 // FUNCIONES
 // ==========================================================================
 
+// Función para manejar el proceso de inicio de sesión
 async function login(datos) {
     const URL = `${URL_BASE}auth/login?admin=true`;
     const btnLogin = document.getElementById("btnLogin");

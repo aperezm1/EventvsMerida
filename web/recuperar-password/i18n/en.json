@@ -1,0 +1,16 @@
+{
+  "pageTitle": "Reset password - Eventvs Mérida",
+  "resetTitle": "Reset your password",
+  "newPassword": "New password",
+  "confirmPassword": "Confirm new password",
+  "passwordRequirements": "The password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number and one symbol.",
+  "changePassword": "Change password",
+  "passwordChanged": "Password changed",
+  "passwordChangedDescription": "Your password has been updated successfully. You can now return to the app.",
+  "showPassword": "Show password",
+  "hidePassword": "Hide password",
+  "passwordsMustMatch": "Passwords must match",
+  "invalidOrExpiredLink": "The reset link is invalid or has expired",
+  "resetError": "An error occurred while resetting the password",
+  "resetSuccess": "Password updated successfully"
+}
