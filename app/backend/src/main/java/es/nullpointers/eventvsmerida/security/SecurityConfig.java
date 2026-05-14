@@ -1,5 +1,6 @@
 package es.nullpointers.eventvsmerida.security;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -46,7 +47,7 @@ public class SecurityConfig {
 
     /**
      * Configura la cadena de filtros de seguridad para la aplicación.
-     *
+     * <p>
      * Reglas aplicadas (resumen):
      * - GET/POST/PUT/DELETE sobre /api/eventos/** => Administrador u Organizador
      * - POST/PUT/DELETE de categorías (add/update/delete) => solo Administrador
@@ -60,43 +61,53 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) {
         http
-            .csrf(AbstractHttpConfigurer::disable)
-            .cors(Customizer.withDefaults())
-            .authorizeHttpRequests(auth -> auth
+                .csrf(AbstractHttpConfigurer::disable)
+                .cors(Customizer.withDefaults())
+                .authorizeHttpRequests(auth -> auth
 
-                // Eventos: (GET/POST/PUT/DELETE) -> Administrador u Organizador
-                .requestMatchers(HttpMethod.POST, "/api/eventos/add").hasAnyAuthority("Administrador", "Organizador")
-                .requestMatchers(HttpMethod.PUT,  "/api/eventos/update/*").hasAnyAuthority("Administrador", "Organizador")
-                .requestMatchers(HttpMethod.DELETE, "/api/eventos/delete/*").hasAnyAuthority("Administrador", "Organizador")
-                .requestMatchers(HttpMethod.GET, "/api/eventos/organizador/*").hasAnyAuthority("Administrador", "Organizador")
+                        // Eventos: (GET/POST/PUT/DELETE) -> Administrador u Organizador
+                        .requestMatchers(HttpMethod.POST, "/api/eventos/add").hasAnyAuthority("Administrador", "Organizador")
+                        .requestMatchers(HttpMethod.PUT, "/api/eventos/update/*").hasAnyAuthority("Administrador", "Organizador")
+                        .requestMatchers(HttpMethod.DELETE, "/api/eventos/delete/*").hasAnyAuthority("Administrador", "Organizador")
+                        .requestMatchers(HttpMethod.GET, "/api/eventos/organizador/*").hasAnyAuthority("Administrador", "Organizador")
 
-                // Categorías: (POST/PUT/DELETE) -> solo Administrador
-                .requestMatchers(HttpMethod.POST,   "/api/categorias/add").hasAuthority("Administrador")
-                .requestMatchers(HttpMethod.PUT,    "/api/categorias/update/*").hasAuthority("Administrador")
-                .requestMatchers(HttpMethod.DELETE, "/api/categorias/delete/*").hasAuthority("Administrador")
+                        // Categorías: (POST/PUT/DELETE) -> solo Administrador
+                        .requestMatchers(HttpMethod.POST, "/api/categorias/add").hasAuthority("Administrador")
+                        .requestMatchers(HttpMethod.PUT, "/api/categorias/update/*").hasAuthority("Administrador")
+                        .requestMatchers(HttpMethod.DELETE, "/api/categorias/delete/*").hasAuthority("Administrador")
 
-                // Usuarios: solo los GETs -> solo Administrador
-                .requestMatchers(HttpMethod.GET,
-                    "/api/usuarios/*",
-                    "/api/usuarios/registered",
-                    "/api/usuarios/organizers",
-                    "/api/usuarios/count/registered",
-                    "/api/usuarios/count/organizers",
-                    "/api/usuarios/all"
-                ).hasAuthority("Administrador")
+                        // Usuarios: solo los GETs -> solo Administrador
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/usuarios/*",
+                                "/api/usuarios/registered",
+                                "/api/usuarios/organizers",
+                                "/api/usuarios/count/registered",
+                                "/api/usuarios/count/organizers",
+                                "/api/usuarios/all"
+                        ).hasAuthority("Administrador")
 
-                // Roles y swagger: solo Administrador
-                .requestMatchers(
-                    "/swagger-ui/**",
-                    "/swagger-ui.html",
-                    "/v3/api-docs/**",
-                    "/api/roles/**"
-                ).hasAuthority("Administrador")
+                        // Roles y swagger: solo Administrador
+                        .requestMatchers(
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/v3/api-docs/**",
+                                "/api/roles/**"
+                        ).hasAuthority("Administrador")
 
-                // Resto de rutas públicas
-                .anyRequest().permitAll()
-            )
-            .formLogin(Customizer.withDefaults());
+                        // Resto de rutas públicas
+                        .anyRequest().permitAll()
+                )
+                .exceptionHandling(ex -> ex
+                        .defaultAuthenticationEntryPointFor(
+                                (request, response, authException) -> {
+                                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                                    response.setContentType("application/json;charset=UTF-8");
+                                    response.getWriter().write("{\"message\":\"Sesión expirada\"}");
+                                },
+                                request -> request.getRequestURI().startsWith("/api/")
+                        )
+                )
+                .formLogin(Customizer.withDefaults());
 
         return http.build();
     }
