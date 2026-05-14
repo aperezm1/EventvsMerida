@@ -689,6 +689,7 @@ async function crearEvento(datosFormulario) {
       );
 
       modal.hide();
+      limpiarFormularioCrearEvento();
     } else {
       mostrarAlerta("error", "Error al crear el evento: " + respuesta.error);
     }
@@ -852,11 +853,13 @@ function inicializarAutocompleteLocalizacion(inputId, listId) {
   });
 }
 
+// Función para vaciar los resultados de búsqueda
 function limpiarResultadosLocalizacion(lista) {
   lista.innerHTML = "";
   lista.classList.add("d-none");
 }
 
+// Funciones para mostrar mensajes mientras están cargando los resultados
 function renderizarCargandoLocalizacion(lista) {
   lista.innerHTML = `
     <div class="list-group-item localizacion-loading">
@@ -876,6 +879,7 @@ function renderizarMensajeLocalizacion(lista, mensaje) {
   lista.classList.remove("d-none");
 }
 
+// Función para mostrar los reultados obtenidos
 function renderizarResultadosLocalizacion(lista, resultados, input) {
   lista.innerHTML = "";
 
@@ -913,4 +917,26 @@ function renderizarResultadosLocalizacion(lista, resultados, input) {
   });
 
   lista.classList.remove("d-none");
+}
+
+// Función para limpiar el formulario de creación de eventos
+function limpiarFormularioCrearEvento() {
+  const form = document.getElementById("formAgregarEvento");
+
+  if (!form) return;
+
+  // Limpia todos los campos del formulario, incluido el input file
+  form.reset();
+
+  // Quita estilos de validación de Bootstrap
+  form.classList.remove("was-validated");
+
+  // Limpia resultados del autocompletado de localización
+  const listaLocalizacion = document.getElementById("localizacionResultados");
+  if (listaLocalizacion) {
+    limpiarResultadosLocalizacion(listaLocalizacion);
+  }
+
+  // Limpia coordenadas seleccionadas de la localización del formulario crear
+  coordenadasSeleccionadas.delete("localizacion");
 }
