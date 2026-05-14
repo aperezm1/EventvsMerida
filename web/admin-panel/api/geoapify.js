@@ -1,3 +1,4 @@
+// Función API para buscar direcciones usando Geoapify
 export default async function handler(req, res) {
   const { text } = req.query;
 
