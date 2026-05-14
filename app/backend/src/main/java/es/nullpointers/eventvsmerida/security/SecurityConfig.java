@@ -86,6 +86,10 @@ public class SecurityConfig {
                                 "/api/usuarios/all"
                         ).hasAuthority("Administrador")
 
+                        // Todos los usuarios: UPDATE y DELETE de usuarios -> Administrador, Organizador o Registrado
+                        .requestMatchers(HttpMethod.PUT, "/api/usuarios/update/*").hasAnyAuthority("Administrador", "Organizador", "Registrado")
+                        .requestMatchers(HttpMethod.DELETE, "/api/usuarios/delete/*").hasAnyAuthority("Administrador", "Organizador", "Registrado")
+
                         // Roles y swagger: solo Administrador
                         .requestMatchers(
                                 "/swagger-ui/**",

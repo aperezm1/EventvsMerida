@@ -19,7 +19,7 @@ class ApiService {
   // VARIABLES
   // ============================================================================
 
-  static const String baseUrl = 'https://eventvsmerida-x2t1.onrender.com/api';
+  static const String baseUrl = 'http://192.168.1.36:8080/api';
   static const Duration _tiempoLimite = Duration(seconds: 10);
 
   static const Map<String, String> _cabecerasJson = {
@@ -247,9 +247,10 @@ class ApiService {
       final uri = Uri.parse('$baseUrl/usuarios/update/$idUsuario');
       final request = http.MultipartRequest('PUT', uri);
 
-      if (datosUsuario != null && datosUsuario.isNotEmpty) {
-        request.fields['usuario'] = jsonEncode(datosUsuario);
-      }
+      final cabeceras = await _cabecerasConSesion();
+      request.headers.addAll(cabeceras);
+
+      request.fields['usuario'] = jsonEncode(datosUsuario);
 
       if (imagen != null) {
         final extension = p.extension(imagen.path).toLowerCase();
