@@ -169,7 +169,7 @@ public class EmailService {
                                                     </div>
                                                     <div class="content">
                                                         <p>%s</p>
-                                                        <p>Hemos recibido una solicitud para restablecer tu contraseña en <span class="highlight">EventvsMerida</span>.</p>
+                                                        <p>Hemos recibido una solicitud para restablecer tu contraseña en <span class="highlight">Eventvs Mérida</span>.</p>
                                                         <div class="button-container">
                                                             <a href="%s" class="button" style="color: #ffffff !important; text-decoration: none !important;">Restablecer mi Contraseña</a>
                                                         </div>
@@ -178,9 +178,9 @@ public class EmailService {
                                                         <p style="font-size: 13px;">Este enlace expirará en 30 minutos. Si no solicitaste restablecer tu contraseña, puedes ignorar este correo de forma segura.</p>
                                                     </div>
                                                     <div class="footer">
-                                                        <p><strong>EventvsMerida</strong></p>
+                                                        <p><strong>Eventvs Mérida</strong></p>
                                                         <p>Tu plataforma de eventos de Mérida</p>
-                                                        <p style="margin-top: 10px; font-size: 11px;">© 2026 EventvsMerida. Todos los derechos reservados.</p>
+                                                        <p style="margin-top: 10px; font-size: 11px;">© 2026 Eventvs Mérida. Todos los derechos reservados.</p>
                                                     </div>
                                                 </div>
                                             </body>
