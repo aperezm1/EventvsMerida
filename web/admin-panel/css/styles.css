@@ -11972,3 +11972,46 @@ body.auth-pending {
 .card {
   border-radius: 6px !important;
 }
+
+/* Autocomplete localizacion */
+.localizacion-item,
+.localizacion-loading,
+.localizacion-empty {
+  background-color: #1b1f24;
+  color: #e9ecef;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+#localizacionResultados,
+#localizacionEditarResultados {
+  z-index: 1050;
+}
+
+.localizacion-item:hover,
+.localizacion-item:focus {
+  background-color: #242a31;
+  color: #ffffff;
+}
+
+.localizacion-loading,
+.localizacion-empty {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.localizacion-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: localizacion-spin 0.8s linear infinite;
+}
+
+@keyframes localizacion-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -31,6 +31,13 @@ window.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
+  [
+    { inputId: "localizacion", listId: "localizacionResultados" },
+    { inputId: "localizacionEditar", listId: "localizacionEditarResultados" },
+  ].forEach(({ inputId, listId }) => {
+    inicializarAutocompleteLocalizacion(inputId, listId);
+  });
+
   // Formulario agregar evento
   const form = document.getElementById("formAgregarEvento");
 
@@ -781,3 +788,112 @@ document.getElementById("btnSiguiente").addEventListener("click", (e) => {
     cargarEventos();
   }
 });
+
+// Función que realiza la llamada a la API para obtener los lugares buscados.
+async function buscarLugar(textoBusqueda) {
+  try {
+    const texto = encodeURIComponent(
+      `${textoBusqueda} Mérida, Badajoz, España`,
+    );
+    const resp = await fetch(`/api/geoapify?text=${encodeURIComponent(textoBusqueda)}`);
+    if (!resp.ok) throw new Error("Geoapify error");
+    const data = await resp.json();
+    return data?.features || [];
+  } catch (error) {
+    console.error("Error al obtener la Ubicación:", error);
+    return [];
+  }
+}
+
+// Función que carga y muestra los resultados obtenidos en la búsqueda
+function inicializarAutocompleteLocalizacion(inputId, listId) {
+  const input = document.getElementById(inputId);
+  const lista = document.getElementById(listId);
+
+  if (!input || !lista) return;
+
+  let timerId;
+
+  input.addEventListener("input", () => {
+    clearTimeout(timerId);
+    const texto = input.value.trim();
+
+    if (texto.length < 2) {
+      limpiarResultadosLocalizacion(lista);
+      return;
+    }
+
+    timerId = setTimeout(async () => {
+      const consulta = texto;
+      renderizarCargandoLocalizacion(lista);
+      const resultados = await buscarLugar(consulta);
+      if (input.value.trim() !== consulta) return;
+      renderizarResultadosLocalizacion(lista, resultados, input);
+    }, 500);
+  });
+
+  input.addEventListener("focus", () => {
+    if (lista.children.length > 0) {
+      lista.classList.remove("d-none");
+    }
+  });
+
+  document.addEventListener("click", (event) => {
+    if (event.target === input || lista.contains(event.target)) return;
+    limpiarResultadosLocalizacion(lista);
+  });
+}
+
+function limpiarResultadosLocalizacion(lista) {
+  lista.innerHTML = "";
+  lista.classList.add("d-none");
+}
+
+function renderizarCargandoLocalizacion(lista) {
+  lista.innerHTML = `
+    <div class="list-group-item localizacion-loading">
+      <span class="localizacion-spinner"></span>
+      Buscando ubicaciones...
+    </div>
+  `;
+  lista.classList.remove("d-none");
+}
+
+function renderizarMensajeLocalizacion(lista, mensaje) {
+  lista.innerHTML = `
+    <div class="list-group-item localizacion-empty">
+      ${mensaje}
+    </div>
+  `;
+  lista.classList.remove("d-none");
+}
+
+function renderizarResultadosLocalizacion(lista, resultados, input) {
+  lista.innerHTML = "";
+
+  if (!Array.isArray(resultados) || resultados.length === 0) {
+    renderizarMensajeLocalizacion(lista, "No hay resultados para esta búsqueda.");
+    return;
+  }
+
+  resultados.slice(0, 6).forEach((item) => {
+    const categoria = String(item?.properties?.category || "").toLowerCase();
+    const texto =
+      item?.properties?.formatted ||
+      item?.properties?.address_line1 ||
+      "Ubicación";
+
+    const boton = document.createElement("button");
+    boton.type = "button";
+    boton.className = "list-group-item list-group-item-action localizacion-item";
+    boton.innerHTML = `<i class="fa-solid fa-signs-post"></i> </i>${texto}`;
+    boton.addEventListener("click", () => {
+      input.value = texto;
+      limpiarResultadosLocalizacion(lista);
+    });
+
+    lista.appendChild(boton);
+  });
+
+  lista.classList.remove("d-none");
+}
