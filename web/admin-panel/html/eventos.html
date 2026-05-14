@@ -251,7 +251,7 @@
                       />
                       <div class="invalid-feedback">Introduce un título (mínimo 2 caracteres).</div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-6 position-relative">
                       <label for="localizacionEvento" class="form-label">
                         Localización <span class="campo-obligatorio">*</span>
                       </label>
@@ -263,6 +263,10 @@
                         minlength="2"
                         maxlength="50"
                       />
+                      <div
+                        id="localizacionResultados"
+                        class="list-group position-absolute w-100 mt-1 d-none"
+                      ></div>
                       <div class="invalid-feedback">Introduce una localización (mínimo 2 caracteres).</div>
                     </div>
                     <div class="col-md-12">
@@ -489,7 +493,7 @@
                       />
                       <div class="invalid-feedback">Introduce un título (mínimo 2 caracteres).</div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-6 position-relative">
                       <label for="localizacionEditar" class="form-label">Localización</label>
                       <input
                         type="text"
@@ -500,6 +504,10 @@
                         maxlength="50"
                         title="Solo letras y espacios"
                       />
+                      <div
+                        id="localizacionEditarResultados"
+                        class="list-group position-absolute w-100 mt-1 d-none"
+                      ></div>
                       <div class="invalid-feedback">Introduce una localización (mínimo 2 caracteres).</div>
                     </div>
                     <div class="col-md-12">
