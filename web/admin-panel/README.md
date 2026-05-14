@@ -91,6 +91,11 @@ El proyecto usa el logo de Eventvs Mérida en `assets/img/` y dependencias exter
 - `html/categorias.html`
 - `html/roles.html`
 
+## 🔗 Links
+
+- **Repositorio**: https://github.com/Null-Pointers-Albarregas/EventvsMerida
+- **Despliegue**: https://eventvsmerida-admin.vercel.app/
+
 ---
 
 Desarrollado por **Adrián Pérez Morales**, **David Muñoz Collado** y **Eva Retamar Muñoz**  

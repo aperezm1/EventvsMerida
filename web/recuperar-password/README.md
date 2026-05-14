@@ -79,6 +79,11 @@ La interfaz se puede abrir directamente desde un servidor local y realiza la pet
 4. Pulsa **Cambiar contraseña**.
 5. Si todo es correcto, verás la confirmación de éxito.
 
+## 🔗 Links
+
+- **Repositorio**: https://github.com/Null-Pointers-Albarregas/EventvsMerida
+- **Despliegue**: https://eventvsmerida-recover.vercel.app/
+
 ---
 
 Desarrollado por **Adrián Pérez Morales**, **David Muñoz Collado** y **Eva Retamar Muñoz**  
