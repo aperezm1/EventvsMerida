@@ -1,0 +1,148 @@
+{
+  "app": {
+    "title": "Eventvs Mérida",
+    "description": "Eventvs Mérida — Todos los eventos culturales de Mérida en un solo lugar."
+  },
+  "navbar": {
+    "logoAlt": "Eventvs Mérida",
+    "about": "Sobre la App",
+    "features": "Funcionalidades",
+    "team": "Equipo",
+    "download": "Descargar",
+    "languageSelectorLabel": "Selector de idioma",
+    "languages": {
+      "es": "Español",
+      "en": "Inglés",
+      "pt": "Portugués",
+      "fr": "Francés"
+    }
+  },
+  "hero": {
+    "location": "Mérida · Extremadura · España",
+    "title": {
+      "first": "Todos los",
+      "second": "Eventos",
+      "third": "de Mérida"
+    },
+    "subtitle": {
+      "first": "Una sola app para descubrir la cultura, el ocio y los eventos",
+      "second": "de la ciudad. Para residentes y viajeros."
+    },
+    "actions": {
+      "download": "Descargar Aplicación",
+      "repository": "Ver Repositorio"
+    },
+    "scrollHint": "Descubre más",
+    "qr": {
+      "alt": "Código QR de descarga"
+    },
+    "logoAlt": "Eventvs Mérida"
+  },
+  "about": {
+    "imageAlt": "Templo de Diana en Mérida",
+    "label": "¿Qué es Eventvs Mérida?",
+    "title": {
+      "first": "La cultura de",
+      "second": "Mérida,",
+      "third": "unificada"
+    },
+    "paragraphs": {
+      "first": "Eventvs Mérida es una aplicación móvil Android diseñada para reunir en un único lugar la inmensa mayoría de los eventos culturales de la ciudad: teatro, conciertos, exposiciones, festivales y mucho más.",
+      "second": "Surge como respuesta directa a la dificultad actual para encontrar actividades culturales dispersas en diferentes medios y plataformas, dificultando la participación tanto de residentes como de turistas."
+    },
+    "stats": {
+      "oneApp": "App para todo",
+      "culturalEvents": "Eventos culturales",
+      "complications": "Complicaciones"
+    },
+    "cards": {
+      "heritage": {
+        "title": "Patrimonio histórico",
+        "description": "Teatro Romano, Anfiteatro, Circo… Mérida tiene uno de los conjuntos arqueológicos más importantes de España."
+      },
+      "culture": {
+        "title": "Cultura viva",
+        "description": "Festival de Teatro Clásico, mercados, exposiciones, música en vivo y eventos para todos los gustos."
+      }
+    }
+  },
+  "features": {
+    "label": "¿Qué puedes hacer?",
+    "title": {
+      "first": "Todo lo que",
+      "second": "necesitas saber"
+    },
+    "description": "Eventvs Mérida centraliza, organiza y presenta los eventos culturales de la ciudad de la forma más sencilla posible.",
+    "images": {
+      "theatreAlt": "Teatro de Mérida",
+      "squareAlt": "Plaza de Mérida"
+    },
+    "items": {
+      "map": {
+        "title": "Mapa interactivo",
+        "description": "Localiza eventos cercanos en tiempo real con geolocalización integrada."
+      },
+      "calendar": {
+        "title": "Agenda completa",
+        "description": "Vista de calendario con todos los eventos filtrados por días."
+      },
+      "audience": {
+        "title": "Para residentes y turistas",
+        "description": "Diseñado para que tanto emeritenses como visitantes disfruten de la ciudad."
+      },
+      "details": {
+        "title": "Información detallada",
+        "description": "Horarios, ubicación, imagen y descripción completa de cada evento."
+      },
+      "search": {
+        "title": "Búsqueda y filtros",
+        "description": "Encuentra exactamente lo que buscas por categoría, título o ubicación."
+      }
+    }
+  },
+  "team": {
+    "label": "Quiénes somos",
+    "title": {
+      "first": "El equipo",
+      "second": "Null Pointers"
+    },
+    "description": "Desarrollado por tres estudiantes de Mérida con ganas de mejorar el acceso a la cultura de su ciudad.",
+    "members": {
+      "fullstackMale": "Desarrollador FullStack",
+      "fullstackFemale": "Desarrolladora FullStack"
+    },
+    "school": {
+      "label": "IES Albarregas · Mérida"
+    },
+    "photoAlt": "Letras de Mérida"
+  },
+  "download": {
+    "label": "Disponible ahora",
+    "title": {
+      "first": "Descarga",
+      "second": "Eventvs Mérida"
+    },
+    "description": "Disponible para Android. Descarga el APK directamente desde las releases del repositorio oficial en GitHub.",
+    "actions": {
+      "app": {
+        "subtitle": "Descargar Aplicación",
+        "title": "Android"
+      },
+      "repository": {
+        "subtitle": "Código fuente",
+        "title": "GitHub"
+      }
+    },
+    "note": {
+      "text": "Puede ser necesario activar",
+      "strong": "«Instalar apps de fuentes desconocidas» en los ajustes de tu dispositivo Android."
+    },
+    "qrAlt": "Código QR de descarga",
+    "footer": {
+      "copyright": "© 2026 Eventvs Mérida · Null Pointers · IES Albarregas",
+      "location": "Mérida, Extremadura, España",
+      "adminAccess": "Acceso admin",
+      "adminAccessAriaLabel": "Acceso al panel de administración para tutores"
+    }
+  }
+}

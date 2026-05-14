@@ -1,0 +1,148 @@
+{
+  "app": {
+    "title": "Eventvs Mérida",
+    "description": "Eventvs Mérida — All cultural events in Mérida in one place."
+  },
+  "navbar": {
+    "logoAlt": "Eventvs Mérida",
+    "about": "About the App",
+    "features": "Features",
+    "team": "Team",
+    "download": "Download",
+    "languageSelectorLabel": "Language selector",
+    "languages": {
+      "es": "Spanish",
+      "en": "English",
+      "pt": "Portuguese",
+      "fr": "French"
+    }
+  },
+  "hero": {
+    "location": "Mérida · Extremadura · Spain",
+    "title": {
+      "first": "All",
+      "second": "Events",
+      "third": "in Mérida"
+    },
+    "subtitle": {
+      "first": "A single app to discover culture, leisure and events",
+      "second": "in the city. For residents and travelers."
+    },
+    "actions": {
+      "download": "Download App",
+      "repository": "View Repository"
+    },
+    "scrollHint": "Discover more",
+    "qr": {
+      "alt": "Download QR code"
+    },
+    "logoAlt": "Eventvs Mérida"
+  },
+  "about": {
+    "imageAlt": "Temple of Diana in Mérida",
+    "label": "What is Eventvs Mérida?",
+    "title": {
+      "first": "The culture of",
+      "second": "Mérida,",
+      "third": "unified"
+    },
+    "paragraphs": {
+      "first": "Eventvs Mérida is an Android mobile application designed to bring together, in one place, the vast majority of the city's cultural events: theatre, concerts, exhibitions, festivals and much more.",
+      "second": "It was created as a direct response to the current difficulty of finding cultural activities scattered across different media and platforms, making participation harder for both residents and tourists."
+    },
+    "stats": {
+      "oneApp": "One app for everything",
+      "culturalEvents": "Cultural events",
+      "complications": "Complications"
+    },
+    "cards": {
+      "heritage": {
+        "title": "Historical heritage",
+        "description": "Roman Theatre, Amphitheatre, Circus… Mérida has one of the most important archaeological sites in Spain."
+      },
+      "culture": {
+        "title": "Living culture",
+        "description": "Classical Theatre Festival, markets, exhibitions, live music and events for every taste."
+      }
+    }
+  },
+  "features": {
+    "label": "What can you do?",
+    "title": {
+      "first": "Everything you",
+      "second": "need to know"
+    },
+    "description": "Eventvs Mérida centralizes, organizes and presents the city's cultural events in the simplest possible way.",
+    "images": {
+      "theatreAlt": "Theatre of Mérida",
+      "squareAlt": "Square in Mérida"
+    },
+    "items": {
+      "map": {
+        "title": "Interactive map",
+        "description": "Find nearby events in real time with integrated geolocation."
+      },
+      "calendar": {
+        "title": "Complete agenda",
+        "description": "Calendar view with all events filtered by day."
+      },
+      "audience": {
+        "title": "For residents and tourists",
+        "description": "Designed so both locals and visitors can enjoy the city."
+      },
+      "details": {
+        "title": "Detailed information",
+        "description": "Schedules, location, image and full description for each event."
+      },
+      "search": {
+        "title": "Search and filters",
+        "description": "Find exactly what you are looking for by category, title or location."
+      }
+    }
+  },
+  "team": {
+    "label": "Who we are",
+    "title": {
+      "first": "The",
+      "second": "Null Pointers team"
+    },
+    "description": "Developed by three students from Mérida who want to improve access to culture in their city.",
+    "members": {
+      "fullstackMale": "FullStack Developer",
+      "fullstackFemale": "FullStack Developer"
+    },
+    "school": {
+      "label": "IES Albarregas · Mérida"
+    },
+    "photoAlt": "Mérida letters"
+  },
+  "download": {
+    "label": "Available now",
+    "title": {
+      "first": "Download",
+      "second": "Eventvs Mérida"
+    },
+    "description": "Available for Android. Download the APK directly from the releases of the official GitHub repository.",
+    "actions": {
+      "app": {
+        "subtitle": "Download App",
+        "title": "Android"
+      },
+      "repository": {
+        "subtitle": "Source code",
+        "title": "GitHub"
+      }
+    },
+    "note": {
+      "text": "You may need to enable",
+      "strong": "“Install apps from unknown sources” in your Android device settings."
+    },
+    "qrAlt": "Download QR code",
+    "footer": {
+      "copyright": "© 2026 Eventvs Mérida · Null Pointers · IES Albarregas",
+      "location": "Mérida, Extremadura, Spain",
+      "adminAccess": "Admin access",
+      "adminAccessAriaLabel": "Access to the administration panel for tutors"
+    }
+  }
+}

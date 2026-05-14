@@ -1,43 +1,45 @@
-<section id="team" class="team">
+<section [id]="sectionId" class="team">
   <div class="team-inner">
     <div class="team-header">
       <div appReveal>
-        <span class="label">Quiénes somos</span>
+        <span class="label">{{ labelKey | translate }}</span>
         <div class="glow-line" style="margin-top: 0.75rem"></div>
       </div>
+
       <h2 appReveal [revealDelay]="1">
-        El equipo<br /><span class="gradient-text">Null Pointers</span>
+        {{ titleLineKeys.first | translate }}<br />
+        <span class="gradient-text">{{ titleLineKeys.second | translate }}</span>
       </h2>
+
       <p appReveal [revealDelay]="2">
-        Desarrollado por tres estudiantes de Mérida con ganas de mejorar el
-        acceso a la cultura de su ciudad.
+        {{ descriptionKey | translate }}
       </p>
     </div>
 
     <div class="team-grid">
-      @for (member of members; track member.name; let i = $index) {
+      @for (member of members; track member.name; let index = $index) {
         <a
           class="member-card"
           appReveal
-          [revealDelay]="i + 1"
+          [revealDelay]="index + 1"
           [href]="member.url"
           target="_blank"
-          rel="noopener noreferrer">
-         <div class="member-avatar" [style.--color]="member.color">
-  <div class="avatar-inner">
-    <img [src]="member.image" [alt]="member.name">
-  </div>
+          rel="noopener noreferrer"
+        >
+          <div class="member-avatar" [style.--color]="member.color">
+            <div class="avatar-inner">
+              <img [src]="member.imageUrl" [alt]="member.name" />
+            </div>
 
-  <div class="avatar-ring"></div>
-</div>
+            <div class="avatar-ring"></div>
+          </div>
+
           <div class="member-info">
             <h3>{{ member.name }}</h3>
-            <span class="member-role">{{ member.role }}</span>
+            <span class="member-role">{{ member.roleKey | translate }}</span>
           </div>
-          <div
-            class="member-glow"
-            [style.background]="member.color + '0D'"
-          ></div>
+
+          <div class="member-glow" [style.background]="member.color + '0D'"></div>
         </a>
       }
     </div>
@@ -45,11 +47,12 @@
     <div class="team-footer" appReveal [revealDelay]="2">
       <a
         class="team-badge"
-        href="https://sites.google.com/iesalbarregas.es/portada/inicio"
+        [href]="schoolUrl"
         target="_blank"
-        rel="noopener noreferrer">
-        <span>🏫</span>
-        <span>IES Albarregas · Mérida</span>
+        rel="noopener noreferrer"
+      >
+        <span>{{ schoolBadgeIcon }}</span>
+        <span>{{ schoolBadgeLabelKey | translate }}</span>
       </a>
     </div>
   </div>
@@ -57,7 +60,7 @@
   <div class="team-photo-wrap" appReveal revealDirection="right" [revealDelay]="2">
     <div class="team-photo">
       <div class="team-photo-media" #teamPhoto>
-        <img src="assets/merida_letras.jpg" alt="Letras de Mérida" />
+        <img [src]="photoUrl" [alt]="photoAltKey | translate" />
       </div>
     </div>
   </div>

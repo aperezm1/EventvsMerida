@@ -1,5 +1,16 @@
-import { Directive, ElementRef, Input, OnInit, OnDestroy } from '@angular/core';
+import { Directive, ElementRef, inject, Input, OnInit, OnDestroy } from '@angular/core';
 
+/**
+ * Directiva que aplica una animación de aparición al elemento
+ * cuando entra en el viewport.
+ *
+ * Uso:
+ * <div appReveal [revealDelay]="200" revealDirection="left"></div>
+ * 
+ * @author Eva Retamar
+ * @author David Muñoz
+ * @author Adrián Pérez
+ */
 @Directive({
   selector: '[appReveal]',
   standalone: true
@@ -8,12 +19,17 @@ export class RevealDirective implements OnInit, OnDestroy {
   @Input() revealDelay: number = 0;
   @Input() revealDirection: 'up' | 'left' | 'right' | 'scale' = 'up';
 
-  private observer!: IntersectionObserver;
+  private observer?: IntersectionObserver;
+  private el = inject(ElementRef);
 
-  constructor(private el: ElementRef) {}
 
+  /**
+   * Configura las clases iniciales y observa cuándo el elemento
+   * entra o sale del viewport para mostrar u ocultar la animación.
+   */
   ngOnInit() {
     const el = this.el.nativeElement as HTMLElement;
+
     el.classList.add('reveal');
 
     if (this.revealDirection === 'left') el.classList.add('from-left');
@@ -36,6 +52,10 @@ export class RevealDirective implements OnInit, OnDestroy {
     this.observer.observe(el);
   }
 
+
+  /**
+   * Limpia el observer al destruir la directiva.
+   */
   ngOnDestroy() {
     this.observer?.disconnect();
   }
