@@ -6,6 +6,7 @@ const URL_BASE = window.APP_CONFIG.API_BASE;
 
 let paginaActual = 0;
 let cantidadPaginacion = 1;
+const coordenadasSeleccionadas = new Map();
 
 // ==========================================================================
 // CONTENIDO DEL DOM
@@ -67,12 +68,15 @@ window.addEventListener("DOMContentLoaded", async () => {
           return;
         }
 
+        const coords = coordenadasSeleccionadas.get("localizacion") || {};
         const evento = {
           titulo: document.getElementById("titulo").value,
           descripcion: document.getElementById("descripcion").value,
           fechaInicio: `${fechaInicioVal}T${horaInicioVal}:00.000`,
           fechaFin: `${fechaFinVal}T${horaFinVal}:00.000`,
           localizacion: document.getElementById("localizacion").value,
+          latitud: coords.lat ?? null,
+          longitud: coords.lon ?? null,
           foto: null,
           idUsuario: document.getElementById("organizadores").value,
           idCategoria: document.getElementById("categorias").value,
@@ -135,6 +139,7 @@ window.addEventListener("DOMContentLoaded", async () => {
         return;
       }
 
+      const coords = coordenadasSeleccionadas.get("localizacionEditar") || {};
       const evento = {
         titulo,
         descripcion,
@@ -143,6 +148,8 @@ window.addEventListener("DOMContentLoaded", async () => {
         localizacion: document
           .getElementById("localizacionEditar")
           .value.trim(),
+        latitud: coords.lat ?? null,
+        longitud: coords.lon ?? null,
         foto: null,
         idUsuario:
           Number(document.getElementById("organizadoresEditar").value) || null,
@@ -817,6 +824,7 @@ function inicializarAutocompleteLocalizacion(inputId, listId) {
   input.addEventListener("input", () => {
     clearTimeout(timerId);
     const texto = input.value.trim();
+    coordenadasSeleccionadas.delete(inputId);
 
     if (texto.length < 2) {
       limpiarResultadosLocalizacion(lista);
@@ -882,6 +890,10 @@ function renderizarResultadosLocalizacion(lista, resultados, input) {
       item?.properties?.formatted ||
       item?.properties?.address_line1 ||
       "Ubicación";
+    const coords = {
+      lat: Number(item?.properties?.lat ?? item?.geometry?.coordinates?.[1]),
+      lon: Number(item?.properties?.lon ?? item?.geometry?.coordinates?.[0]),
+    };
 
     const boton = document.createElement("button");
     boton.type = "button";
@@ -889,6 +901,11 @@ function renderizarResultadosLocalizacion(lista, resultados, input) {
     boton.innerHTML = `<i class="fa-solid fa-signs-post"></i> </i>${texto}`;
     boton.addEventListener("click", () => {
       input.value = texto;
+      if (Number.isFinite(coords.lat) && Number.isFinite(coords.lon)) {
+        coordenadasSeleccionadas.set(input.id, coords);
+      } else {
+        coordenadasSeleccionadas.delete(input.id);
+      }
       limpiarResultadosLocalizacion(lista);
     });
 
