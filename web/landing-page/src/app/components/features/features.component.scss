@@ -10,21 +10,15 @@
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(
-      ellipse 55% 40% at 50% 20%,
+    radial-gradient(ellipse 55% 40% at 50% 20%,
       rgba(245, 166, 35, 0.08) 0%,
-      transparent 60%
-    ),
-    radial-gradient(
-      ellipse 45% 45% at 20% 75%,
+      transparent 60%),
+    radial-gradient(ellipse 45% 45% at 20% 75%,
       rgba(43, 108, 176, 0.1) 0%,
-      transparent 65%
-    ),
-    radial-gradient(
-      ellipse 45% 45% at 85% 45%,
+      transparent 65%),
+    radial-gradient(ellipse 45% 45% at 85% 45%,
       rgba(43, 108, 176, 0.08) 0%,
-      transparent 65%
-    );
+      transparent 65%);
   pointer-events: none;
   z-index: 0;
 }
@@ -35,13 +29,11 @@
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(
-      180deg,
+    linear-gradient(180deg,
       rgba(6, 10, 16, 0.15) 0%,
       transparent 25%,
       transparent 75%,
-      rgba(6, 10, 16, 0.25) 100%
-    );
+      rgba(6, 10, 16, 0.25) 100%);
   pointer-events: none;
   z-index: 1;
 }
@@ -105,11 +97,9 @@
     position: absolute;
     inset: 0;
     background:
-      linear-gradient(
-        180deg,
+      linear-gradient(180deg,
         rgba(6, 10, 16, 0.05) 0%,
-        rgba(6, 10, 16, 0.25) 100%
-      );
+        rgba(6, 10, 16, 0.25) 100%);
     z-index: 1;
     pointer-events: none;
   }
@@ -129,14 +119,12 @@
   width: clamp(230px, 18vw, 340px);
   height: clamp(320px, 26vw, 460px);
   border-radius: 26px 8px 24px 8px;
-  clip-path: polygon(
-    0 18px,
-    18px 0,
-    100% 0,
-    100% calc(100% - 14px),
-    calc(100% - 14px) 100%,
-    0 100%
-  );
+  clip-path: polygon(0 18px,
+      18px 0,
+      100% 0,
+      100% calc(100% - 14px),
+      calc(100% - 14px) 100%,
+      0 100%);
 }
 
 /* Imagen plaza derecha */
@@ -144,14 +132,12 @@
   width: clamp(220px, 17vw, 320px);
   height: clamp(300px, 24vw, 430px);
   border-radius: 8px 26px 8px 24px;
-  clip-path: polygon(
-    12px 0,
-    100% 0,
-    100% calc(100% - 18px),
-    calc(100% - 18px) 100%,
-    0 100%,
-    0 14px
-  );
+  clip-path: polygon(12px 0,
+      100% 0,
+      100% calc(100% - 18px),
+      calc(100% - 18px) 100%,
+      0 100%,
+      0 14px);
 }
 
 /* Contenido principal */

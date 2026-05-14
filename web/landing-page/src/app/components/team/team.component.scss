@@ -29,7 +29,10 @@
   text-align: center;
   margin-bottom: 4.5rem;
 
-  .glow-line { display: block; margin: 0.75rem auto 0; }
+  .glow-line {
+    display: block;
+    margin: 0.75rem auto 0;
+  }
 
   h2 {
     font-size: clamp(2.8rem, 5vw, 4.5rem);
@@ -89,7 +92,7 @@
 
 .member-card {
   background: var(--surface);
-  border: 1px solid rgba(255,255,255,0.05);
+  border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 4px;
   padding: 2.5rem 2rem;
   display: flex;
@@ -131,7 +134,7 @@
 .member-avatar img {
   width: 100%;
   height: 100%;
-  object-fit: cover;    
+  object-fit: cover;
   border-radius: 50%;
   display: block;
   position: relative;
@@ -140,7 +143,7 @@
 
 .member-avatar .avatar-ring {
   position: absolute;
-  inset: -8px;           
+  inset: -8px;
   border-radius: 50%;
   border: 1px solid color-mix(in srgb, var(--color) 30%, transparent);
   animation: spin 8s linear infinite;
@@ -169,8 +172,13 @@
 
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .member-info {
@@ -229,7 +237,11 @@
     opacity: 0.6;
   }
 
-  .team-grid { grid-template-columns: 1fr; max-width: 360px; margin: 0 auto; }
+  .team-grid {
+    grid-template-columns: 1fr;
+    max-width: 360px;
+    margin: 0 auto;
+  }
 
   .team-photo {
     display: none;

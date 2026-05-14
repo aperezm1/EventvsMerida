@@ -1,71 +1,59 @@
-<section id="about" class="about">
+<section [id]="sectionId" class="about">
   <div class="about-inner">
 
+    <!-- Imagen -->
     <div class="about-media" appReveal revealDirection="left">
       <div class="about-media-frame">
-        <img src="assets/merida_templo.jpg" alt="Templo de Diana en Mérida">
+        <img [src]="imageUrl" [alt]="imageAltKey | translate" />
       </div>
     </div>
 
+    <!-- Texto central -->
     <div class="about-text">
       <div appReveal>
-        <span class="label">¿Qué es Eventvs Mérida?</span>
+        <span class="label">{{ labelKey | translate }}</span>
         <div class="glow-line" style="margin-top: 0.75rem;"></div>
       </div>
 
       <h2 appReveal [revealDelay]="1">
-        La cultura de<br>
-        <span class="gradient-text">Mérida,</span><br>
-        unificada
+        {{ titleLineKeys.first | translate }}<br />
+        <span class="gradient-text">{{ titleLineKeys.second | translate }}</span><br />
+        {{ titleLineKeys.third | translate }}
       </h2>
 
-      <p appReveal [revealDelay]="2">
-        Eventvs Mérida es una aplicación móvil Android diseñada para reunir en
-        un único lugar la inmensa mayoría de los eventos culturales de la ciudad:
-        teatro, conciertos, exposiciones, festivales y mucho más.
-      </p>
-
-      <p appReveal [revealDelay]="3">
-        Surge como respuesta directa a la dificultad actual para encontrar
-        actividades culturales dispersas en diferentes medios y plataformas,
-        dificultando la participación tanto de residentes como de turistas.
-      </p>
+      @for (paragraphKey of paragraphKeys; track paragraphKey; let index = $index) {
+        <p appReveal [revealDelay]="index + 2">
+          {{ paragraphKey | translate }}
+        </p>
+      }
 
       <div class="about-stats" appReveal [revealDelay]="4">
-        <div class="stat">
-          <span class="stat-num">1</span>
-          <span class="stat-label">App para todo</span>
-        </div>
-        <div class="stat-divider"></div>
-        <div class="stat">
-          <span class="stat-num">∞</span>
-          <span class="stat-label">Eventos culturales</span>
-        </div>
-        <div class="stat-divider"></div>
-        <div class="stat">
-          <span class="stat-num">0</span>
-          <span class="stat-label">Complicaciones</span>
-        </div>
+        @for (stat of stats; track stat.labelKey; let last = $last) {
+          <div class="stat">
+            <span class="stat-num">{{ stat.value }}</span>
+            <span class="stat-label">{{ stat.labelKey | translate }}</span>
+          </div>
+
+        @if (!last) {
+          <div class="stat-divider"></div>
+        }
+        }
       </div>
     </div>
 
+    <!-- Tarjetas -->
     <div class="about-visual" appReveal revealDirection="right">
       <div class="about-cards">
-        <div class="visual-card">
-          <div class="card-accent"></div>
-          <div class="card-icon">🏛️</div>
-          <h3>Patrimonio histórico</h3>
-          <p>Teatro Romano, Anfiteatro, Circo… Mérida tiene uno de los conjuntos arqueológicos más importantes de España.</p>
-        </div>
-        <div class="visual-card card-offset">
-          <div class="card-accent accent-blue"></div>
-          <div class="card-icon">🎭</div>
-          <h3>Cultura viva</h3>
-          <p>Festival de Teatro Clásico, mercados, exposiciones, música en vivo y eventos para todos los gustos.</p>
-        </div>
+        @for (card of cards; track card.titleKey) {
+          <div class="visual-card" [class.card-offset]="card.offset">
+            <div class="card-accent" [class]="card.accentClass"></div>
+            <div class="card-icon">{{ card.icon }}</div>
+            <h3>{{ card.titleKey | translate }}</h3>
+            <p>{{ card.descriptionKey | translate }}</p>
+          </div>
+        }
       </div>
     </div>
-
   </div>
 
   <!-- Línea decorativa de fondo -->
