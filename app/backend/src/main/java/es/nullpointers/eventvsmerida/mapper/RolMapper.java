@@ -24,7 +24,7 @@ public class RolMapper {
      */
     public static Rol convertirAEntidad(RolRequest request) {
         Rol rol = new Rol();
-        rol.setNombre(TextoUtils.capitalizarTexto(request.nombre()));
+        rol.setNombre(TextoUtils.capitalizarTexto(request.nombre().trim()));
         return rol;
     }
 

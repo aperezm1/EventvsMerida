@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 /**
  * Servicio para gestionar la logica de negocio relacionada con la
@@ -65,6 +66,10 @@ public class CategoriaService {
      * @return Categoria creada.
      */
     public CategoriaResponse crearCategoria(CategoriaRequest categoriaRequest) {
+        if (categoriaRepository.existsByNombre(categoriaRequest.nombre().trim())) {
+            throw new RuntimeException("Ya existe una categoría con este nombre");
+        }
+
         Categoria categoriaNueva = CategoriaMapper.convertirAEntidad(categoriaRequest);
         Categoria categoriaCreada = categoriaRepository.save(categoriaNueva);
         return CategoriaMapper.convertirAResponse(categoriaCreada);

@@ -33,12 +33,12 @@ public class UsuarioMapper {
     public static Usuario convertirAEntidad(UsuarioCrearRequest request, Rol rol, MultipartFile imagen, SupabaseStorage storage) {
         Usuario usuario = new Usuario();
 
-        usuario.setNombre(TextoUtils.capitalizarTexto(request.nombre()));
-        usuario.setApellidos(TextoUtils.capitalizarTexto(request.apellidos()));
+        usuario.setNombre(TextoUtils.capitalizarTexto(request.nombre().trim()));
+        usuario.setApellidos(TextoUtils.capitalizarTexto(request.apellidos().trim()));
         usuario.setFechaNacimiento(request.fechaNacimiento());
-        usuario.setEmail(TextoUtils.normalizarTexto(request.email()));
-        usuario.setTelefono(request.telefono());
-        usuario.setPassword(request.password());
+        usuario.setEmail(TextoUtils.normalizarTexto(request.email().trim()));
+        usuario.setTelefono(request.telefono().trim());
+        usuario.setPassword(request.password().trim());
         usuario.setRol(rol);
 
         String objectPath = null;

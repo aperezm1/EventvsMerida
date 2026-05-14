@@ -5,6 +5,7 @@ import es.nullpointers.eventvsmerida.dto.response.EventoResponse;
 import es.nullpointers.eventvsmerida.entity.Categoria;
 import es.nullpointers.eventvsmerida.entity.Evento;
 import es.nullpointers.eventvsmerida.entity.Usuario;
+import es.nullpointers.eventvsmerida.repository.EventoRepository;
 import es.nullpointers.eventvsmerida.supabase.SupabaseStorage;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -34,11 +35,11 @@ public class EventoMapper {
     public static Evento convertirAEntidad(EventoCrearRequest request, MultipartFile imagen, Usuario usuario, Categoria categoria, SupabaseStorage storageUploader) {
         Evento evento = new Evento();
 
-        evento.setTitulo(request.titulo());
-        evento.setDescripcion(request.descripcion());
+        evento.setTitulo(request.titulo().trim());
+        evento.setDescripcion(request.descripcion().trim());
         evento.setFechaInicio(request.fechaInicio());
         evento.setFechaFin(request.fechaFin());
-        evento.setLocalizacion(request.localizacion());
+        evento.setLocalizacion(request.localizacion().trim());
         evento.setLatitud(request.latitud());
         evento.setLongitud(request.longitud());
         
