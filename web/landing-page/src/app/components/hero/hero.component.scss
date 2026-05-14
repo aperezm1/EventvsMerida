@@ -43,38 +43,59 @@
 }
 
 .orb-1 {
-  width: 500px; height: 500px;
+  width: 500px;
+  height: 500px;
   background: var(--blue);
-  top: -10%; right: 5%;
+  top: -10%;
+  right: 5%;
   animation-delay: 0s;
 }
 
 .orb-2 {
-  width: 350px; height: 350px;
+  width: 350px;
+  height: 350px;
   background: var(--gold);
-  bottom: 5%; left: -5%;
+  bottom: 5%;
+  left: -5%;
   animation-delay: -3s;
 }
 
 .orb-3 {
-  width: 250px; height: 250px;
+  width: 250px;
+  height: 250px;
   background: #4299E1;
-  top: 50%; left: 40%;
+  top: 50%;
+  left: 40%;
   animation-delay: -5s;
 }
 
 @keyframes orbFloat {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(20px, -30px) scale(1.05); }
-  66% { transform: translate(-15px, 15px) scale(0.97); }
+
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  33% {
+    transform: translate(20px, -30px) scale(1.05);
+  }
+
+  66% {
+    transform: translate(-15px, 15px) scale(0.97);
+  }
 }
 
 /* ── PARTICLES ── */
-.particles { position: absolute; inset: 0; pointer-events: none; }
+.particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
 
 .particle {
   position: absolute;
-  width: 3px; height: 3px;
+  width: 3px;
+  height: 3px;
   background: var(--gold);
   border-radius: 50%;
   opacity: 0.5;
@@ -98,9 +119,19 @@ $particle-opacities: 0.34, 0.58, 0.44, 0.68, 0.49, 0.39, 0.54, 0.63;
 }
 
 @keyframes particleDrift {
-  0% { transform: translateY(0) rotate(0deg); opacity: 0.5; }
-  50% { opacity: 0.8; }
-  100% { transform: translateY(-120px) rotate(180deg); opacity: 0; }
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 0.5;
+  }
+
+  50% {
+    opacity: 0.8;
+  }
+
+  100% {
+    transform: translateY(-120px) rotate(180deg);
+    opacity: 0;
+  }
 }
 
 /* ── CONTENT ── */
@@ -131,9 +162,17 @@ $particle-opacities: 0.34, 0.58, 0.44, 0.68, 0.49, 0.39, 0.54, 0.63;
   display: block;
   opacity: 0;
 
-  &.line-1 { animation: fadeSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.5s forwards; }
-  &.line-2 { animation: fadeSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.65s forwards; }
-  &.line-3 { animation: fadeSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.8s forwards; }
+  &.line-1 {
+    animation: fadeSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.5s forwards;
+  }
+
+  &.line-2 {
+    animation: fadeSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.65s forwards;
+  }
+
+  &.line-3 {
+    animation: fadeSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.8s forwards;
+  }
 }
 
 .hero-sub {
@@ -196,11 +235,13 @@ $particle-opacities: 0.34, 0.58, 0.44, 0.68, 0.49, 0.39, 0.54, 0.63;
   cursor: pointer;
 
   &:hover {
-    box-shadow: 0 0 30px var(--accent-glow), 0 8px 25px rgba(0,0,0,0.3);
+    box-shadow: 0 0 30px var(--accent-glow), 0 8px 25px rgba(0, 0, 0, 0.3);
     transform: translateY(-2px);
   }
 
-  &:active { transform: translateY(0); }
+  &:active {
+    transform: translateY(0);
+  }
 }
 
 .btn-secondary {
@@ -252,8 +293,15 @@ $particle-opacities: 0.34, 0.58, 0.44, 0.68, 0.49, 0.39, 0.54, 0.63;
 }
 
 @keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(6px); }
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(6px);
+  }
 }
 
 /* ── HERO LOGO ── */
@@ -285,8 +333,17 @@ $particle-opacities: 0.34, 0.58, 0.44, 0.68, 0.49, 0.39, 0.54, 0.63;
 }
 
 @keyframes ringPulse {
-  0%, 100% { transform: scale(1); opacity: 0.6; }
-  50% { transform: scale(1.05); opacity: 1; }
+
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
 }
 
 .hero-logo {
@@ -296,24 +353,46 @@ $particle-opacities: 0.34, 0.58, 0.44, 0.68, 0.49, 0.39, 0.54, 0.63;
   object-fit: contain;
   background: rgba(8, 12, 18, 0.5);
   padding: 1.5rem;
-  filter: drop-shadow(0 0 40px rgba(245, 166, 35, 0.3))
-          drop-shadow(0 20px 60px rgba(0,0,0,0.5));
+  filter: drop-shadow(0 0 40px rgba(245, 166, 35, 0.3)) drop-shadow(0 20px 60px rgba(0, 0, 0, 0.5));
 }
 
 @keyframes logoReveal {
-  from { opacity: 0; transform: translateY(-50%) scale(0.85); }
-  to   { opacity: 1; transform: translateY(-50%) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(-50%) scale(0.85);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+  }
 }
 
 /* ── KEYFRAMES ── */
 @keyframes fadeSlideUp {
-  from { opacity: 0; transform: translateY(40px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ── RESPONSIVE ── */
 @media (max-width: 900px) {
-  .hero-logo-wrap { display: none; }
-  .hero-qr { display: none; }
-  .hero-content { max-width: 100%; padding: 7rem 1.5rem 4rem; }
+  .hero-logo-wrap {
+    display: none;
+  }
+
+  .hero-qr {
+    display: none;
+  }
+
+  .hero-content {
+    max-width: 100%;
+    padding: 7rem 1.5rem 4rem;
+  }
 }
