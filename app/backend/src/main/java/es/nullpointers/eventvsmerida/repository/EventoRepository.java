@@ -27,6 +27,8 @@ public interface EventoRepository extends JpaRepository<Evento, Long> {
 
     Optional<Evento> findByTituloAndFechaInicioAndFechaFin(String titulo, LocalDateTime fechaInicio, LocalDateTime fechaFin);
 
+    Optional<Evento> findByTitulo(String titulo);
+
     List<Evento> findByCategoria_IdIn(List<Long> categoriaIds);
 
     List<Evento> findByUsuario_IdOrderByFechaInicioAsc(Long idUsuario);

@@ -113,6 +113,10 @@ public class EventoService {
         Usuario usuario = usuarioService.obtenerUsuarioPorIdOExcepcion(eventoRequest.idUsuario(), "Error en EventoService.crearEvento: No se encontró el usuario con id " + eventoRequest.idUsuario());
         Categoria categoria = categoriaService.obtenerCategoriaPorIdOExcepcion(eventoRequest.idCategoria(), "Error en EventoService.crearEvento: No se encontró la categoría con id " + eventoRequest.idCategoria());
 
+        eventoRepository.findByTitulo(eventoRequest.titulo()).ifPresent(e -> {
+            throw new DataIntegrityViolationException("Ya existe un evento con este título");
+        });
+
         Evento eventoNuevo = EventoMapper.convertirAEntidad(eventoRequest, imagen, usuario, categoria, storageUploader);
         Evento eventoCreado = eventoRepository.save(eventoNuevo);
 
