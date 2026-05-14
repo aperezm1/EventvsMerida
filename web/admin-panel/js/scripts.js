@@ -24,7 +24,17 @@ window.addEventListener("DOMContentLoaded", async (event) => {
     });
   }
 
-  document.getElementById("nombreUsuario").innerText = obtenerNombreUsuario();
+  if (!document.URL.includes("/html/login.html")) {
+    document.getElementById("nombreUsuario").innerText = obtenerNombreUsuario();
+  }
+
+  if (sessionStorage.getItem("sesionCaducada") === "true") {
+    mostrarAlerta(
+      "error",
+      "Sesión caducada. Inicia sesión nuevamente.",
+    );
+    sessionStorage.removeItem("sesionCaducada");
+  }
 });
 
 // ==========================================================================
@@ -69,7 +79,7 @@ async function cerrarSesion() {
       localStorage.removeItem("nombreUsuario");
       window.location.href = `${window.location.origin}/html/login.html`;
     } else {
-      console.warn('Logout falló, status:', respuesta.status);
+      console.warn("Logout falló, status:", respuesta.status);
     }
   } catch (error) {
     console.error("Error en scripts.js", error);
@@ -134,7 +144,8 @@ function validarEdad(input, edadMinima, edadMaxima, fechaObligatoria) {
     input.setCustomValidity("Fecha inválida");
 
     if (feedback) {
-      feedback.textContent = "La fecha de nacimiento no puede ser una fecha futura.";
+      feedback.textContent =
+        "La fecha de nacimiento no puede ser una fecha futura.";
     }
 
     return false;
@@ -269,18 +280,14 @@ const fetchConAuth = async (url, options = {}) => {
   const resp = await fetch(url, options);
 
   if (resp.redirected && resp.url.includes("login")) {
-    mostrarAlerta("error", "Sesion caducada. Por favor, inicia sesion nuevamente.");
-    setTimeout(() => {
-      window.location.href = `${window.location.origin}/html/login.html`;
-    }, 800);
+    sessionStorage.setItem("sesionCaducada", "true");
+    window.location.href = `${window.location.origin}/html/login.html`;
     return resp;
   }
 
   if (resp.status === 401) {
-    mostrarAlerta("error", "Sesion caducada. Por favor, inicia sesion nuevamente.");
-    setTimeout(() => {
-      window.location.href = `${window.location.origin}/html/login.html`;
-    }, 800);
+    sessionStorage.setItem("sesionCaducada", "true");
+    window.location.href = `${window.location.origin}/html/login.html`;
     return resp;
   }
 
@@ -294,7 +301,10 @@ function validarImagen(imagen) {
   if (!imagen) return true;
 
   if (!formatosPermitidos.includes(imagen.type)) {
-    mostrarAlerta("error", "Solo se permiten imágenes en formato JPG, JPEG o PNG");
+    mostrarAlerta(
+      "error",
+      "Solo se permiten imágenes en formato JPG, JPEG o PNG",
+    );
     return false;
   }
   if (imagen.size > maxSize) {
