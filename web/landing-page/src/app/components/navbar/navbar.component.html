@@ -1,13 +1,16 @@
 <nav class="navbar" [class.scrolled]="scrolled()">
   <div class="nav-inner">
-    <button class="nav-logo" (click)="scrollToTop()">
+
+    <!-- Logo -->
+    <button class="nav-logo" type="button" (click)="scrollToTop()">
       <img [src]="logoUrl" [alt]="logoAltKey | translate" class="logo-img" />
     </button>
 
+    <!-- Botones de navegación -->
     <ul class="nav-links">
       @for (item of navItems; track item.sectionId) {
         <li>
-          <button (click)="scrollTo(item.sectionId)" [class.nav-cta]="item.cta">
+          <button type="button" (click)="scrollTo(item.sectionId)" [class.nav-cta]="item.cta">
             {{ item.labelKey | translate }}
           </button>
         </li>
@@ -15,20 +18,35 @@
     </ul>
 
     <div class="nav-controls">
-      <select
-        class="language-select"
-        [attr.aria-label]="languageSelectorLabelKey | translate"
-        [value]="currentLanguage()"
-        (change)="changeLanguageFromSelect($event)"
-      >
-        @for (language of languages; track language.code) {
-          <option [value]="language.code">
-            {{ language.labelKey | translate }}
-          </option>
-        }
-      </select>
 
-      <button class="hamburger" (click)="toggleMenu()" [class.open]="menuOpen()">
+      <!-- Botón CTA móvil -->
+      @if (mobileCtaItem; as item) {
+        <button class="mobile-nav-cta" type="button" (click)="scrollToAndClose(item.sectionId)">
+          {{ item.labelKey | translate }}
+        </button>
+      }
+
+      <!-- Selector de idioma -->
+      <div class="language-switcher" [class.open]="languageMenuOpen()">
+        <button class="language-trigger" type="button" aria-haspopup="true"
+          [attr.aria-label]="languageSelectorLabelKey | translate" [attr.aria-expanded]="languageMenuOpen()"
+          (click)="toggleLanguageMenu()">
+          <img class="language-flag" [src]="selectedLanguage().flagUrl" alt="" aria-hidden="true" />
+          <span>{{ selectedLanguage().labelKey | translate }}</span>
+        </button>
+
+        <div class="language-menu" role="menu">
+          @for (language of languages; track language.code) {
+            <button type="button" role="menuitem" class="language-option" (click)="selectLanguage(language)">
+              <img class="language-flag" [src]="language.flagUrl" alt="" aria-hidden="true" />
+              <span>{{ language.labelKey | translate }}</span>
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Botón hamburguesa -->
+      <button class="hamburger" type="button" (click)="toggleMenu()" [class.open]="menuOpen()">
         <span></span>
         <span></span>
         <span></span>
@@ -36,26 +54,35 @@
     </div>
   </div>
 
+  <!-- Menú hamburguesa móvil -->
   <div class="mobile-menu" [class.open]="menuOpen()">
+
+    <!-- Botones de navegación -->
     @for (item of mobileNavItems; track item.sectionId) {
-      <button (click)="scrollToAndClose(item.sectionId)">
+      <button type="button" (click)="scrollToAndClose(item.sectionId)">
         {{ item.labelKey | translate }}
       </button>
     }
 
+    <!-- Selector de idioma -->
     <div class="mobile-language-wrap">
-      <select
-        class="language-select mobile-language-select"
-        [attr.aria-label]="languageSelectorLabelKey | translate"
-        [value]="currentLanguage()"
-        (change)="changeLanguageFromSelect($event, true)"
-      >
-        @for (language of languages; track language.code) {
-          <option [value]="language.code">
-            {{ language.labelKey | translate }}
-          </option>
-        }
-      </select>
+      <div class="language-switcher mobile-language-switcher" [class.open]="languageMenuOpen()">
+        <button class="language-trigger mobile-language-trigger" type="button" aria-haspopup="true"
+          [attr.aria-label]="languageSelectorLabelKey | translate" [attr.aria-expanded]="languageMenuOpen()"
+          (click)="toggleLanguageMenu()">
+          <img class="language-flag" [src]="selectedLanguage().flagUrl" alt="" aria-hidden="true" />
+          <span>{{ selectedLanguage().labelKey | translate }}</span>
+        </button>
+
+        <div class="language-menu mobile-language-menu" role="menu">
+          @for (language of languages; track language.code) {
+            <button type="button" role="menuitem" class="language-option" (click)="selectLanguage(language, true)">
+              <img class="language-flag" [src]="language.flagUrl" alt="" aria-hidden="true" />
+              <span>{{ language.labelKey | translate }}</span>
+            </button>
+          }
+        </div>
+      </div>
     </div>
   </div>
 </nav>

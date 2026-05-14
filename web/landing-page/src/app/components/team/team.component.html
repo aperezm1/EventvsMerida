@@ -1,11 +1,14 @@
 <section [id]="sectionId" class="team">
   <div class="team-inner">
     <div class="team-header">
+
+      <!-- Etiqueta -->
       <div appReveal>
         <span class="label">{{ labelKey | translate }}</span>
         <div class="glow-line" style="margin-top: 0.75rem"></div>
       </div>
 
+      <!-- Textos -->
       <h2 appReveal [revealDelay]="1">
         {{ titleLineKeys.first | translate }}<br />
         <span class="gradient-text">{{ titleLineKeys.second | translate }}</span>
@@ -16,16 +19,11 @@
       </p>
     </div>
 
+    <!-- Miembros -->
     <div class="team-grid">
       @for (member of members; track member.name; let index = $index) {
-        <a
-          class="member-card"
-          appReveal
-          [revealDelay]="index + 1"
-          [href]="member.url"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+        <a class="member-card" appReveal [revealDelay]="index + 1" [href]="member.url" target="_blank"
+          rel="noopener noreferrer">
           <div class="member-avatar" [style.--color]="member.color">
             <div class="avatar-inner">
               <img [src]="member.imageUrl" [alt]="member.name" />
@@ -44,19 +42,16 @@
       }
     </div>
 
+    <!-- Link al instituto -->
     <div class="team-footer" appReveal [revealDelay]="2">
-      <a
-        class="team-badge"
-        [href]="schoolUrl"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
+      <a class="team-badge" [href]="schoolUrl" target="_blank" rel="noopener noreferrer">
         <span>{{ schoolBadgeIcon }}</span>
         <span>{{ schoolBadgeLabelKey | translate }}</span>
       </a>
     </div>
   </div>
 
+  <!-- Imagen -->
   <div class="team-photo-wrap" appReveal revealDirection="right" [revealDelay]="2">
     <div class="team-photo">
       <div class="team-photo-media" #teamPhoto>

@@ -24,10 +24,7 @@
       "second": "Events",
       "third": "in Mérida"
     },
-    "subtitle": {
-      "first": "A single app to discover culture, leisure and events",
-      "second": "in the city. For residents and travelers."
-    },
+    "subtitle": "A single app to discover culture, leisure and events in the city. For residents and travelers.",
     "actions": {
       "download": "Download App",
       "repository": "View Repository"

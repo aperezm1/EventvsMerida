@@ -22,7 +22,6 @@ export class RevealDirective implements OnInit, OnDestroy {
   private observer?: IntersectionObserver;
   private el = inject(ElementRef);
 
-
   /**
    * Configura las clases iniciales y observa cuándo el elemento
    * entra o sale del viewport para mostrar u ocultar la animación.

@@ -1,12 +1,13 @@
 import { DOCUMENT } from '@angular/common';
-import { Component, HostListener, OnInit, inject, signal } from '@angular/core';
-import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { Component, ElementRef, HostListener, computed, inject, signal } from '@angular/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { LanguageOption } from '../../core/models/language-option.model';
 import { NavItem } from '../../core/models/nav-item.model';
+import { LanguageService } from '../../core/services/language.service';
 
 /**
  * Componente de barra de navegación.
- * Controla el estado del scroll, el menú móvil, el cambio de idioma y la navegación suave entre secciones.
+ * Controla el estado del scroll, el menú móvil, el selector de idioma y la navegación suave entre secciones.
  *
  * @author Eva Retamar
  * @author David Muñoz
@@ -19,22 +20,19 @@ import { NavItem } from '../../core/models/nav-item.model';
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.scss'
 })
-export class NavbarComponent implements OnInit {
+export class NavbarComponent {
   private readonly document = inject(DOCUMENT);
-  private readonly translateService = inject(TranslateService);
+  private readonly elementRef = inject(ElementRef<HTMLElement>);
+  private readonly languageService = inject(LanguageService);
   private readonly scrollLimit = 60;
-  private readonly languageStorageKey = 'eventvs-language';
 
   readonly logoUrl = 'assets/logo.jpeg';
   readonly logoAltKey = 'navbar.logoAlt';
   readonly languageSelectorLabelKey = 'navbar.languageSelectorLabel';
 
-  readonly languages: LanguageOption[] = [
-    { code: 'es', labelKey: 'navbar.languages.es' },
-    { code: 'en', labelKey: 'navbar.languages.en' },
-    { code: 'pt', labelKey: 'navbar.languages.pt' },
-    { code: 'fr', labelKey: 'navbar.languages.fr' }
-  ];
+  readonly languages = this.languageService.languages;
+  readonly currentLanguage = this.languageService.currentLanguage;
+  readonly selectedLanguage = computed(() => this.getSelectedLanguage());
 
   readonly navItems: NavItem[] = [
     { labelKey: 'navbar.about', sectionId: 'about' },
@@ -44,17 +42,11 @@ export class NavbarComponent implements OnInit {
   ];
 
   readonly mobileNavItems: NavItem[] = this.navItems.filter((item) => !item.cta);
+  readonly mobileCtaItem: NavItem | undefined = this.navItems.find((item) => item.cta);
 
   readonly scrolled = signal(false);
   readonly menuOpen = signal(false);
-  readonly currentLanguage = signal('es');
-
-  /**
-   * Inicializa el idioma guardado o el idioma por defecto.
-   */
-  ngOnInit(): void {
-    this.setInitialLanguage();
-  }
+  readonly languageMenuOpen = signal(false);
 
   /**
    * Actualiza el estado de la navbar cuando la ventana supera el límite de scroll.
@@ -66,6 +58,18 @@ export class NavbarComponent implements OnInit {
   }
 
   /**
+   * Cierra el menú de idiomas si se hace clic fuera del componente.
+   */
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as Node | null;
+
+    if (target && !this.elementRef.nativeElement.contains(target)) {
+      this.languageMenuOpen.set(false);
+    }
+  }
+
+  /**
    * Abre o cierra el menú móvil.
    */
   toggleMenu(): void {
@@ -73,23 +77,18 @@ export class NavbarComponent implements OnInit {
   }
 
   /**
-   * Cambia el idioma desde el selector desplegable.
+   * Abre o cierra el selector de idioma.
    */
-  changeLanguageFromSelect(event: Event, closeMenu = false): void {
-    const language = (event.target as HTMLSelectElement).value;
-    this.changeLanguage(language, closeMenu);
+  toggleLanguageMenu(): void {
+    this.languageMenuOpen.update((open) => !open);
   }
 
   /**
-   * Cambia el idioma activo de la aplicación.
+   * Selecciona un idioma desde el selector.
    */
-  changeLanguage(language: string, closeMenu = false): void {
-    if (!this.isSupportedLanguage(language)) return;
-
-    this.currentLanguage.set(language);
-    this.translateService.use(language);
-    this.document.documentElement.lang = language;
-    this.document.defaultView?.localStorage.setItem(this.languageStorageKey, language);
+  selectLanguage(language: LanguageOption, closeMenu = false): void {
+    this.languageService.changeLanguage(language.code);
+    this.languageMenuOpen.set(false);
 
     if (closeMenu) {
       this.menuOpen.set(false);
@@ -119,19 +118,9 @@ export class NavbarComponent implements OnInit {
   }
 
   /**
- * Obtiene el idioma inicial desde localStorage o usa español por defecto.
- */
-  private setInitialLanguage(): void {
-    const savedLanguage =this.document.defaultView?.localStorage.getItem(this.languageStorageKey) ?? null;
-    const language = this.isSupportedLanguage(savedLanguage) ? savedLanguage : 'es';
-
-    this.changeLanguage(language);
-  }
-
-  /**
-   * Comprueba si el idioma está soportado por la aplicación.
+   * Obtiene la opción completa del idioma actualmente seleccionado.
    */
-  private isSupportedLanguage(language: string | null): language is string {
-    return this.languages.some((item) => item.code === language);
+  private getSelectedLanguage(): LanguageOption {
+    return this.languages.find((language) => language.code === this.currentLanguage()) ?? this.languages[0];
   }
 }

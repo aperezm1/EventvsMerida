@@ -1,12 +1,14 @@
 <section [id]="sectionId" class="features">
   <div class="features-bg"></div>
 
+  <!-- Imagen izquierda -->
   <div class="features-img-left" appReveal revealDirection="left">
     <div class="feature-image feature-image-teatro">
       <img [src]="leftImage.url" [alt]="leftImage.altKey | translate" />
     </div>
   </div>
 
+  <!-- Imagen derecha -->
   <div class="features-img-right" appReveal revealDirection="right">
     <div class="feature-image feature-image-plaza">
       <img [src]="rightImage.url" [alt]="rightImage.altKey | translate" />
@@ -15,11 +17,14 @@
 
   <div class="features-inner">
     <div class="features-header">
+
+      <!-- Etiqueta -->
       <div appReveal>
         <span class="label">{{ labelKey | translate }}</span>
         <div class="glow-line" style="margin-top: 0.75rem;"></div>
       </div>
 
+      <!-- Textos -->
       <h2 appReveal [revealDelay]="1">
         {{ titleLineKeys.first | translate }}<br />
         <span class="gradient-text">{{ titleLineKeys.second | translate }}</span>
@@ -30,14 +35,10 @@
       </p>
     </div>
 
+    <!-- Tarjetas -->
     <div class="features-grid">
       @for (feature of features; track feature.titleKey; let index = $index) {
-        <div
-          class="feature-card"
-          appReveal
-          [revealDelay]="(index % 3) + 1"
-          revealDirection="scale"
-        >
+        <div class="feature-card" appReveal [revealDelay]="(index % 3) + 1" revealDirection="scale">
           <div class="feature-icon">{{ feature.icon }}</div>
           <h3>{{ feature.titleKey | translate }}</h3>
           <p>{{ feature.descriptionKey | translate }}</p>

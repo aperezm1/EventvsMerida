@@ -12,7 +12,7 @@ import { RevealDirective } from '../../core/directives/reveal.directive';
 import { HeroAction } from '../../core/models/hero-action.model';
 
 /**
- * Componente de la sección hero.
+ * Componente de la sección Hero.
  * Gestiona el efecto parallax, los enlaces principales y la navegación hacia la sección About.
  *
  * @author Eva Retamar
@@ -41,10 +41,7 @@ export class HeroComponent implements AfterViewInit, OnDestroy {
     third: 'hero.title.third'
   };
 
-  readonly subtitleLineKeys = {
-    first: 'hero.subtitle.first',
-    second: 'hero.subtitle.second'
-  };
+  readonly subtitleLine = 'hero.subtitle'
 
   readonly scrollHintTextKey = 'hero.scrollHint';
 

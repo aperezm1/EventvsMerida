@@ -24,10 +24,7 @@
       "second": "Eventos",
       "third": "de Mérida"
     },
-    "subtitle": {
-      "first": "Una sola app para descubrir la cultura, el ocio y los eventos",
-      "second": "de la ciudad. Para residentes y viajeros."
-    },
+    "subtitle": "Una sola app para descubrir la cultura, el ocio y los eventos de la ciudad. Para residentes y viajeros.",
     "actions": {
       "download": "Descargar Aplicación",
       "repository": "Ver Repositorio"
