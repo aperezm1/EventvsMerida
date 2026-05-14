@@ -1,0 +1,16 @@
+{
+  "pageTitle": "Redefinir palavra-passe - Eventvs Mérida",
+  "resetTitle": "Redefinir a tua palavra-passe",
+  "newPassword": "Nova palavra-passe",
+  "confirmPassword": "Confirmar nova palavra-passe",
+  "passwordRequirements": "A palavra-passe deve ter pelo menos 8 caracteres, uma letra maiúscula, uma letra minúscula, um número e um símbolo.",
+  "changePassword": "Alterar palavra-passe",
+  "passwordChanged": "Palavra-passe alterada",
+  "passwordChangedDescription": "A tua palavra-passe foi atualizada corretamente. Já podes voltar à app.",
+  "showPassword": "Mostrar palavra-passe",
+  "hidePassword": "Ocultar palavra-passe",
+  "passwordsMustMatch": "As palavras-passe têm de coincidir",
+  "invalidOrExpiredLink": "A ligação de redefinição é inválida ou expirou",
+  "resetError": "Ocorreu um erro ao redefinir a palavra-passe",
+  "resetSuccess": "Palavra-passe atualizada corretamente"
+}
