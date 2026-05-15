@@ -41,7 +41,7 @@ async function login(datos) {
         btnLogin.textContent = 'Iniciando sesión...';
         btnLogin.classList.add("loading");
 
-        const respuesta = await fetchConAuth(URL, {
+        const respuesta = await fetch(URL, {
             method: "POST",
             credentials: "include",
             body: JSON.stringify(datos),
@@ -63,7 +63,7 @@ async function login(datos) {
         } else {
             mostrarAlerta("error", "Ha ocurrido un problema inesperado")
             const errorTexto = await respuesta.text();
-            console.error(`Error ${respuesta.status}: ${errorTexto}`);
+            mostrarAlerta(`Error ${respuesta.status}: ${errorTexto}`);
         }
     } catch (error) {
         if (error.name === "TypeError") {

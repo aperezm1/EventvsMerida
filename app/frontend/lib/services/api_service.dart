@@ -247,9 +247,10 @@ class ApiService {
       final uri = Uri.parse('$baseUrl/usuarios/update/$idUsuario');
       final request = http.MultipartRequest('PUT', uri);
 
-      if (datosUsuario != null && datosUsuario.isNotEmpty) {
-        request.fields['usuario'] = jsonEncode(datosUsuario);
-      }
+      final cabeceras = await _cabecerasConSesion();
+      request.headers.addAll(cabeceras);
+
+      request.fields['usuario'] = jsonEncode(datosUsuario);
 
       if (imagen != null) {
         final extension = p.extension(imagen.path).toLowerCase();
