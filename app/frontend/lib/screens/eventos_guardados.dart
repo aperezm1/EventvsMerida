@@ -7,6 +7,12 @@ import '../services/api_service.dart';
 import '../services/shared_preferences_service.dart';
 import '../widgets/componentes_compartidos.dart';
 
+/// Pantalla que muestra los eventos guardados por el usuario.
+/// Permite ver detalles de cada evento y eliminar eventos guardados.
+///
+/// @author: Eva Retamar
+/// @author: Adrián Pérez
+/// @author: David Muñoz
 class EventosGuardados extends StatefulWidget {
   const EventosGuardados({super.key});
 

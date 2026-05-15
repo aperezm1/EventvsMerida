@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 
+/// Pantalla de la Política de Privacidad de la app.
+///
+/// @author: Eva Retamar
+/// @author: Adrián Pérez
+/// @author: David Muñoz
 class Privacidad extends StatefulWidget {
   const Privacidad({super.key});
 

@@ -17,10 +17,20 @@ import '../services/api_service.dart';
 import '../utils/validation_utils.dart';
 import '../utils/fecha_utils.dart';
 
+/// Clase que contiene los componentes compartidos que se utilizan en varias partes
+/// de la aplicación, como la barra superior, modales de eventos, snackbars
+/// y modales de confirmación para salidas de la aplicación.
+/// Estos componentes ayudan a mantener una apariencia y comportamiento consistentes
+/// en toda la aplicación, además de centralizar la lógica relacionada con estas
+/// funcionalidades comunes.
+///
+/// @author: Eva Retamar
+/// @author: Adrián Pérez
+/// @author: David Muñoz
+
 // ===========================================================================
 // 1. BARRA SUPERIOR
 // ===========================================================================
-
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final List<Widget>? actions;
 
@@ -51,6 +61,10 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }
+
+// ===========================================================================
+// 2. MODAL DE DETALLE DEL EVENTO
+// ===========================================================================
 
 // ===========================================================================
 // 2. MODAL DE DETALLE DEL EVENTO
@@ -87,9 +101,11 @@ class _ModalEventoState extends State<ModalEvento> {
   int _indiceActual = 0;
   late List<Evento> _eventosGuardados;
 
-  ColorScheme get _cs => Theme.of(context).colorScheme;
+  final Map<int, ScrollController> _scrollControllers = {};
 
+  ColorScheme get _cs => Theme.of(context).colorScheme;
   TextTheme get _tt => Theme.of(context).textTheme;
+
   FechaUtils fu = FechaUtils();
 
   // ===========================================================================
@@ -101,6 +117,17 @@ class _ModalEventoState extends State<ModalEvento> {
     super.initState();
     _pageController = PageController();
     _eventosGuardados = List.from(widget.eventosGuardados);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+
+    for (final controller in _scrollControllers.values) {
+      controller.dispose();
+    }
+
+    super.dispose();
   }
 
   // ===========================================================================
@@ -123,6 +150,13 @@ class _ModalEventoState extends State<ModalEvento> {
     return _eventosGuardados.any((e) => _esMismoEvento(e, evento));
   }
 
+  ScrollController _obtenerScrollController(int index) {
+    return _scrollControllers.putIfAbsent(
+      index,
+          () => ScrollController(),
+    );
+  }
+
   String _textoFechaHoraDetalle(Evento evento) {
     final esMismoDia = fu.esMismoDia(evento.fechaInicio, evento.fechaFin);
     final inicioFecha = fu.formatearFecha(evento.fechaInicio);
@@ -139,8 +173,10 @@ class _ModalEventoState extends State<ModalEvento> {
       return 'Fecha: $inicioFecha\nHora: $inicioHora - $finHora';
     }
 
-    if (horasIguales && ambasHorasCero)
+    if (horasIguales && ambasHorasCero) {
       return 'Desde: $inicioFecha\nHasta: $finFecha';
+    }
+
     return 'Desde: $inicioFecha $inicioHora\nHasta: $finFecha $finHora';
   }
 
@@ -182,9 +218,13 @@ class _ModalEventoState extends State<ModalEvento> {
   }
 
   Future<void> _compartirEvento(Evento evento) async {
-    final descripcionLimpia = evento.descripcion.trim().replaceAll(RegExp(r'\n{3,}'), '\n\n');
+    final descripcionLimpia = evento.descripcion.trim().replaceAll(
+      RegExp(r'\n{3,}'),
+      '\n\n',
+    );
 
-    const enlaceDescarga = 'https://github.com/Null-Pointers-Albarregas/EventvsMerida/releases/download/Alpha/eventvs-merida.apk';
+    const enlaceDescarga =
+        'https://github.com/Null-Pointers-Albarregas/EventvsMerida/releases/download/Alpha/eventvs-merida.apk';
 
     final texto =
     '''
@@ -230,17 +270,17 @@ $enlaceDescarga
 
     final respuesta = yaGuardado
         ? await ApiService.eliminarEventoUsuario(
-            usuario.email,
-            evento.titulo,
-            evento.fechaInicio,
-            evento.fechaFin,
-          )
+      usuario.email,
+      evento.titulo,
+      evento.fechaInicio,
+      evento.fechaFin,
+    )
         : await ApiService.guardarEventoUsuario(
-            usuario.email,
-            evento.titulo,
-            evento.fechaInicio,
-            evento.fechaFin,
-          );
+      usuario.email,
+      evento.titulo,
+      evento.fechaInicio,
+      evento.fechaFin,
+    );
 
     if (!mounted) return;
 
@@ -272,7 +312,7 @@ $enlaceDescarga
     if (urlLimpia.isEmpty) return;
 
     final urlConEsquema =
-        urlLimpia.startsWith('http://') || urlLimpia.startsWith('https://')
+    urlLimpia.startsWith('http://') || urlLimpia.startsWith('https://')
         ? urlLimpia
         : 'https://$urlLimpia';
 
@@ -320,7 +360,6 @@ $enlaceDescarga
                 ),
               ),
             ),
-
             Center(
               child: AlertDialog(
                 backgroundColor: _cs.surface.withValues(alpha: 0.98),
@@ -330,7 +369,6 @@ $enlaceDescarga
                 titlePadding: const EdgeInsets.fromLTRB(20, 20, 12, 0),
                 contentPadding: const EdgeInsets.fromLTRB(20, 12, 20, 10),
                 actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-
                 title: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
@@ -359,7 +397,6 @@ $enlaceDescarga
                     ),
                   ],
                 ),
-
                 content: Text(
                   'Para poder guardar un evento, tienes que iniciar sesión o registrarte.',
                   style: _tt.bodyMedium?.copyWith(
@@ -367,7 +404,6 @@ $enlaceDescarga
                     height: 1.35,
                   ),
                 ),
-
                 actions: [
                   Row(
                     children: [
@@ -428,12 +464,14 @@ $enlaceDescarga
   // INTERFAZ
   // ===========================================================================
 
-  Widget _buildContenidoEvento(Evento evento) {
+  Widget _buildContenidoEvento(Evento evento, int index) {
     final estaGuardado = _estaGuardado(evento);
+    final scrollController = _obtenerScrollController(index);
 
     return Column(
-      mainAxisSize: MainAxisSize.min,
+      mainAxisSize: MainAxisSize.max,
       children: [
+        // CABECERA
         Padding(
           padding: const EdgeInsets.fromLTRB(12, 10, 4, 0),
           child: Row(
@@ -442,7 +480,9 @@ $enlaceDescarga
               Expanded(
                 child: Text(
                   evento.titulo,
-                  style: _tt.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                  style: _tt.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -460,6 +500,7 @@ $enlaceDescarga
             ],
           ),
         ),
+
         if (widget.eventos.length > 1)
           Padding(
             padding: const EdgeInsets.only(bottom: 8),
@@ -471,102 +512,115 @@ $enlaceDescarga
               ),
             ),
           ),
+
+        // IMAGEN
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                return ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxHeight: 320,
-                    maxWidth: constraints.maxWidth,
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: SizedBox(
-                        width: double.infinity,
-                        height: 340,
-                        child: FadeInImage.assetNetwork(
-                          placeholder: 'assets/images/icono.gif',
-                          image: evento.foto,
-                          fit: BoxFit.contain,
-                          placeholderFit: BoxFit.contain,
-                          alignment: Alignment.center,
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              },
+            child: SizedBox(
+              width: double.infinity,
+              height: 270,
+              child: FadeInImage.assetNetwork(
+                placeholder: 'assets/images/icono.gif',
+                image: evento.foto,
+                fit: BoxFit.contain,
+                placeholderFit: BoxFit.contain,
+                alignment: Alignment.center,
+              ),
             ),
           ),
         ),
+
         const SizedBox(height: 12),
+
+        // CONTENIDO DESPLAZABLE CON BARRA
         Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TextButton.icon(
-                  onPressed: () => _abrirEnGoogleMaps(evento.localizacion),
-                  icon: const Icon(Icons.place_outlined, size: 18),
-                  label: Text(
-                    evento.localizacion,
-                    style: _tt.bodyMedium?.copyWith(
-                      decoration: TextDecoration.underline,
-                    ),
-                  ),
-                  style: TextButton.styleFrom(
-                    alignment: Alignment.centerLeft,
-                    padding: EdgeInsets.zero,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.event_note, size: 18),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        _textoFechaHoraDetalle(evento),
-                        style: _tt.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          height: 1.35,
-                        ),
+          child: RawScrollbar(
+            controller: scrollController,
+            thumbVisibility: true,
+            trackVisibility: true,
+            interactive: true,
+            thickness: 5,
+            radius: const Radius.circular(12),
+            thumbColor: _cs.primary,
+            trackColor: _cs.onSurface.withValues(alpha: 0.12),
+            trackBorderColor: Colors.transparent,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              padding: const EdgeInsets.fromLTRB(16, 0, 28, 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextButton.icon(
+                    onPressed: () => _abrirEnGoogleMaps(evento.localizacion),
+                    icon: const Icon(Icons.place_outlined, size: 18),
+                    label: Text(
+                      evento.localizacion,
+                      style: _tt.bodyMedium?.copyWith(
+                        decoration: TextDecoration.underline,
                       ),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Descripción',
-                  style: _tt.titleSmall?.copyWith(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 4),
-                Linkify(
-                  text: evento.descripcion,
-                  style: _tt.bodyMedium,
-                  linkStyle: _tt.bodyMedium?.copyWith(
-                    color: _cs.primary,
-                    decoration: TextDecoration.underline,
-                    fontWeight: FontWeight.w600,
+                    style: TextButton.styleFrom(
+                      alignment: Alignment.centerLeft,
+                      padding: EdgeInsets.zero,
+                    ),
                   ),
-                  onOpen: (link) => _abrirUrl(link.url),
-                  options: const LinkifyOptions(
-                    humanize: false,
-                    removeWww: false,
+
+                  const SizedBox(height: 10),
+
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.event_note, size: 18),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _textoFechaHoraDetalle(evento),
+                          style: _tt.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            height: 1.35,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  linkifiers: const [UrlLinkifier()],
-                ),
-              ],
+
+                  const SizedBox(height: 16),
+
+                  Text(
+                    'Descripción',
+                    style: _tt.titleSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+
+                  const SizedBox(height: 4),
+
+                  Linkify(
+                    text: evento.descripcion,
+                    style: _tt.bodyMedium,
+                    linkStyle: _tt.bodyMedium?.copyWith(
+                      color: _cs.primary,
+                      decoration: TextDecoration.underline,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    onOpen: (link) => _abrirUrl(link.url),
+                    options: const LinkifyOptions(
+                      humanize: false,
+                      removeWww: false,
+                    ),
+                    linkifiers: const [UrlLinkifier()],
+                  ),
+
+                  const SizedBox(height: 12),
+                ],
+              ),
             ),
           ),
         ),
+
+        // BOTÓN GUARDAR
         if (widget.mostrarBotonGuardado)
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
@@ -623,63 +677,71 @@ $enlaceDescarga
                   color: _cs.surface,
                   borderRadius: BorderRadius.circular(16),
                   elevation: 12,
-                  child: Stack(
-                    children: [
-                      PageView.builder(
-                        controller: _pageController,
-                        itemCount: widget.eventos.length,
-                        onPageChanged: (index) {
-                          setState(() {
-                            _indiceActual = index;
-                          });
-                        },
-                        itemBuilder: (context, index) {
-                          return _buildContenidoEvento(widget.eventos[index]);
-                        },
-                      ),
-                      if (widget.mostrarFlechasDeslizamiento &&
-                          widget.eventos.length > 1 &&
-                          _indiceActual < widget.eventos.length - 1)
-                        Positioned(
-                          right: 8,
-                          top: 0,
-                          bottom: 0,
-                          child: Center(
-                            child: IconButton(
-                              onPressed: _irAlSiguienteEvento,
-                              icon: Icon(
-                                Icons.chevron_right,
-                                color: _cs.surface,
-                                size: 32,
-                              ),
-                              style: IconButton.styleFrom(
-                                backgroundColor: _cs.primary.withAlpha(90),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Stack(
+                      children: [
+                        PageView.builder(
+                          controller: _pageController,
+                          itemCount: widget.eventos.length,
+                          onPageChanged: (index) {
+                            setState(() {
+                              _indiceActual = index;
+                            });
+                          },
+                          itemBuilder: (context, index) {
+                            return _buildContenidoEvento(
+                              widget.eventos[index],
+                              index,
+                            );
+                          },
+                        ),
+
+                        if (widget.mostrarFlechasDeslizamiento &&
+                            widget.eventos.length > 1 &&
+                            _indiceActual < widget.eventos.length - 1)
+                          Positioned(
+                            right: 8,
+                            top: 0,
+                            bottom: 0,
+                            child: Center(
+                              child: IconButton(
+                                onPressed: _irAlSiguienteEvento,
+                                icon: Icon(
+                                  Icons.chevron_right,
+                                  color: _cs.surface,
+                                  size: 32,
+                                ),
+                                style: IconButton.styleFrom(
+                                  backgroundColor: _cs.primary.withAlpha(90),
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      if (widget.mostrarFlechasDeslizamiento &&
-                          widget.eventos.length > 1 &&
-                          _indiceActual > 0)
-                        Positioned(
-                          left: 8,
-                          top: 0,
-                          bottom: 0,
-                          child: Center(
-                            child: IconButton(
-                              onPressed: _irAlEventoAnterior,
-                              icon: Icon(
-                                Icons.chevron_left,
-                                color: _cs.surface,
-                                size: 32,
-                              ),
-                              style: IconButton.styleFrom(
-                                backgroundColor: _cs.primary.withAlpha(90),
+
+                        if (widget.mostrarFlechasDeslizamiento &&
+                            widget.eventos.length > 1 &&
+                            _indiceActual > 0)
+                          Positioned(
+                            left: 8,
+                            top: 0,
+                            bottom: 0,
+                            child: Center(
+                              child: IconButton(
+                                onPressed: _irAlEventoAnterior,
+                                icon: Icon(
+                                  Icons.chevron_left,
+                                  color: _cs.surface,
+                                  size: 32,
+                                ),
+                                style: IconButton.styleFrom(
+                                  backgroundColor: _cs.primary.withAlpha(90),
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -797,9 +859,7 @@ class SalidaApp {
                 },
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-                  child: Container(
-                    color: Colors.black.withValues(alpha: 0.08),
-                  ),
+                  child: Container(color: Colors.black.withValues(alpha: 0.08)),
                 ),
               ),
             ),
@@ -839,15 +899,21 @@ class SalidaApp {
                                     color: cs.primary.withValues(alpha: 0.14),
                                     shape: BoxShape.circle,
                                   ),
-                                  child: Icon(icono, color: cs.primary, size: 24),
+                                  child: Icon(
+                                    icono,
+                                    color: cs.primary,
+                                    size: 24,
+                                  ),
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Row(
-                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
                                         children: [
                                           Expanded(
                                             child: Text(
@@ -859,15 +925,22 @@ class SalidaApp {
                                             ),
                                           ),
                                           IconButton(
-                                            visualDensity: VisualDensity.compact,
+                                            visualDensity:
+                                                VisualDensity.compact,
                                             padding: EdgeInsets.zero,
                                             constraints: const BoxConstraints(
                                               minWidth: 32,
                                               minHeight: 32,
                                             ),
-                                            icon: Icon(Icons.close, color: cs.onSurface),
+                                            icon: Icon(
+                                              Icons.close,
+                                              color: cs.onSurface,
+                                            ),
                                             onPressed: () {
-                                              Navigator.of(dialogContext, rootNavigator: true).pop(false);
+                                              Navigator.of(
+                                                dialogContext,
+                                                rootNavigator: true,
+                                              ).pop(false);
                                             },
                                           ),
                                         ],
@@ -891,12 +964,17 @@ class SalidaApp {
                                 Expanded(
                                   child: OutlinedButton(
                                     onPressed: () {
-                                      Navigator.of(dialogContext, rootNavigator: true).pop(false);
+                                      Navigator.of(
+                                        dialogContext,
+                                        rootNavigator: true,
+                                      ).pop(false);
                                     },
                                     style: OutlinedButton.styleFrom(
                                       foregroundColor: cs.primary,
                                       side: BorderSide(color: cs.primary),
-                                      padding: const EdgeInsets.symmetric(vertical: 12),
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 12,
+                                      ),
                                     ),
                                     child: Text(textoCancelar),
                                   ),
@@ -905,13 +983,26 @@ class SalidaApp {
                                 Expanded(
                                   child: FilledButton.icon(
                                     onPressed: () {
-                                      Navigator.of(dialogContext, rootNavigator: true).pop(true);
+                                      Navigator.of(
+                                        dialogContext,
+                                        rootNavigator: true,
+                                      ).pop(true);
                                     },
-                                    icon: Icon(icono, size: 18, color: cs.surface),
-                                    label: Text(textoConfirmar, style: TextStyle(color: cs.surface)),
+                                    icon: Icon(
+                                      icono,
+                                      size: 18,
+                                      color: cs.surface,
+                                    ),
+                                    label: Text(
+                                      textoConfirmar,
+                                      style: TextStyle(color: cs.surface),
+                                    ),
                                     style: FilledButton.styleFrom(
-                                      backgroundColor: colorConfirmar ?? cs.primary,
-                                      padding: const EdgeInsets.symmetric(vertical: 12),
+                                      backgroundColor:
+                                          colorConfirmar ?? cs.primary,
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 12,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -1094,10 +1185,7 @@ Future<XFile?> elegirImagen(BuildContext context) async {
     backgroundColor: Theme.of(context).colorScheme.surface,
     shape: RoundedRectangleBorder(
       borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-      side: BorderSide(
-        color: Theme.of(context).colorScheme.primary,
-        width: 2,
-      ),
+      side: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
     ),
     builder: (context) {
       final cs = Theme.of(context).colorScheme;

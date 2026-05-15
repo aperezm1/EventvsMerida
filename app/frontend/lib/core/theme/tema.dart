@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
 
+/// Clase que define el tema de la aplicación, incluyendo los colores
+/// y estilos para la interfaz de usuario.
+///
+/// @author: Eva Retamar
+/// @author: Adrián Pérez
+/// @author: David Muñoz
 ThemeData buildTheme({required ColorScheme colorScheme, required AppBarTheme appBarTheme}) {
   return ThemeData(
     colorScheme: colorScheme,
     appBarTheme: appBarTheme,
   );
 }
-
+/// Tema claro
 final ThemeData lightTheme = buildTheme(
   colorScheme: const ColorScheme(
     brightness: Brightness.light,
@@ -25,6 +31,7 @@ final ThemeData lightTheme = buildTheme(
   ),
 );
 
+/// Tema oscuro
 final ThemeData darkTheme = buildTheme(
   colorScheme: const ColorScheme(
     brightness: Brightness.dark,

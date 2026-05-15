@@ -6,6 +6,12 @@ import '../core/router/app_routes.dart';
 import '../services/shared_preferences_service.dart';
 import '../models/usuario.dart';
 
+/// Clase que envuelve las pantallas principales de la aplicación, proporcionando una
+/// barra de navegación inferior para poder navegar entre ellas
+///
+/// @author: Eva Retamar
+/// @author: Adrián Pérez
+/// @author: David Muñoz
 class Menu extends StatefulWidget {
   final Widget child;
 

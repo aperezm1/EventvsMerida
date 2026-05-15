@@ -14,6 +14,14 @@ import '../models/evento.dart';
 import '../models/usuario.dart';
 import '../models/categoria.dart';
 
+/// Servicio para interactuar con la API REST de nuestro backend. Proporciona métodos
+/// para usuarios, eventos y categorías, manejando autenticación, errores y respuestas
+/// de manera centralizada.
+///
+/// @author: Eva Retamar
+/// @author: Adrián Pérez
+/// @author: David Muñoz
+
 class ApiService {
   // ============================================================================
   // VARIABLES
@@ -347,6 +355,7 @@ class ApiService {
     }
   }
 
+  /// POST /api/auth/forgot-password?email=
   static Future<ApiResponse<Usuario>> recuperarPassword(String email) async {
     try {
       final respuesta = await _post('/auth/forgot-password?email=$email', {});
@@ -1386,14 +1395,20 @@ class ApiService {
   // PETICIONES HTTP
   // ============================================================================
 
+  // Realiza una solicitud GET a la ruta especificada, utilizando la URL base
+  // y aplicando el tiempo límite configurado.
   static Future<http.Response> _get(String ruta) {
     return _solicitud(() => http.get(Uri.parse('$baseUrl$ruta')));
   }
 
+
+  // Permite realizar una solicitud GET a cualquier URI,
+  // lo que es útil para endpoints con parámetros complejos.
   static Future<http.Response> _getUri(Uri uri) {
     return _solicitud(() => http.get(uri));
   }
 
+  // Realiza una solicitud POST con cuerpo JSON.
   static Future<http.Response> _post(String ruta, Object cuerpo) {
     return _solicitud(() {
       return http.post(
@@ -1404,6 +1419,7 @@ class ApiService {
     });
   }
 
+  // Método DELETE que incluye un cuerpo JSON, ya que algunos endpoints lo requieren.
   static Future<http.Response> _delete(String ruta, Object cuerpo) {
     return _solicitud(() {
       return http.delete(
@@ -1414,12 +1430,15 @@ class ApiService {
     });
   }
 
+  // Realiza la solicitud y aplica un tiempo límite para evitar esperas indefinidas.
   static Future<http.Response> _solicitud(
       Future<http.Response> Function() accion,
       ) async {
     return await accion().timeout(_tiempoLimite);
   }
 
+  // Realiza una solicitud GET con sesión, manejando el refresco automático
+  // si es necesario.
   static Future<http.Response> _getConSesion(String ruta) {
     return _solicitudConRefresh(() async {
       final cabeceras = await _cabecerasConSesion();
@@ -1430,6 +1449,8 @@ class ApiService {
     });
   }
 
+  // Realiza una solicitud DELETE sin cuerpo pero con sesión, manejando el
+  // refresco automático si es necesario.
   static Future<http.Response> _deleteSinBodyConSesion(String ruta) async {
     return _solicitudConRefresh(() async {
       final cabeceras = await _cabecerasConSesion();
@@ -1440,6 +1461,7 @@ class ApiService {
     });
   }
 
+  // Cierra la sesión en el servidor y borra las credenciales locales.
   static Future<void> cerrarSesionRemota() async {
     final cabeceras = await _cabecerasConSesion();
     await _solicitud(() {
@@ -1450,6 +1472,8 @@ class ApiService {
     });
   }
 
+  // Intenta ejecutar la acción y si recibe un error de autenticación,
+  // intenta refrescar la sesión y repetir la acción una vez.
   static Future<http.Response> _solicitudConRefresh(
       Future<http.Response> Function() accion,
       ) async {
@@ -1465,6 +1489,8 @@ class ApiService {
     return response;
   }
 
+  // Intenta refrescar la sesión utilizando el refresh token almacenado. Si el refresh
+  // es exitoso, guarda la nueva cookie y refresh token.
   static Future<bool> _refrescarSesion() async {
     final refreshToken = await SecureStorageService.cargarRefreshToken();
 
@@ -1493,6 +1519,8 @@ class ApiService {
     return false;
   }
 
+  // Guarda el refresh token que viene en la respuesta del servidor
+  // si el usuario ha elegido inicio de sesión automático.
   static Future<void> _guardarRefreshTokenDesdeRespuesta(
       http.Response respuesta, {
         required bool rememberMe,
@@ -1508,6 +1536,7 @@ class ApiService {
     await SecureStorageService.guardarRefreshToken(refreshToken);
   }
 
+  // Guarda la cookie de sesión que viene en la respuesta del servidor.
   static Future<void> _guardarCookieDesdeRespuesta(http.Response respuesta) async {
     final setCookie = respuesta.headers['set-cookie'];
 
@@ -1522,6 +1551,8 @@ class ApiService {
     }
   }
 
+  // Construye las cabeceras necesarias para una solicitud autenticada, incluyendo
+  // la cookie de sesión.
   static Future<Map<String, String>> _cabecerasConSesion() async {
     final cookie = await SharedPreferencesService.cargarSessionCookie();
 
@@ -1534,6 +1565,9 @@ class ApiService {
     };
   }
 
+  // Intenta leer un mensaje de error del cuerpo de la respuesta
+  // buscando en campos comunes como "mensaje", "message" o "error". Si no se
+  // encuentra un mensaje
   static String _leerMensajeError(String body) {
     if (body.trim().isEmpty) return '';
     try {

@@ -8,6 +8,12 @@ import '../models/usuario.dart';
 import '../services/shared_preferences_service.dart';
 import '../widgets/componentes_compartidos.dart';
 
+/// Pantalla de cuenta de usuario, donde se muestran los datos del usuario,
+/// configurar preferencias, editar los datos o cerrar sesión.
+///
+/// @author: Eva Retamar
+/// @author: Adrián Pérez
+/// @author: David Muñoz
 class Cuenta extends StatefulWidget {
   const Cuenta({super.key});
 
@@ -828,7 +834,7 @@ class _CuentaState extends State<Cuenta> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // DATOS DE USUARIO
+                  // DATOS DEL USUARIO
                   _buildUserInfo(),
 
                   // BOTONES

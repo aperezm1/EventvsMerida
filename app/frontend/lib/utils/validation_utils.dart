@@ -1,6 +1,11 @@
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 
+/// Servicio de validación para entradas de texto y tamaños de las imágenes.
+///
+/// @author: Eva Retamar
+/// @author: Adrián Pérez
+/// @author: David Muñoz
 class DayRangeTextInputFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {

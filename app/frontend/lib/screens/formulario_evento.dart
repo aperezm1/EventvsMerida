@@ -14,6 +14,12 @@ import '../services/shared_preferences_service.dart';
 import '../utils/validation_utils.dart';
 import '../widgets/componentes_compartidos.dart';
 
+/// Pantalla del formulairo para crear o editar un evento.
+/// En caso de la edición los datos del evento se rellenan automáticamente.
+///
+/// @author: Eva Retamar
+/// @author: Adrián Pérez
+/// @author: David Muñoz
 class FormularioEvento extends StatefulWidget {
   final Evento? evento;
 

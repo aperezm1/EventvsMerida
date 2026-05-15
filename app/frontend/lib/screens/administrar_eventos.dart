@@ -11,6 +11,11 @@ import '../services/api_service.dart';
 import '../services/shared_preferences_service.dart';
 import '../widgets/componentes_compartidos.dart';
 
+/// Pantalla para que administradores y organizadores puedan gestionar los eventos.
+///
+/// @author: Eva Retamar
+/// @author: Adrián Pérez
+/// @author: David Muñoz
 class AdministrarEventos extends StatefulWidget {
   const AdministrarEventos({super.key});
 
