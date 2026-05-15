@@ -215,7 +215,7 @@ async function cargarEventos() {
     const data = await resp.json();
     mostrarEventos(data["content"], data["totalPages"]);
   } catch (error) {
-    console.error("Error al cargar los eventos:", error);
+    mostrarAlerta(error, `Error al cargar los eventos: ${error}`);
   } finally {
     body.classList.remove("loading");
     loader.style.display = "none";
@@ -249,7 +249,7 @@ async function buscarEvento(textoBusqueda) {
     const data = await resp.json();
     mostrarEventos(data);
   } catch (error) {
-    console.error("Error al buscar el evento", error);
+    mostrarAlerta(error, `Error al buscar el evento ${error}`);
   } finally {
     body.classList.remove("loading");
     loader.style.display = "none";
@@ -623,7 +623,7 @@ async function obtenerCategorias() {
       });
     });
   } catch (error) {
-    console.error("Error al cargar las categorías:", error);
+    mostrarAlerta(error, `Error al cargar las categorías: ${error}`);
   }
 }
 
@@ -665,7 +665,7 @@ async function obtenerOrganizadores() {
       });
     });
   } catch (error) {
-    console.error("Error al cargar los organizadores:", error);
+    mostrarAlerta(error, `Error al cargar los organizadores: ${error}`);
   }
 }
 
@@ -694,7 +694,7 @@ async function crearEvento(datosFormulario) {
       mostrarAlerta("error", "Error al crear el evento: " + respuesta.error);
     }
   } catch (error) {
-    console.error("Error al subir el evento:", error);
+    mostrarAlerta(error, `Error al subir el evento: ${error}`);
   } finally {
     limpiarBuscador();
     cargarEventos();
@@ -725,7 +725,7 @@ async function editarEvento(id, datosFormulario) {
       mostrarAlerta("error", "Error al editar el evento: " + respuesta.error);
     }
   } catch (error) {
-    console.error("Error al editar el evento:", error);
+    mostrarAlerta(error, `Error al editar el evento: ${error}`);
   } finally {
     limpiarBuscador();
     cargarEventos();
@@ -760,7 +760,7 @@ async function eliminarEvento(id, nombre) {
           mostrarAlerta("error", "Error al eliminar el evento: " + respuesta);
         }
       } catch (error) {
-        console.error("Error al eliminar el evento:", error);
+        mostrarAlerta(error, `Error al eliminar el evento: ${error}`);
       } finally {
         limpiarBuscador();
         cargarEventos();
@@ -808,7 +808,7 @@ async function buscarLugar(textoBusqueda) {
     const data = await resp.json();
     return data?.features || [];
   } catch (error) {
-    console.error("Error al obtener la Ubicación:", error);
+    mostrarAlerta(`Error al obtener la Ubicación: ${error}`);
     return [];
   }
 }
