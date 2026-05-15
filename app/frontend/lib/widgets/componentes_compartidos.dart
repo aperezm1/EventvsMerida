@@ -223,8 +223,8 @@ class _ModalEventoState extends State<ModalEvento> {
       '\n\n',
     );
 
-    const enlaceDescarga =
-        'https://github.com/Null-Pointers-Albarregas/EventvsMerida/releases/download/Alpha/eventvs-merida.apk';
+    const enlaceLanding =
+        'https://eventvsmerida.vercel.app/';
 
     final texto =
     '''
@@ -245,8 +245,8 @@ $descripcionLimpia
 Compartido desde Eventvs Mérida
 Descubre más eventos, planes y actividades de Mérida como este.
 
-📲 Descargar aquí:
-$enlaceDescarga
+📲 Échale un vistazo aquí:
+$enlaceLanding
 ''';
 
     await Share.share(
