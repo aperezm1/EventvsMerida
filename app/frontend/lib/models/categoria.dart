@@ -1,3 +1,8 @@
+/// Modelo de datos que representa las categorías de los eventos en la app.
+///
+/// @author: Eva Retamar
+/// @author: Adrián Pérez
+/// @author: David Muñoz
 class Categoria {
   final int id;
   final String nombre;

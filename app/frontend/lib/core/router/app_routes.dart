@@ -1,3 +1,10 @@
+/// Clase que define las rutas de navegación de la aplicación representadas
+/// por una constante de tipo String, lo que facilita su uso en toda la aplicación y
+/// evita errores tipográficos al referenciar las rutas.
+///
+/// @author: Eva Retamar
+/// @author: Adrián Pérez
+/// @author: David Muñoz
 class AppRoutes {
   AppRoutes._();
 

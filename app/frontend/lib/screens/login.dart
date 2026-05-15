@@ -6,6 +6,12 @@ import '../services/api_service.dart';
 import '../services/shared_preferences_service.dart';
 import '../widgets/componentes_compartidos.dart';
 
+/// Pantalla de inicio de sesión. Permite a los usuarios ingresar sus credenciales
+/// para acceder a su cuenta.
+///
+/// @author: Eva Retamar
+/// @author: Adrián Pérez
+/// @author: David Muñoz
 class Login extends StatefulWidget {
   const Login({super.key});
 

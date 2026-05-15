@@ -1,3 +1,9 @@
+/// Modelo que representa la respuestas de la API, incluyendo el estado de
+/// éxito, mensaje, datos y código de estado.
+///
+/// @author: Eva Retamar
+/// @author: Adrián Pérez
+/// @author: David Muñoz
 class ApiResponse<T> {
   final bool exito;
   final String mensaje;

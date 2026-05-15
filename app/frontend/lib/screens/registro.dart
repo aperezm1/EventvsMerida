@@ -11,6 +11,14 @@ import '../services/api_service.dart';
 import '../services/shared_preferences_service.dart';
 import '../widgets/componentes_compartidos.dart';
 
+/// Pantalla de registro de usuario. Permite crear una nueva cuenta proporcionando
+/// información personal, correo electrónico, contraseña, fecha de nacimiento
+/// y una foto de perfil opcional en un formulario.
+/// También incluye validación de campos y aceptación de los términos y condiciones.
+///
+/// @author: Eva Retamar
+/// @author: Adrián Pérez
+/// @author: David Muñoz
 class Registro extends StatefulWidget {
   const Registro({super.key});
 

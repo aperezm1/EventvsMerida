@@ -1,3 +1,8 @@
+/// Modelo de datos que representa los usuarios de la app.
+///
+/// @author: Eva Retamar
+/// @author: Adrián Pérez
+/// @author: David Muñoz
 class Usuario {
   final int id;
   final String nombre;

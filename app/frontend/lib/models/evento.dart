@@ -1,3 +1,8 @@
+/// Modelo de datos que representa los eventos de la app.
+///
+/// @author: Eva Retamar
+/// @author: Adrián Pérez
+/// @author: David Muñoz
 class Evento {
   final int id;
   final String titulo;

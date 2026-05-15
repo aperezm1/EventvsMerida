@@ -3,6 +3,11 @@ import '../models/usuario.dart';
 import 'api_service.dart';
 import 'package:eventvsmerida/services/shared_preferences_service.dart';
 
+/// Servicio para manejar la carga de eventos guardados del usuario actual.
+///
+/// @author: Eva Retamar
+/// @author: Adrián Pérez
+/// @author: David Muñoz
 class EventosGuardadosService {
   static Future<(Usuario?, List<Evento>)> cargarUsuarioYEventosGuardados() async {
     final usuario = await SharedPreferencesService.cargarUsuario();
