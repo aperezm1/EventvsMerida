@@ -17,6 +17,12 @@ import '../models/usuario.dart';
 import '../services/api_service.dart';
 import '../services/eventos_guardados_service.dart';
 
+/// Pantalla con los eventos, muestra una lista de eventos próximos.
+/// Permite buscar, filtrar o ver todos los detalles de los eventos.
+///
+/// @author: Eva Retamar
+/// @author: Adrián Pérez
+/// @author: David Muñoz
 class Eventos extends StatefulWidget {
   const Eventos({super.key});
 

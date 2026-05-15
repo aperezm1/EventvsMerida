@@ -1,5 +1,11 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+/// Servicio para manejar el almacenamiento seguro de datos sensibles como tokens,
+/// información del usuario y cookies de sesión.
+///
+/// @author: Eva Retamar
+/// @author: Adrián Pérez
+/// @author: David Muñoz
 class SecureStorageService {
   SecureStorageService._();
 

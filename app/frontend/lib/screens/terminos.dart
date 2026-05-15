@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 
+/// Pantalla de Términos y Condiciones de Uso de la app.
+///
+/// @author: Eva Retamar
+/// @author: Adrián Pérez
+/// @author: David Muñoz
 class Terminos extends StatefulWidget {
   const Terminos({super.key});
 

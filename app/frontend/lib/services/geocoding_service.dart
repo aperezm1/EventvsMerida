@@ -3,6 +3,11 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 
+/// Servicio para geocodificar las localizaciones utilizando la API de Nominatim de OpenStreetMap.
+///
+/// @author: Eva Retamar
+/// @author: Adrián Pérez
+/// @author: David Muñoz
 class GeocodingService {
   GeocodingService._();
 

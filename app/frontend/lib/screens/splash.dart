@@ -5,6 +5,11 @@ import 'package:go_router/go_router.dart';
 
 import '../core/router/app_routes.dart';
 
+/// Pantalla de splash que se muestra al iniciar la aplicación con el logo de Eventvs.
+///
+/// @author: Eva Retamar
+/// @author: Adrián Pérez
+/// @author: David Muñoz
 class Splash extends StatefulWidget {
   const Splash({super.key});
 

@@ -12,6 +12,13 @@ import '../models/usuario.dart';
 import '../services/api_service.dart';
 import '../services/eventos_guardados_service.dart';
 
+/// Pantalla donde se muestran los eventos organizados en eun calendario por día.
+/// Permite navegar entre meses y años, y al seleccionar un día se muestra un listado
+/// de los eventos correspondientes a ese día.
+///
+/// @author: Eva Retamar
+/// @author: Adrián Pérez
+/// @author: David Muñoz
 class Calendario extends StatefulWidget {
   const Calendario({super.key});
 

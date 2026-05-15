@@ -1,5 +1,10 @@
 import 'package:intl/intl.dart';
 
+/// Utilidades para manejo de fechas y horas en la aplicación.
+///
+/// @author: Eva Retamar
+/// @author: Adrián Pérez
+/// @author: David Muñoz
 class FechaUtils {
   bool esMismoDia(DateTime a, DateTime b) {
     return a.year == b.year && a.month == b.month && a.day == b.day;

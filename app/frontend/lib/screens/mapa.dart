@@ -12,6 +12,12 @@ import '../services/api_service.dart';
 import '../services/eventos_guardados_service.dart';
 import '../widgets/componentes_compartidos.dart';
 
+/// Pantalla que muestra un mapa con los eventos ubicados en Mérida.
+/// Permite al usuario interactuar con los pines para ver detalles de los eventos.
+///
+/// @author: Eva Retamar
+/// @author: Adrián Pérez
+/// @author: David Muñoz
 class Mapa extends StatefulWidget {
   const Mapa({super.key});
 

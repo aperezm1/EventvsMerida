@@ -6,6 +6,12 @@ import 'package:latlong2/latlong.dart';
 
 import '../services/geocoding_service.dart';
 
+/// Pantalla para seleccionar una ubicación en el mapa. Se puede pasar un punto inicial
+/// para ubicarlo en el mapa y mostrar la ubicación seleccionada al abrir la pantalla.
+///
+/// @author: Eva Retamar
+/// @author: Adrián Pérez
+/// @author: David Muñoz
 class SeleccionarUbicacion extends StatefulWidget {
   final LatLng? puntoInicial;
 

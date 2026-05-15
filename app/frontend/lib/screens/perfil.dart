@@ -8,6 +8,13 @@ import '../services/shared_preferences_service.dart';
 import '../models/usuario.dart';
 import '../widgets/componentes_compartidos.dart';
 
+/// Pantalla de perfil del usuario, donde puede ver su información, acceder a sus eventos
+/// guardados, configurar preferencias y administrar si es un organizador
+/// o administrador.
+///
+/// @author: Eva Retamar
+/// @author: Adrián Pérez
+/// @author: David Muñoz
 class Perfil extends StatefulWidget {
   const Perfil({super.key});
 

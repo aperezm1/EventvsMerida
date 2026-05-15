@@ -5,6 +5,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/usuario.dart';
 import 'secure_storage_service.dart';
 
+/// Servicio para gestionar la sesión del usuario y otras preferencias
+/// utilizando SharedPreferences.
+///
+/// @author: Eva Retamar
+/// @author: Adrián Pérez
+/// @author: David Muñoz
 class SharedPreferencesService {
   SharedPreferencesService._();
 

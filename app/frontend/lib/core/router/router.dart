@@ -20,7 +20,12 @@ import 'package:latlong2/latlong.dart';
 import '../../models/evento.dart';
 import '../../screens/administrar_eventos.dart';
 import '../../screens/formulario_evento.dart';
-
+/// Clase que define la configuración de rutas de navegación de la aplicación
+/// utilizando el paquete go_router.
+///
+/// @author: Eva Retamar
+/// @author: Adrián Pérez
+/// @author: David Muñoz
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
 

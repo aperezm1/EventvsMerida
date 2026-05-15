@@ -5,6 +5,11 @@ import 'router/router.dart';
 import 'theme/controlador_tema.dart';
 import 'theme/tema.dart';
 
+/// Clase principal de la aplicación, que configura el tema o el enrutamiento.
+///
+/// @author: Eva Retamar
+/// @author: Adrián Pérez
+/// @author: David Muñoz
 class App extends StatelessWidget {
   const App({super.key});
 
