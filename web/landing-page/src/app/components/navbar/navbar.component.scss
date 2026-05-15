@@ -299,7 +299,6 @@
   width: 100%;
 }
 
-/* Selector de idioma móvil rediseñado */
 .mobile-language-trigger {
   position: relative;
   width: 100%;
@@ -334,11 +333,6 @@
   transform: translateY(-35%) rotate(-135deg);
 }
 
-/*
-  Corrección del hueco en móvil:
-  El menú móvil no puede estar en position static con opacity 0 únicamente,
-  porque seguiría ocupando espacio. Se colapsa con max-height: 0.
-*/
 .mobile-language-menu {
   position: static;
   top: auto;
@@ -364,7 +358,6 @@
     transform 0.2s ease;
 }
 
-/* Estado abierto solo para el selector móvil */
 .language-switcher.open .mobile-language-menu {
   max-height: 320px;
   margin-top: 0.5rem;
