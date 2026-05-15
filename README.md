@@ -40,8 +40,8 @@
 ```
 EventvsMerida/
 ├── app/          # Aplicación móvil (Flutter / Spring Boot)
-├── web/          # Landing page y panel de administración
-├── scripts/      # Scripts auxiliares y automatización
+├── web/          # Landing page, panel de administración y web de restablcer contraseña
+├── scripts/      # Scripts auxiliares de Python
 ├── docs/         # Documentación técnica del proyecto
 └── README.md
 ```
