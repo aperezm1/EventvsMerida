@@ -19,7 +19,7 @@ class ApiService {
   // VARIABLES
   // ============================================================================
 
-  static const String baseUrl = 'http://192.168.1.36:8080/api';
+  static const String baseUrl = 'https://eventvsmerida-x2t1.onrender.com/api';
   static const Duration _tiempoLimite = Duration(seconds: 10);
 
   static const Map<String, String> _cabecerasJson = {

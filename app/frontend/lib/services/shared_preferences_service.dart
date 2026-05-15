@@ -89,6 +89,7 @@ class SharedPreferencesService {
     if (cookieSegura != null && cookieSegura.isNotEmpty) {
       return cookieSegura;
     }
+    return null;
   }
 
   // ===========================
