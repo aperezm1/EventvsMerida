@@ -12,6 +12,14 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Servicio para gestionar el envio de correos electronicos relacionados con la
+ * recuperacion de contraseñas.
+ * 
+ * @author Eva Retamar
+ * @author David Muñoz
+ * @author Adrián Pérez
+ */
 @Service
 @RequiredArgsConstructor
 public class EmailService {
@@ -31,6 +39,18 @@ public class EmailService {
     @Value("${app.recover-url}")
     private String recoverUrl;
 
+    /**
+     * Envía un correo electrónico de recuperación de contraseña al destinatario
+     * proporcionado, utilizando Mailjet como servicio de correo. El correo incluye
+     * un enlace para restablecer la contraseña, que contiene un token de
+     * recuperación.
+     * 
+     * @param destinatario  la dirección de correo electrónico del destinatario
+     * @param token         el token de recuperación que se incluirá en el enlace de
+     *                      restablecimiento de contraseña
+     * @param nombreUsuario el nombre del usuario para personalizar el saludo en el
+     *                      correo (opcional)
+     */
     public void enviarCorreoRecuperacion(String destinatario, String token, String nombreUsuario) {
         String basicAuth = Base64.getEncoder()
                 .encodeToString((apiKey.trim() + ":" + secretKey.trim()).getBytes(StandardCharsets.UTF_8));
@@ -55,17 +75,17 @@ public class EmailService {
                         Map.of(
                                 "From", Map.of(
                                         "Email", fromEmail,
-                                        "Name", fromName
-                                ),
+                                        "Name", fromName),
                                 "To", List.of(
                                         Map.of(
                                                 "Email", destinatario,
-                                                "Name", nombreDestinatario
-                                        )
-                                ),
+                                                "Name", nombreDestinatario)),
                                 "Subject", "Recuperación de contraseña - Eventvs Mérida",
-                                "TextPart", saludo + " Has solicitado restablecer tu contraseña. Abre este enlace: " + urlRecuperacion,
-                                "HTMLPart", """
+                                "TextPart",
+                                saludo + " Has solicitado restablecer tu contraseña. Abre este enlace: "
+                                        + urlRecuperacion,
+                                "HTMLPart",
+                                """
                                          <!DOCTYPE html>
                                         <html>
                                             <head>
@@ -185,10 +205,8 @@ public class EmailService {
                                                 </div>
                                             </body>
                                         </html>
-                                        """.formatted(saludo, urlRecuperacion, urlRecuperacion)
-                        )
-                )
-        );
+                                        """
+                                        .formatted(saludo, urlRecuperacion, urlRecuperacion))));
 
         client.post()
                 .uri("/send")

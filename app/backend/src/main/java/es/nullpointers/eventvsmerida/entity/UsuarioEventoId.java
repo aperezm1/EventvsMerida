@@ -3,8 +3,10 @@ package es.nullpointers.eventvsmerida.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
@@ -13,8 +15,10 @@ import java.io.Serializable;
  * Clase embebida que representa la clave primaria compuesta de la relación
  * entre un usuario y un evento.
  *
- * <p>Se utiliza como identificador de la entidad {@link UsuarioEvento},
- * combinando el identificador del usuario y el identificador del evento.</p>
+ * <p>
+ * Se utiliza como identificador de la entidad {@link UsuarioEvento},
+ * combinando el identificador del usuario y el identificador del evento.
+ * </p>
  *
  * @author Eva Retamar
  * @author David Muñoz
@@ -22,6 +26,8 @@ import java.io.Serializable;
  */
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @EqualsAndHashCode
 @Embeddable
 public class UsuarioEventoId implements Serializable {

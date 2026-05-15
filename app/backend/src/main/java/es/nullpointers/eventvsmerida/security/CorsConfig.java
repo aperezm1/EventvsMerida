@@ -15,10 +15,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class CorsConfig {
     private static final String[] ALLOWED_ORIGINS = {
-        "http://127.0.0.1:5500",
-        "http://127.0.0.1:5501",
-        "https://eventvsmerida-admin.vercel.app",
-        "https://eventvsmerida-recover.vercel.app"
+            "https://eventvsmerida-admin.vercel.app",
+            "https://eventvsmerida-recover.vercel.app"
     };
     private static final String[] ALLOWED_METHODS = { "GET", "POST", "PUT", "DELETE", "OPTIONS" };
     private static final String[] ALLOWED_HEADERS = { "Content-Type", "Authorization", "X-Requested-With" };
@@ -26,7 +24,8 @@ public class CorsConfig {
     private static final long MAX_AGE = 3600;
 
     /**
-     * Configura CORS para permitir solicitudes desde el frontend admin desplegado en Vercel.
+     * Configura CORS para permitir solicitudes desde el frontend admin 
+     * y la web de restablecer contraseña desplegados en Vercel.
      * 
      * @return WebMvcConfigurer con la configuración de CORS personalizada.
      */

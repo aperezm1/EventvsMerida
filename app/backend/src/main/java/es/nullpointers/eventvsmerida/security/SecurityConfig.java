@@ -34,11 +34,15 @@ public class SecurityConfig {
     }
 
     /**
-     * Bean para el AuthenticationManager, que se utiliza para gestionar la autenticación de los usuarios.
+     * Bean para el AuthenticationManager, que se utiliza para gestionar la
+     * autenticación de los usuarios.
      *
-     * @param config la configuración de autenticación proporcionada por Spring Security.
-     * @return un AuthenticationManager que se puede utilizar para autenticar a los usuarios.
-     * @throws Exception si ocurre un error al obtener el AuthenticationManager de la configuración.
+     * @param config la configuración de autenticación proporcionada por Spring
+     *               Security.
+     * @return un AuthenticationManager que se puede utilizar para autenticar a los
+     *         usuarios.
+     * @throws Exception si ocurre un error al obtener el AuthenticationManager de
+     *                   la configuración.
      */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
@@ -47,16 +51,11 @@ public class SecurityConfig {
 
     /**
      * Configura la cadena de filtros de seguridad para la aplicación.
-     * <p>
-     * Reglas aplicadas (resumen):
-     * - GET/POST/PUT/DELETE sobre /api/eventos/** => Administrador u Organizador
-     * - POST/PUT/DELETE de categorías (add/update/delete) => solo Administrador
-     * - GET específicos de usuarios => solo Administrador
-     * - /api/roles/** y Swagger => solo Administrador
-     * - Resto de rutas => público
      *
-     * @param http el objeto HttpSecurity utilizado para configurar la seguridad HTTP.
-     * @return un SecurityFilterChain que define las reglas de seguridad para las solicitudes HTTP.
+     * @param http el objeto HttpSecurity utilizado para configurar la seguridad
+     *             HTTP.
+     * @return un SecurityFilterChain que define las reglas de seguridad para las
+     *         solicitudes HTTP.
      */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) {
@@ -66,15 +65,22 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
 
                         // Eventos: (GET/POST/PUT/DELETE) -> Administrador u Organizador
-                        .requestMatchers(HttpMethod.POST, "/api/eventos/add").hasAnyAuthority("Administrador", "Organizador")
-                        .requestMatchers(HttpMethod.PUT, "/api/eventos/update/*").hasAnyAuthority("Administrador", "Organizador")
-                        .requestMatchers(HttpMethod.DELETE, "/api/eventos/delete/*").hasAnyAuthority("Administrador", "Organizador")
-                        .requestMatchers(HttpMethod.GET, "/api/eventos/organizador/*").hasAnyAuthority("Administrador", "Organizador")
+                        .requestMatchers(HttpMethod.POST, "/api/eventos/add")
+                        .hasAnyAuthority("Administrador", "Organizador")
+                        .requestMatchers(HttpMethod.PUT, "/api/eventos/update/*")
+                        .hasAnyAuthority("Administrador", "Organizador")
+                        .requestMatchers(HttpMethod.DELETE, "/api/eventos/delete/*")
+                        .hasAnyAuthority("Administrador", "Organizador")
+                        .requestMatchers(HttpMethod.GET, "/api/eventos/organizador/*")
+                        .hasAnyAuthority("Administrador", "Organizador")
 
                         // Categorías: (POST/PUT/DELETE) -> solo Administrador
-                        .requestMatchers(HttpMethod.POST, "/api/categorias/add").hasAuthority("Administrador")
-                        .requestMatchers(HttpMethod.PUT, "/api/categorias/update/*").hasAuthority("Administrador")
-                        .requestMatchers(HttpMethod.DELETE, "/api/categorias/delete/*").hasAuthority("Administrador")
+                        .requestMatchers(HttpMethod.POST, "/api/categorias/add")
+                        .hasAuthority("Administrador")
+                        .requestMatchers(HttpMethod.PUT, "/api/categorias/update/*")
+                        .hasAuthority("Administrador")
+                        .requestMatchers(HttpMethod.DELETE, "/api/categorias/delete/*")
+                        .hasAuthority("Administrador")
 
                         // Usuarios: solo los GETs -> solo Administrador
                         .requestMatchers(HttpMethod.GET,
@@ -83,30 +89,34 @@ public class SecurityConfig {
                                 "/api/usuarios/organizers",
                                 "/api/usuarios/count/registered",
                                 "/api/usuarios/count/organizers",
-                                "/api/usuarios/all"
-                        ).hasAuthority("Administrador")
+                                "/api/usuarios/all")
+                        .hasAuthority("Administrador")
+
+                        // Todos los usuarios: UPDATE y DELETE de usuarios -> Administrador, Organizador o Registrado
+                        .requestMatchers(HttpMethod.PUT, "/api/usuarios/update/*").hasAnyAuthority("Administrador", "Organizador", "Registrado")
+                        .requestMatchers(HttpMethod.DELETE, "/api/usuarios/delete/*").hasAnyAuthority("Administrador", "Organizador", "Registrado")
 
                         // Roles y swagger: solo Administrador
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/v3/api-docs/**",
-                                "/api/roles/**"
-                        ).hasAuthority("Administrador")
+                                "/api/roles/**")
+                        .hasAuthority("Administrador")
 
                         // Resto de rutas públicas
-                        .anyRequest().permitAll()
-                )
+                        .anyRequest().permitAll())
                 .exceptionHandling(ex -> ex
                         .defaultAuthenticationEntryPointFor(
                                 (request, response, authException) -> {
-                                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                                    response.setContentType("application/json;charset=UTF-8");
-                                    response.getWriter().write("{\"message\":\"Sesión expirada\"}");
+                                    response.setStatus(
+                                            HttpServletResponse.SC_UNAUTHORIZED);
+                                    response.setContentType(
+                                            "application/json;charset=UTF-8");
+                                    response.getWriter().write(
+                                            "{\"message\":\"Sesión expirada\"}");
                                 },
-                                request -> request.getRequestURI().startsWith("/api/")
-                        )
-                )
+                                request -> request.getRequestURI().startsWith("/api/")))
                 .formLogin(Customizer.withDefaults());
 
         return http.build();

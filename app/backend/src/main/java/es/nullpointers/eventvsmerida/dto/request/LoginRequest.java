@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Pattern;
 /**
  * DTO para la solicitud de inicio de sesión.
  *
- * @param email correo electrónico del usuario. Debe tener un formato válido.
+ * @param email    correo electrónico del usuario. Debe tener un formato válido.
  * @param password contraseña del usuario. Debe tener al menos 8 caracteres,
  *                 una mayúscula, una minúscula y un número.
  *
@@ -16,14 +16,6 @@ import jakarta.validation.constraints.Pattern;
  * @author Adrián Pérez
  */
 public record LoginRequest(
-        @NotBlank
-        @Email
-        String email,
-
-        @NotBlank
-        @Pattern(
-                regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$",
-                message = "La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número"
-        )
-        String password
+        @NotBlank @Email String email,
+        @NotBlank @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$", message = "La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número") String password
 ) {}

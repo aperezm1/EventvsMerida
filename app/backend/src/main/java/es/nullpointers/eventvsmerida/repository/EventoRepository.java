@@ -37,16 +37,17 @@ public interface EventoRepository extends JpaRepository<Evento, Long> {
 
     @Query(value = "SELECT e.* FROM \"Evento\" e JOIN \"Categoria\" c ON e.id_categoria = c.id " +
             "WHERE unaccent(lower(e.titulo)) LIKE concat('%', unaccent(lower(:q)), '%') " +
-            //"OR unaccent(lower(e.descripcion)) LIKE concat('%', unaccent(lower(:q)), '%') " +
+            // "OR unaccent(lower(e.descripcion)) LIKE concat('%', unaccent(lower(:q)), '%')
+            // " +
             "OR unaccent(lower(e.localizacion)) LIKE concat('%', unaccent(lower(:q)), '%') " +
             "OR unaccent(lower(c.nombre)) LIKE concat('%', unaccent(lower(:q)), '%')", countQuery = "SELECT COUNT(*) FROM \"Evento\" e JOIN \"Categoria\" c ON e.id_categoria = c.id "
                     +
                     "WHERE unaccent(lower(e.titulo)) LIKE concat('%', unaccent(lower(:q)), '%') " +
-                    //"OR unaccent(lower(e.descripcion)) LIKE concat('%', unaccent(lower(:q)), '%') " +
+                    // "OR unaccent(lower(e.descripcion)) LIKE concat('%', unaccent(lower(:q)), '%')
+                    // " +
                     "OR unaccent(lower(e.localizacion)) LIKE concat('%', unaccent(lower(:q)), '%') " +
                     "OR unaccent(lower(c.nombre)) LIKE concat('%', unaccent(lower(:q)), '%')", nativeQuery = true)
     Page<Evento> searchByQuery(@Param("q") String q, Pageable pageable);
-
 
     @Query("""
                 SELECT MONTH(e.fechaInicio), COUNT(e)
@@ -57,14 +58,12 @@ public interface EventoRepository extends JpaRepository<Evento, Long> {
             """)
     List<Object[]> contarEventosPorMes();
 
-
     @Query(value = """
-    SELECT c.nombre AS categoria, COUNT(e.id) AS total
-    FROM "Categoria" c
-    LEFT JOIN "Evento" e ON e.id_categoria = c.id
-    GROUP BY c.id, c.nombre
-    ORDER BY COUNT(e.id) DESC
-""", nativeQuery = true)
+                SELECT c.nombre AS categoria, COUNT(e.id) AS total
+                FROM "Categoria" c
+                LEFT JOIN "Evento" e ON e.id_categoria = c.id
+                GROUP BY c.id, c.nombre
+                ORDER BY COUNT(e.id) DESC
+            """, nativeQuery = true)
     List<EventosPorCategoriaResponse> contarEventosPorCategoria();
-
 }

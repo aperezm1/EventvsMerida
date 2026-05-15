@@ -25,7 +25,7 @@ public class CategoriaMapper {
     public static Categoria convertirAEntidad(CategoriaRequest request) {
         Categoria categoria = new Categoria();
         categoria.setNombre(TextoUtils.capitalizarTexto(request.nombre().trim()));
-        
+
         return categoria;
     }
 

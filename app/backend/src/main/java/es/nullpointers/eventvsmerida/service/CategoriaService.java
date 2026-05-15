@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 
 /**
  * Servicio para gestionar la logica de negocio relacionada con la
@@ -55,7 +54,8 @@ public class CategoriaService {
      * @return Categoria encontrada.
      */
     public CategoriaResponse obtenerCategoriaPorId(Long id) {
-        Categoria categoriaObtenida = obtenerCategoriaPorIdOExcepcion(id, "Error en CategoriaService.obtenerCategoriaPorId: No se encontró la categoria con id " + id);
+        Categoria categoriaObtenida = obtenerCategoriaPorIdOExcepcion(id,
+                "Error en CategoriaService.obtenerCategoriaPorId: No se encontró la categoria con id " + id);
         return CategoriaMapper.convertirAResponse(categoriaObtenida);
     }
 
@@ -81,19 +81,21 @@ public class CategoriaService {
      * @param id ID de la categoria a eliminar.
      */
     public void eliminarCategoria(Long id) {
-        Categoria categoria = obtenerCategoriaPorIdOExcepcion(id, "Error en CategoriaService.eliminarCategoria: No se encontró la categoria con id " + id);
+        Categoria categoria = obtenerCategoriaPorIdOExcepcion(id,
+                "Error en CategoriaService.eliminarCategoria: No se encontró la categoria con id " + id);
         categoriaRepository.delete(categoria);
     }
 
     /**
      * Metodo para actualizar una categoria por su ID.
      *
-     * @param id ID de la categoria a actualizar.
+     * @param id               ID de la categoria a actualizar.
      * @param categoriaRequest Datos de la categoria a actualizar.
      * @return Categoria actualizada.
      */
     public CategoriaResponse actualizarCategoria(Long id, CategoriaRequest categoriaRequest) {
-        Categoria categoriaExistente = obtenerCategoriaPorIdOExcepcion(id, "Error en CategoriaService.actualizarCategoria: No se encontró la categoria con id: " + id);
+        Categoria categoriaExistente = obtenerCategoriaPorIdOExcepcion(id,
+                "Error en CategoriaService.actualizarCategoria: No se encontró la categoria con id: " + id);
 
         categoriaExistente.setNombre(categoriaRequest.nombre());
         Categoria categoriaActualizada = categoriaRepository.save(categoriaExistente);
@@ -119,9 +121,10 @@ public class CategoriaService {
     // ==================
 
     /**
-     * Metodo privado para obtener una categoria por su ID o lanzar una excepcion si no se encuentra.
+     * Metodo privado para obtener una categoria por su ID o lanzar una excepcion si
+     * no se encuentra.
      *
-     * @param id ID de la categoria a obtener.
+     * @param id           ID de la categoria a obtener.
      * @param mensajeError Mensaje de error para la excepcion.
      * @return Categoria encontrada.
      */

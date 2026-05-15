@@ -195,28 +195,21 @@ class _PerfilState extends State<Perfil> {
           height: 96,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            border: Border.all(
-              color: _cs.surface,
-              width: 2,
-            ),
+            border: Border.all(color: _cs.surface, width: 2),
           ),
           child: ClipOval(
             child: Container(
               color: _cs.surface.withValues(alpha: 0.9),
               child: _usuario?.fotoUrl != null && _usuario!.fotoUrl!.isNotEmpty
                   ? FadeInImage.assetNetwork(
-                placeholder: 'assets/images/icono.gif',
-                image: _usuario!.fotoUrl!,
-                width: 90,
-                height: 90,
-                fit: BoxFit.cover,
-                placeholderFit: BoxFit.contain,
-              )
-                  : Icon(
-                Icons.person,
-                color: _cs.primary,
-                size: 34,
-              ),
+                      placeholder: 'assets/images/icono.gif',
+                      image: _usuario!.fotoUrl!,
+                      width: 90,
+                      height: 90,
+                      fit: BoxFit.cover,
+                      placeholderFit: BoxFit.contain,
+                    )
+                  : Icon(Icons.person, color: _cs.primary, size: 34),
             ),
           ),
         ),
@@ -272,7 +265,13 @@ class _PerfilState extends State<Perfil> {
           _buildItem(
             Icons.account_circle,
             'Cuenta',
-            onTap: () => context.push(AppRoutes.cuenta),
+            onTap: () async {
+              await context.push(AppRoutes.cuenta);
+
+              if (!mounted) return;
+
+              await _cargarUsuario();
+            },
           ),
           _buildItem(
             Icons.bookmark_border,
@@ -353,7 +352,12 @@ class _PerfilState extends State<Perfil> {
 
     if (!mounted) return;
     context.go(AppRoutes.eventos);
-    Mensaje.mostrarSnackBar(context: context, mensaje: "¡Has completado el tutorial!", icon: Icons.help_outline, color: Colors.green);
+    Mensaje.mostrarSnackBar(
+      context: context,
+      mensaje: "¡Has completado el tutorial!",
+      icon: Icons.help_outline,
+      color: Colors.green,
+    );
   }
 
   void cargarPasosTutorial() {
@@ -363,7 +367,8 @@ class _PerfilState extends State<Perfil> {
           context: context,
           key: keyCabecera,
           titulo: 'Registrarse o iniciar sesión',
-          descripcion: 'En esta sección puedes registrarte para crear una cuenta o iniciar sesión si ya tienes una. Al hacerlo, podrás acceder a funciones personalizadas como guardar eventos favoritos.',
+          descripcion:
+              'En esta sección puedes registrarte para crear una cuenta o iniciar sesión si ya tienes una. Al hacerlo, podrás acceder a funciones personalizadas como guardar eventos favoritos.',
           icon: Icons.calendar_month,
           siguiente: true,
           onNext: () => Tutorial.tutorial.next(),
@@ -376,7 +381,8 @@ class _PerfilState extends State<Perfil> {
           context: context,
           key: keySecciones,
           titulo: 'Preferencias e información legal',
-          descripcion: 'Aquí puedes configurar tus preferencias, eventos guardados, o la política de privacidad entre otros.',
+          descripcion:
+              'Aquí puedes configurar tus preferencias, eventos guardados, o la política de privacidad entre otros.',
           icon: Icons.list_alt,
           siguiente: false,
           onNext: () => finalizarTutorial(),
@@ -389,7 +395,8 @@ class _PerfilState extends State<Perfil> {
           context: context,
           key: keyPreferencias,
           titulo: 'Preferencias',
-          descripcion: 'En esta sección puedes configurar tus preferencias, como tus datos personales o los eventos guardados.',
+          descripcion:
+              'En esta sección puedes configurar tus preferencias, como tus datos personales o los eventos guardados.',
           icon: Icons.calendar_month,
           siguiente: true,
           onNext: () => Tutorial.tutorial.next(),
@@ -397,13 +404,15 @@ class _PerfilState extends State<Perfil> {
         ),
       );
 
-      if (_usuario?.rol.toLowerCase() == 'organizador' || _usuario?.rol.toLowerCase() == 'administrador') {
+      if (_usuario?.rol.toLowerCase() == 'organizador' ||
+          _usuario?.rol.toLowerCase() == 'administrador') {
         Tutorial.pasosTutorial.add(
           Tutorial.crearPaso(
             context: context,
             key: keyAdmin,
             titulo: 'Administración',
-            descripcion: 'Aquí puedes gestionar todos los datos de tus eventos, tanto crear nuevos, como editar o eliminar los existentes.',
+            descripcion:
+                'Aquí puedes gestionar todos los datos de tus eventos, tanto crear nuevos, como editar o eliminar los existentes.',
             icon: Icons.admin_panel_settings,
             siguiente: true,
             onNext: () => Tutorial.tutorial.next(),
@@ -418,7 +427,8 @@ class _PerfilState extends State<Perfil> {
           context: context,
           key: keyinfoLegal,
           titulo: 'Información legal',
-          descripcion: 'Aquí puedes consultar los términos y condiciones así como la política de privacidad.',
+          descripcion:
+              'Aquí puedes consultar los términos y condiciones así como la política de privacidad.',
           icon: Icons.calendar_month,
           siguiente: false,
           onNext: () => finalizarTutorial(),

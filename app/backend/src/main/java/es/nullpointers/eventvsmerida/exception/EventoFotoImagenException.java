@@ -1,7 +1,8 @@
 package es.nullpointers.eventvsmerida.exception;
 
 /**
- * Excepción lanzada cuando hay un error de validación con la imagen o URL del evento.
+ * Excepción lanzada cuando hay un error de validación con la imagen o URL del
+ * evento.
  * 
  * @author Eva Retamar
  * @author David Muñoz

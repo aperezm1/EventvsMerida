@@ -280,13 +280,15 @@ async function requireAuth() {
 const fetchConAuth = async (url, options = {}) => {
   const resp = await fetch(url, options);
 
-  if (resp.redirected && resp.url.includes("login")) {
-    sessionStorage.setItem("sesionCaducada", "true");
-    window.location.href = `${window.location.origin}/html/login.html`;
-    return resp;
+  let data = null;
+
+  try {
+    data = await resp.clone().json();
+  } catch (error) {
+    data = null;
   }
 
-  if (resp.status === 401) {
+  if (resp.status === 401 && data?.message === "Sesión expirada") {
     sessionStorage.setItem("sesionCaducada", "true");
     window.location.href = `${window.location.origin}/html/login.html`;
     return resp;

@@ -32,11 +32,14 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
 
     /**
-     * Restablece la contraseña de un usuario utilizando un token de restablecimiento.
+     * Restablece la contraseña de un usuario utilizando un token de
+     * restablecimiento.
      *
-     * @param token El token de restablecimiento de contraseña enviado al correo del usuario.
+     * @param token         El token de restablecimiento de contraseña enviado al
+     *                      correo del usuario.
      * @param nuevaPassword La nueva contraseña que el usuario desea establecer.
-     * @return Un mensaje indicando el resultado del proceso de restablecimiento de contraseña.
+     * @return Un mensaje indicando el resultado del proceso de restablecimiento de
+     *         contraseña.
      */
     public String resetPassword(String token, String nuevaPassword) {
         PasswordResetToken resetToken = tokenRepository.findByToken(token);
@@ -71,9 +74,11 @@ public class AuthService {
     }
 
     /**
-     * Crea un nuevo refresh token para el usuario especificado, revocando cualquier token anterior no revocado.
+     * Crea un nuevo refresh token para el usuario especificado, revocando cualquier
+     * token anterior no revocado.
+     * 
      * @param usuario El usuario para el cual se va a crear el refresh token.
-     * @param ttl La duración del refresh token antes de su expiración.
+     * @param ttl     La duración del refresh token antes de su expiración.
      * @return El token de refresh generado para el usuario.
      */
     public String crearRefreshToken(Usuario usuario, Duration ttl) {
@@ -82,10 +87,12 @@ public class AuthService {
     }
 
     /**
-     * Valida un refresh token verificando su existencia, estado de revocación y fecha de expiración.
+     * Valida un refresh token verificando su existencia, estado de revocación y
+     * fecha de expiración.
      *
      * @param token El token de refresh que se desea validar.
-     * @return El objeto RefreshToken si es válido, o null si el token es inválido, revocado o expirado.
+     * @return El objeto RefreshToken si es válido, o null si el token es inválido,
+     *         revocado o expirado.
      */
     public RefreshToken validarRefreshToken(String token) {
         if (token == null || token.isBlank()) {
@@ -112,9 +119,12 @@ public class AuthService {
     /**
      * Revoca un refresh token específico y genera uno nuevo para el mismo usuario.
      *
-     * @param refreshToken El refresh token que se desea rotar (revocar y reemplazar).
-     * @param ttl La duración del nuevo refresh token antes de su expiración.
-     * @return El nuevo token de refresh generado para el usuario después de revocar el token anterior.
+     * @param refreshToken El refresh token que se desea rotar (revocar y
+     *                     reemplazar).
+     * @param ttl          La duración del nuevo refresh token antes de su
+     *                     expiración.
+     * @return El nuevo token de refresh generado para el usuario después de revocar
+     *         el token anterior.
      */
     public String rotarRefreshToken(RefreshToken refreshToken, Duration ttl) {
         refreshToken.setRevocado(true);
@@ -123,9 +133,11 @@ public class AuthService {
     }
 
     /**
-     * Revoca todos los refresh tokens no revocados asociados a un usuario específico, marcándolos como revocados en la base de datos.
+     * Revoca todos los refresh tokens no revocados asociados a un usuario
+     * específico, marcándolos como revocados en la base de datos.
      *
-     * @param usuario El usuario para el cual se desean revocar todos los refresh tokens activos (no revocados).
+     * @param usuario El usuario para el cual se desean revocar todos los refresh
+     *                tokens activos (no revocados).
      */
     public void revocarTokensUsuario(Usuario usuario) {
         var tokens = refreshTokenRepository.findAllByUsuarioAndRevocadoFalse(usuario);
@@ -138,10 +150,11 @@ public class AuthService {
     }
 
     /**
-     * Crea un nuevo refresh token para un usuario específico con una duración determinada, sin revocar tokens anteriores.
+     * Crea un nuevo refresh token para un usuario específico con una duración
+     * determinada, sin revocar tokens anteriores.
      *
      * @param usuario El usuario para el cual se va a crear el refresh token.
-     * @param ttl La duración del refresh token antes de su expiración.
+     * @param ttl     La duración del refresh token antes de su expiración.
      * @return El token de refresh generado para el usuario.
      */
     private String crearRefreshTokenInterno(Usuario usuario, Duration ttl) {

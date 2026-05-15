@@ -1,7 +1,9 @@
 package es.nullpointers.eventvsmerida.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -9,9 +11,11 @@ import org.hibernate.annotations.OnDeleteAction;
 /**
  * Entidad que representa la relación entre un usuario y un evento.
  *
- * <p>Se utiliza para gestionar los eventos guardados por los usuarios.
+ * <p>
+ * Se utiliza para gestionar los eventos guardados por los usuarios.
  * La relación se identifica mediante una clave primaria compuesta formada
- * por el identificador del usuario y el identificador del evento.</p>
+ * por el identificador del usuario y el identificador del evento.
+ * </p>
  *
  * @author Eva Retamar
  * @author David Muñoz
@@ -19,6 +23,8 @@ import org.hibernate.annotations.OnDeleteAction;
  */
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Table(name = "\"Usuario-Evento\"")
 public class UsuarioEvento {
