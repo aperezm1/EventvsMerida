@@ -12,6 +12,5 @@ import jakarta.validation.constraints.NotBlank;
  * @author Adrián Pérez
  */
 public record RolRequest(
-        @NotBlank
-        String nombre
+        @NotBlank String nombre
 ) {}

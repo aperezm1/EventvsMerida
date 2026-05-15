@@ -22,8 +22,10 @@ import java.util.Map;
  * Componente encargado de gestionar la subida, eliminación y generación
  * de URLs de imágenes almacenadas en Supabase Storage.
  *
- * <p>Gestiona imágenes públicas de eventos y fotos privadas de perfil
- * de usuarios, utilizando la API REST de Supabase mediante {@link RestClient}.</p>
+ * <p>
+ * Gestiona imágenes públicas de eventos y fotos privadas de perfil
+ * de usuarios, utilizando la API REST de Supabase mediante {@link RestClient}.
+ * </p>
  *
  * @author Eva Retamar
  * @author David Muñoz
@@ -41,12 +43,15 @@ public class SupabaseStorage {
     /**
      * Constructor que inicializa el cliente REST de Supabase.
      *
-     * <p>Obtiene la URL y la clave de Supabase desde las propiedades de configuración
-     * de la aplicación y configura las cabeceras necesarias para autenticarse contra
-     * la API de Supabase Storage.</p>
+     * <p>
+     * Obtiene la URL y la clave de Supabase desde las propiedades de configuración
+     * de la aplicación y configura las cabeceras necesarias para autenticarse
+     * contra la API de Supabase Storage.
+     * </p>
      *
      * @param supabaseUrl URL base del proyecto Supabase.
-     * @param key clave de acceso utilizada para autenticar las peticiones a Supabase.
+     * @param key         clave de acceso utilizada para autenticar las peticiones a
+     *                    Supabase.
      */
     public SupabaseStorage(@Value("${supabase.url}") String supabaseUrl, @Value("${supabase.key}") String key) {
         this.supabaseUrl = supabaseUrl;
@@ -98,7 +103,8 @@ public class SupabaseStorage {
                     }
                     objectPath = filename; // raíz del bucket
                 } catch (IOException e) {
-                    throw new IllegalStateException("Error al leer el contenido de la imagen: " + imagen.getOriginalFilename(), e);
+                    throw new IllegalStateException(
+                            "Error al leer el contenido de la imagen: " + imagen.getOriginalFilename(), e);
                 }
             }
         }
@@ -130,12 +136,15 @@ public class SupabaseStorage {
     }
 
     /**
-     * Método que se encarga de borrar la imagen del bucket de Supabase a partir de su URL pública.
+     * Método que se encarga de borrar la imagen del bucket de Supabase a partir de
+     * su URL pública.
      * 
-     * @param publicUrl URL pública de la imagen que se desea borrar. Si es null o vacía, no se realiza ninguna acción.
+     * @param publicUrl URL pública de la imagen que se desea borrar. Si es null o
+     *                  vacía, no se realiza ninguna acción.
      */
     public void borrarImagenEvento(@Nullable String publicUrl) {
-        if (publicUrl == null || publicUrl.isBlank()) return;
+        if (publicUrl == null || publicUrl.isBlank())
+            return;
 
         String prefix = supabaseUrl + "/storage/v1/object/public/" + bucketEventos + "/";
         if (!publicUrl.startsWith(prefix)) {
@@ -147,11 +156,11 @@ public class SupabaseStorage {
 
         try {
             supabaseClient.delete()
-                .uri(uriBuilder -> uriBuilder
-                    .path("/storage/v1/object/{bucket}/{path}")
-                    .build(Map.of("bucket", bucketEventos, "path", objectPathEncoded)))
-                .retrieve()
-                .toBodilessEntity();
+                    .uri(uriBuilder -> uriBuilder
+                            .path("/storage/v1/object/{bucket}/{path}")
+                            .build(Map.of("bucket", bucketEventos, "path", objectPathEncoded)))
+                    .retrieve()
+                    .toBodilessEntity();
         } catch (Exception e) {
             log.warn("Error borrando imagen en Supabase Storage: {}", e.getMessage());
             throw new IllegalStateException("No se pudo borrar la imagen en el storage", e);
@@ -161,8 +170,9 @@ public class SupabaseStorage {
     /**
      * Método que se encarga de subir una imagen de perfil a un bucket privado.
      *
-     * @param imagen archivo de imagen de perfil subido por el usuario.
-     * @param emailUsuario email del usuario, utilizado como base para generar el nombre del archivo.
+     * @param imagen       archivo de imagen de perfil subido por el usuario.
+     * @param emailUsuario email del usuario, utilizado como base para generar el
+     *                     nombre del archivo.
      * @return path interno del objeto almacenado en Supabase.
      */
     public String subirImagenUsuario(MultipartFile imagen, String emailUsuario) {
@@ -182,7 +192,8 @@ public class SupabaseStorage {
                 contentType = contentTypeFromFilename(filename);
             }
         } catch (IOException e) {
-            throw new IllegalStateException("Error al leer el contenido de la imagen: " + imagen.getOriginalFilename(), e);
+            throw new IllegalStateException("Error al leer el contenido de la imagen: " + imagen.getOriginalFilename(),
+                    e);
         }
 
         String objectPath = filename;
@@ -207,7 +218,8 @@ public class SupabaseStorage {
      * @param objectPath Path interno del objeto.
      */
     public void borrarImagenUsuario(String objectPath) {
-        if (objectPath == null || objectPath.isBlank()) return;
+        if (objectPath == null || objectPath.isBlank())
+            return;
 
         String encodedPath = UriUtils.encodePath(objectPath, StandardCharsets.UTF_8);
 
@@ -227,7 +239,7 @@ public class SupabaseStorage {
     /**
      * Método para generar una URL firmada de un objeto privado.
      *
-     * @param objectPath Path interno del objeto.
+     * @param objectPath     Path interno del objeto.
      * @param expiresSeconds Segundos de validez de la URL.
      * @return URL firmada completa.
      */
@@ -298,13 +310,16 @@ public class SupabaseStorage {
         return construirNombreImagenEvento(tituloEvento, nombreImagen);
     }
 
-    
     /**
-     * Método para construir el nombre de la imagen del evento a partir del título del evento y el nombre original del archivo.
+     * Método para construir el nombre de la imagen del evento a partir del título
+     * del evento y el nombre original del archivo.
      * 
-     * @param tituloEvento Título del evento, se usará como base para el nombre de la imagen.
-     * @param nombreArchivoOriginal Nombre original del archivo para extraer la extensión y generar el nombre final.
-     * @return Nombre construido para la imagen del evento, con formato "base.extensión".
+     * @param tituloEvento          Título del evento, se usará como base para el
+     *                              nombre de la imagen.
+     * @param nombreArchivoOriginal Nombre original del archivo para extraer la
+     *                              extensión y generar el nombre final.
+     * @return Nombre construido para la imagen del evento, con formato
+     *         "base.extensión".
      */
     private static String construirNombreImagenEvento(String tituloEvento, String nombreArchivoOriginal) {
         // Separar base + extensión.
@@ -321,11 +336,15 @@ public class SupabaseStorage {
     }
 
     /**
-     * Método para construir el nombre de la imagen de perfil a partir del email del usuario y el nombre original del archivo.
+     * Método para construir el nombre de la imagen de perfil a partir del email del
+     * usuario y el nombre original del archivo.
      * 
-     * @param email Email del usuario, se usará la parte antes de '@' como base del nombre.
-     * @param nombreArchivoOriginal Nombre original del archivo para extraer la extensión.
-     * @return Nombre construido para la imagen de perfil, con formato "base.extensión".
+     * @param email                 Email del usuario, se usará la parte antes de
+     *                              '@' como base del nombre.
+     * @param nombreArchivoOriginal Nombre original del archivo para extraer la
+     *                              extensión.
+     * @return Nombre construido para la imagen de perfil, con formato
+     *         "base.extensión".
      */
     private static String construirNombreImagenUsuario(String email, String nombreArchivoOriginal) {
         String base = email;
@@ -346,16 +365,18 @@ public class SupabaseStorage {
 
     /**
      * Método que en función de como termine la extensión, sacamos el tipo de imagen
-     * la cual se incluye en las cabeceras a la hora de subir la imagen para indicarle a Supabase
-     * el tipo de imagen.
+     * la cual se incluye en las cabeceras a la hora de subir la imagen para
+     * indicarle a Supabase el tipo de imagen.
      *
      * @param filename Imagen.
      * @return Tipo de imagen.
      */
     private static String contentTypeFromFilename(String filename) {
         String f = filename.toLowerCase();
-        if (f.endsWith(".png")) return "image/png";
-        if (f.endsWith(".jpg") || f.endsWith(".jpeg")) return "image/jpeg";
+        if (f.endsWith(".png"))
+            return "image/png";
+        if (f.endsWith(".jpg") || f.endsWith(".jpeg"))
+            return "image/jpeg";
         return "application/octet-stream";
     }
 }

@@ -76,26 +76,17 @@ public class EventoController {
     }
 
     /**
-     * Método GET que llama al servicio para obtener los eventos asociados a un organizador.
-     *
-     * @param idUsuario ID del usuario organizador.
-     * @return ResponseEntity con la lista de eventos del organizador y estado HTTP 200 (OK).
-     */
-    @GetMapping("/organizador/{idUsuario}")
-    public ResponseEntity<List<EventoResponse>> obtenerEventosPorOrganizador(@PathVariable Long idUsuario) {
-        List<EventoResponse> eventos = eventoService.obtenerEventosPorOrganizador(idUsuario);
-        return ResponseEntity.ok(eventos);
-    }
-
-    /**
      * Método POST que llama al servicio para crear un nuevo evento.
      * 
-     * @param jsonEvento JSON con los datos del evento a crear, enviado como parte de un multipart/form-data.
-     * @param imagen Archivo de imagen opcional para el evento, enviado como parte de un multipart/form-data.
+     * @param jsonEvento JSON con los datos del evento a crear, enviado como parte
+     *                   de un multipart/form-data.
+     * @param imagen     Archivo de imagen opcional para el evento, enviado como
+     *                   parte de un multipart/form-data.
      * @return ResponseEntity con el evento creado y el estado HTTP 201 (Created).
      */
     @PostMapping(value = "/add", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<EventoResponse> crearEvento(@RequestPart("evento") String jsonEvento, @RequestPart(value = "imagen", required = false) MultipartFile imagen) {
+    public ResponseEntity<EventoResponse> crearEvento(@RequestPart("evento") String jsonEvento,
+            @RequestPart(value = "imagen", required = false) MultipartFile imagen) {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
 
@@ -116,7 +107,8 @@ public class EventoController {
     }
 
     /**
-     * Método DELETE que llama al servicio para eliminar un evento por su ID y borrar su imagen asociada en el storage.
+     * Método DELETE que llama al servicio para eliminar un evento por su ID y
+     * borrar su imagen asociada en el storage.
      *
      * @param id ID del evento a eliminar.
      * @return ResponseEntity con el estado HTTP 204 (No Content).
@@ -128,16 +120,21 @@ public class EventoController {
     }
 
     /**
-     * Método PUT que llama al servicio para actualizar un evento existente por su ID, con la posibilidad de actualizar la imagen asociada.
+     * Método PUT que llama al servicio para actualizar un evento existente por su
+     * ID, con la posibilidad de actualizar la imagen asociada.
      * 
-     * @param id ID del evento a actualizar.
-     * @param jsonEvento JSON con los datos del evento a actualizar, enviado como parte de un multipart/form-data.
-     * @param imagen Archivo de imagen opcional para actualizar la imagen del evento, enviado como parte de un multipart/form-data.
+     * @param id         ID del evento a actualizar.
+     * @param jsonEvento JSON con los datos del evento a actualizar, enviado como
+     *                   parte de un multipart/form-data.
+     * @param imagen     Archivo de imagen opcional para actualizar la imagen del
+     *                   evento, enviado como parte de un multipart/form-data.
      * @return ResponseEntity con el evento actualizado y el estado HTTP 200 (OK).
      * @throws JsonProcessingException
      */
     @PutMapping(value = "/update/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<EventoResponse> actualizarEvento(@PathVariable Long id, @RequestPart("evento") String jsonEvento, @RequestPart(value = "imagen", required = false) MultipartFile imagen) throws JsonProcessingException {
+    public ResponseEntity<EventoResponse> actualizarEvento(@PathVariable Long id,
+            @RequestPart("evento") String jsonEvento,
+            @RequestPart(value = "imagen", required = false) MultipartFile imagen) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
 
@@ -164,40 +161,50 @@ public class EventoController {
     /**
      * Método GET que llama al servicio para obtener eventos paginados.
      * 
-     * @param pageable Objeto Pageable que contiene la información de paginación y ordenación de los eventos a obtener. Se puede configurar con parámetros como page, size, sort, etc.
+     * @param pageable Objeto Pageable que contiene la información de paginación y
+     *                 ordenación de los eventos a obtener. Se puede configurar con
+     *                 parámetros como page, size, sort, etc.
      * @return ResponseEntity con la página de eventos y el estado HTTP 200 (OK).
      */
     @GetMapping("/paginated")
     public ResponseEntity<Page<EventoResponse>> obtenerEventosPaginados(
-        @PageableDefault(page = 0, size = 20, sort = "fechaInicio", direction = Sort.Direction.ASC) Pageable pageable,
-        @RequestParam(name = "fechaFinDesde", required = false)
-        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime fechaFinDesde) {
-    
+            @PageableDefault(page = 0, size = 20, sort = "fechaInicio", direction = Sort.Direction.ASC) Pageable pageable,
+            @RequestParam(name = "fechaFinDesde", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime fechaFinDesde) {
+
         Page<EventoResponse> pagina = eventoService.obtenerEventosPaginados(pageable, fechaFinDesde);
         return ResponseEntity.ok(pagina);
     }
 
     /**
-     * Método GET que llama al servicio para buscar eventos por una consulta de texto.
+     * Método GET que llama al servicio para buscar eventos por una consulta de
+     * texto.
      * 
-     * @param q Consulta de texto para buscar en el título, localización y categoría de los eventos.
-     * @param limit Número máximo de resultados a devolver (opcional, por defecto 10).
-     * @return ResponseEntity con la lista de eventos encontrados y el estado HTTP 200 (OK).
+     * @param q     Consulta de texto para buscar en el título, localización y
+     *              categoría de los eventos.
+     * @param limit Número máximo de resultados a devolver (opcional, por defecto
+     *              10).
+     * @return ResponseEntity con la lista de eventos encontrados y el estado HTTP
+     *         200 (OK).
      */
     @GetMapping("/search")
-    public ResponseEntity<List<EventoResponse>> buscarEventos(@RequestParam(name = "q", required = false) String q, @RequestParam(name = "limit", defaultValue = "10") int limit) {
+    public ResponseEntity<List<EventoResponse>> buscarEventos(@RequestParam(name = "q", required = false) String q,
+            @RequestParam(name = "limit", defaultValue = "10") int limit) {
         List<EventoResponse> resultados = eventoService.buscarEventos(q, limit);
         return ResponseEntity.ok(resultados);
     }
 
     /**
-     * Método GET que llama al servicio para obtener eventos filtrados por categorías.
+     * Método GET que llama al servicio para obtener eventos filtrados por
+     * categorías.
      * 
-     * @param categorias Lista de IDs de categorías para filtrar los eventos (opcional).
-     * @return ResponseEntity con la lista de eventos encontrados y el estado HTTP 200 (OK).
+     * @param categorias Lista de IDs de categorías para filtrar los eventos
+     *                   (opcional).
+     * @return ResponseEntity con la lista de eventos encontrados y el estado HTTP
+     *         200 (OK).
      */
     @GetMapping("/filter-by-categories")
-    public ResponseEntity<List<EventoResponse>> obtenerEventosPorCategorias(@RequestParam(name = "categorias", required = false) List<Long> categorias) {
+    public ResponseEntity<List<EventoResponse>> obtenerEventosPorCategorias(
+            @RequestParam(name = "categorias", required = false) List<Long> categorias) {
         List<EventoResponse> eventos = eventoService.obtenerEventosPorCategorias(categorias);
         return ResponseEntity.ok(eventos);
     }
@@ -205,7 +212,8 @@ public class EventoController {
     /**
      * Método GET que llama al servicio para contar el número total de eventos.
      * 
-     * @return ResponseEntity con la cantidad total de eventos y el estado HTTP 200 (OK).
+     * @return ResponseEntity con la cantidad total de eventos y el estado HTTP 200
+     *         (OK).
      */
     @GetMapping("/count")
     public ResponseEntity<Long> contarEventos() {
@@ -214,7 +222,8 @@ public class EventoController {
     }
 
     /**
-     * Método GET que llama al servicio para obtener la cantidad de eventos agrupados por mes del año.
+     * Método GET que llama al servicio para obtener la cantidad de eventos
+     * agrupados por mes del año.
      *
      * @return ResponseEntity con un listado del mes y la cantidad.
      */
@@ -225,14 +234,29 @@ public class EventoController {
     }
 
     /**
-     * Método GET que llama al servicio para obtener los eventos agrupados por categoría.
+     * Método GET que llama al servicio para obtener los eventos agrupados por
+     * categoría.
      *
-     * @return ResposeEntity con una lista de categorías y el número total de eventos
-     * asociados a cada una, junto con el estado HTTP 200(OK)
+     * @return ResposeEntity con una lista de categorías y el número total de
+     *         eventos asociados a cada una, junto con el estado HTTP 200(OK)
      */
     @GetMapping("/eventos-por-categoria")
     public List<EventosPorCategoriaResponse> obtenerEventosPorCategoria() {
         List<EventosPorCategoriaResponse> resultado = eventoService.obtenerEventosPorCategoria();
         return ResponseEntity.ok().body(resultado).getBody();
+    }
+
+    /**
+     * Método GET que llama al servicio para obtener los eventos asociados a un
+     * organizador.
+     *
+     * @param idUsuario ID del usuario organizador.
+     * @return ResponseEntity con la lista de eventos del organizador y estado HTTP
+     *         200 (OK).
+     */
+    @GetMapping("/organizador/{idUsuario}")
+    public ResponseEntity<List<EventoResponse>> obtenerEventosPorOrganizador(@PathVariable Long idUsuario) {
+        List<EventoResponse> eventos = eventoService.obtenerEventosPorOrganizador(idUsuario);
+        return ResponseEntity.ok(eventos);
     }
 }

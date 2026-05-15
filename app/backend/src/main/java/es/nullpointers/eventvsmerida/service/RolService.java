@@ -54,7 +54,8 @@ public class RolService {
      * @return Rol encontrado.
      */
     public RolResponse obtenerRolPorId(Long id) {
-        Rol rolObtenido = obtenerRolPorIdOExcepcion(id, "Error en RolService.obtenerRolPorId: No se encontró el rol con id " + id);
+        Rol rolObtenido = obtenerRolPorIdOExcepcion(id,
+                "Error en RolService.obtenerRolPorId: No se encontró el rol con id " + id);
         return RolMapper.convertirAResponse(rolObtenido);
     }
 
@@ -83,12 +84,13 @@ public class RolService {
     /**
      * Metodo para actualizar un rol existente.
      *
-     * @param id ID del rol a actualizar.
+     * @param id         ID del rol a actualizar.
      * @param rolRequest Datos actualizados del rol.
      * @return Rol actualizado.
      */
     public RolResponse actualizarRol(Long id, RolRequest rolRequest) {
-        Rol rolExistente = obtenerRolPorIdOExcepcion(id, "Error en RolService.actualizarRol: No se encontró el rol con id " + id);
+        Rol rolExistente = obtenerRolPorIdOExcepcion(id,
+                "Error en RolService.actualizarRol: No se encontró el rol con id " + id);
 
         rolExistente.setNombre(rolRequest.nombre());
         Rol rolActualizado = rolRepository.save(rolExistente);
@@ -114,9 +116,10 @@ public class RolService {
     // ==================
 
     /**
-     * Metodo privado para obtener un rol por su ID o lanzar una excepcion personalizada si no se encuentra.
+     * Metodo privado para obtener un rol por su ID o lanzar una excepcion
+     * personalizada si no se encuentra.
      *
-     * @param id ID del rol a obtener.
+     * @param id           ID del rol a obtener.
      * @param mensajeError Mensaje de error para la excepcion.
      * @return Rol encontrado.
      */

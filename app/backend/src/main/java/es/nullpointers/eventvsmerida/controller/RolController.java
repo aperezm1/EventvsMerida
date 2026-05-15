@@ -81,12 +81,13 @@ public class RolController {
     /**
      * Metodo PUT que llama al servicio para actualizar un rol existente.
      *
-     * @param id ID del rol a actualizar.
+     * @param id                   ID del rol a actualizar.
      * @param rolActualizarRequest DTO con los datos del rol a actualizar.
      * @return ResponseEntity con el rol actualizado y el estado HTTP 200 (OK).
      */
     @PutMapping("/update/{id}")
-    public ResponseEntity<RolResponse> actualizarRol(@PathVariable Long id, @Valid @RequestBody RolRequest rolActualizarRequest) {
+    public ResponseEntity<RolResponse> actualizarRol(@PathVariable Long id,
+            @Valid @RequestBody RolRequest rolActualizarRequest) {
         RolResponse rolActualizado = rolService.actualizarRol(id, rolActualizarRequest);
         return ResponseEntity.ok(rolActualizado);
     }

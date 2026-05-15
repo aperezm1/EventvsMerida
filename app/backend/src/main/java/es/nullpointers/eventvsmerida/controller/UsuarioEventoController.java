@@ -34,8 +34,10 @@ public class UsuarioEventoController {
     /**
      * Guarda un evento como favorito para un usuario.
      * 
-     * @param request Objeto que contiene el email del usuario y el ID del evento a guardar.
-     * @return Respuesta HTTP con el estado de la operación (201 Created si se guarda correctamente).
+     * @param request Objeto que contiene el email del usuario y el ID del evento a
+     *                guardar.
+     * @return Respuesta HTTP con el estado de la operación (201 Created si se
+     *         guarda correctamente).
      */
     @PostMapping("/guardar")
     public ResponseEntity<Void> guardarUsuarioEvento(@Valid @RequestBody UsuarioEventoRequest request) {
@@ -46,8 +48,10 @@ public class UsuarioEventoController {
     /**
      * Elimina un evento guardado por un usuario.
      * 
-     * @param request Objeto que contiene el email del usuario y el ID del evento a eliminar.
-     * @return Respuesta HTTP con el estado de la operación (204 No Content si se elimina correctamente).
+     * @param request Objeto que contiene el email del usuario y el ID del evento a
+     *                eliminar.
+     * @return Respuesta HTTP con el estado de la operación (204 No Content si se
+     *         elimina correctamente).
      */
     @DeleteMapping("/eliminar")
     public ResponseEntity<Void> eliminarUsuarioEvento(@Valid @RequestBody UsuarioEventoRequest request) {
@@ -58,11 +62,14 @@ public class UsuarioEventoController {
     /**
      * Obtiene la lista de eventos guardados por un usuario.
      * 
-     * @param emailUsuario El email del usuario para el cual se desean obtener los eventos guardados.
-     * @return Respuesta HTTP con la lista de eventos guardados por el usuario (200 OK) o un error si el email es inválido.
+     * @param emailUsuario El email del usuario para el cual se desean obtener los
+     *                     eventos guardados.
+     * @return Respuesta HTTP con la lista de eventos guardados por el usuario (200
+     *         OK) o un error si el email es inválido.
      */
     @GetMapping("/guardados")
-    public ResponseEntity<List<EventoResponse>> obtenerEventosGuardadosPorUsuario(@RequestParam @NotBlank @Email String emailUsuario) {
+    public ResponseEntity<List<EventoResponse>> obtenerEventosGuardadosPorUsuario(
+            @RequestParam @NotBlank @Email String emailUsuario) {
         List<EventoResponse> eventos = usuarioEventoService.obtenerEventosGuardadosPorUsuario(emailUsuario);
         return ResponseEntity.ok(eventos);
     }

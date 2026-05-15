@@ -5,13 +5,13 @@ import jakarta.validation.constraints.NotBlank;
 /**
  * DTO para la creación o actualización de una categoría.
  *
- * @param nombre nombre de la categoría. No puede estar vacío ni contener solo espacios.
+ * @param nombre nombre de la categoría. No puede estar vacío ni contener solo
+ *               espacios.
  *
  * @author Eva Retamar
  * @author David Muñoz
  * @author Adrián Pérez
  */
 public record CategoriaRequest(
-        @NotBlank
-        String nombre
+        @NotBlank String nombre
 ) {}

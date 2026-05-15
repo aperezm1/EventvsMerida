@@ -10,8 +10,10 @@ import lombok.Setter;
 /**
  * Entidad que representa una categoría de eventos.
  *
- * <p>Permite clasificar los eventos dentro de la aplicación,
- * por ejemplo música, teatro, deporte, cultura u otras categorías.</p>
+ * <p>
+ * Permite clasificar los eventos dentro de la aplicación,
+ * por ejemplo música, teatro, deporte, cultura u otras categorías.
+ * </p>
  *
  * @author Eva Retamar
  * @author David Muñoz
@@ -32,4 +34,4 @@ public class Categoria {
     @NotNull
     @Column(name = "nombre", nullable = false, length = Integer.MAX_VALUE)
     private String nombre;
-} 
+}

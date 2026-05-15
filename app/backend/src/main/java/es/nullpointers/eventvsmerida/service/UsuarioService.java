@@ -65,7 +65,8 @@ public class UsuarioService {
      * @return Usuario encontrado.
      */
     public UsuarioResponse obtenerUsuarioPorId(Long id) {
-        Usuario usuarioObtenido = obtenerUsuarioPorIdOExcepcion(id, "Error en UsuarioService.obtenerUsuarioPorId: No se encontró el usuario con id " + id);
+        Usuario usuarioObtenido = obtenerUsuarioPorIdOExcepcion(id,
+                "Error en UsuarioService.obtenerUsuarioPorId: No se encontró el usuario con id " + id);
         return UsuarioMapper.convertirAResponse(usuarioObtenido, storageUploader);
     }
 
@@ -73,26 +74,26 @@ public class UsuarioService {
      * Metodo para crear un nuevo usuario.
      *
      * @param usuarioRequest Datos del usuario a crear.
-     * @param imagen Imagen de perfil (opcional).
+     * @param imagen         Imagen de perfil (opcional).
      * @return Usuario creado.
      */
     public UsuarioResponse crearUsuario(UsuarioCrearRequest usuarioRequest, MultipartFile imagen) {
-        // Se hacen las comprobaciones necesarias para evitar errores de integridad de datos
+        // Se hacen las comprobaciones necesarias para evitar errores de integridad de
+        // datos
         if (usuarioRepository.existsByEmail(usuarioRequest.email())) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
-                    "Este correo ya está en uso"
-            );
+                    "Este correo ya está en uso");
         }
 
         if (usuarioRepository.existsByTelefono(usuarioRequest.telefono())) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
-                    "Este teléfono ya está en uso"
-            );
+                    "Este teléfono ya está en uso");
         }
 
-        Rol rol = rolService.obtenerRolPorIdOExcepcion(usuarioRequest.idRol(), "Error en UsuarioService.crearUsuario: No se encontró el rol con id " + usuarioRequest.idRol());
+        Rol rol = rolService.obtenerRolPorIdOExcepcion(usuarioRequest.idRol(),
+                "Error en UsuarioService.crearUsuario: No se encontró el rol con id " + usuarioRequest.idRol());
 
         // Se convierte el DTO a entidad y se codifica la contraseña
         Usuario usuarioNuevo = UsuarioMapper.convertirAEntidad(usuarioRequest, rol, imagen, storageUploader);
@@ -111,7 +112,8 @@ public class UsuarioService {
      * @param id ID del usuario a eliminar.
      */
     public void eliminarUsuario(Long id) {
-        Usuario usuario = obtenerUsuarioPorIdOExcepcion(id, "Error en UsuarioService.eliminarUsuario: No se encontró el usuario con id " + id);
+        Usuario usuario = obtenerUsuarioPorIdOExcepcion(id,
+                "Error en UsuarioService.eliminarUsuario: No se encontró el usuario con id " + id);
 
         if (usuario.getFotoPath() != null && !usuario.getFotoPath().isBlank()) {
             try {
@@ -127,15 +129,17 @@ public class UsuarioService {
     /**
      * Metodo para actualizar un usuario existente.
      *
-     * @param id ID del usuario a actualizar.
+     * @param id             ID del usuario a actualizar.
      * @param usuarioRequest Datos actualizados del usuario.
-     * @param imagen Imagen de perfil (opcional).
+     * @param imagen         Imagen de perfil (opcional).
      * @return Usuario actualizado.
      */
     public UsuarioResponse actualizarUsuario(Long id, UsuarioActualizarRequest usuarioRequest, MultipartFile imagen) {
-        Usuario usuarioExistente = obtenerUsuarioPorIdOExcepcion(id, "Error en UsuarioService.actualizarUsuario: No se encontró el usuario con id " + id);
+        Usuario usuarioExistente = obtenerUsuarioPorIdOExcepcion(id,
+                "Error en UsuarioService.actualizarUsuario: No se encontró el usuario con id " + id);
 
-        // Se actualizan solo los campos que no sean nulos en el request, permitiendo actualizaciones parciales
+        // Se actualizan solo los campos que no sean nulos en el request, permitiendo
+        // actualizaciones parciales
         if (usuarioRequest.nombre() != null) {
             usuarioExistente.setNombre(usuarioRequest.nombre());
         }
@@ -154,8 +158,7 @@ public class UsuarioService {
             if (usuarioConEmail != null && !usuarioConEmail.getId().equals(usuarioExistente.getId())) {
                 throw new ResponseStatusException(
                         HttpStatus.CONFLICT,
-                        "Este correo ya está en uso"
-                );
+                        "Este correo ya está en uso");
             }
 
             usuarioExistente.setEmail(usuarioRequest.email());
@@ -167,8 +170,7 @@ public class UsuarioService {
             if (usuarioConTelefono != null && !usuarioConTelefono.getId().equals(usuarioExistente.getId())) {
                 throw new ResponseStatusException(
                         HttpStatus.CONFLICT,
-                        "Este teléfono ya está en uso"
-                );
+                        "Este teléfono ya está en uso");
             }
 
             usuarioExistente.setTelefono(usuarioRequest.telefono());
@@ -179,7 +181,9 @@ public class UsuarioService {
         }
 
         if (usuarioRequest.idRol() != null) {
-            Rol rol = rolService.obtenerRolPorIdOExcepcion(usuarioRequest.idRol(), "Error en UsuarioService.actualizarUsuario: No se encontró el rol con id " + usuarioRequest.idRol());
+            Rol rol = rolService.obtenerRolPorIdOExcepcion(usuarioRequest.idRol(),
+                    "Error en UsuarioService.actualizarUsuario: No se encontró el rol con id "
+                            + usuarioRequest.idRol());
             usuarioExistente.setRol(rol);
         }
 
@@ -248,7 +252,7 @@ public class UsuarioService {
      * Metodo para obtener un usuario por su ID o lanzar una excepcion
      * personalizada si no se encuentra.
      *
-     * @param id ID del usuario a obtener.
+     * @param id           ID del usuario a obtener.
      * @param mensajeError Mensaje de error para la excepcion.
      * @return Usuario encontrado.
      */
@@ -257,7 +261,8 @@ public class UsuarioService {
     }
 
     public UsuarioResponse obtenerUsuarioPorEmail(String email) {
-        Usuario usuario = usuarioRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException("Error en UsuarioService.obtenerUsuarioPorEmail: No se encontró el usuario con email " + email));
+        Usuario usuario = usuarioRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(
+                "Error en UsuarioService.obtenerUsuarioPorEmail: No se encontró el usuario con email " + email));
         return UsuarioMapper.convertirAResponse(usuario, storageUploader);
     }
 }

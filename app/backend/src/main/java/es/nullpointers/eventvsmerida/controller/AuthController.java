@@ -36,8 +36,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
- * Controlador REST que maneja las operaciones de autenticación, incluyendo inicio de sesión,
- * verificación de sesión activa y cierre de sesión.
+ * Controlador REST que maneja las operaciones de autenticación, incluyendo
+ * inicio de sesión, verificación de sesión activa y cierre de sesión.
  *
  * @author Eva Retamar
  * @author David Muñoz
@@ -57,12 +57,32 @@ public class AuthController {
     private final CustomUserDetailsService userDetailsService;
 
     /**
-     * Endpoint para iniciar sesión. Si el parámetro "admin" es true, solo permitirá el acceso a usuarios con rol de administrador.
-     *
-     * @param loginRequest DTO con email y contraseña
-     * @param admin indica si se requiere rol de administrador para el acceso
-     * @param request objeto HttpServletRequest para gestionar la sesión
-     * @return ResponseEntity con los datos del usuario logeado o error si no se cumplen las condiciones de autenticación/rol
+     * Endpoint para iniciar sesión. Autentica al usuario utilizando el email y la
+     * contraseña proporcionados en el cuerpo de la solicitud.
+     * Si la autenticación es exitosa, se establece el contexto de seguridad y se
+     * devuelve la información del usuario logeado.
+     * 
+     * @param loginRequest DTO de solicitud que contiene el email y la contraseña
+     *                     del usuario.
+     * @param admin        Parámetro opcional que indica si se requiere que el
+     *                     usuario tenga rol de administrador para iniciar sesión.
+     *                     Si es true, solo los usuarios con rol de administrador
+     *                     podrán autenticarse.
+     * @param rememberMe   Parámetro opcional que indica si se debe generar un
+     *                     refresh token para mantener la sesión activa durante un
+     *                     período prolongado. Si es true y el usuario tiene rol de
+     *                     administrador u organizador, se generará un refresh token
+     *                     válido por 60 días y se incluirá en la cabecera de la
+     *                     respuesta.
+     * @param request      objeto HttpServletRequest para gestionar la sesión y el
+     *                     contexto de seguridad.
+     * @param response     objeto HttpServletResponse para agregar el refresh token
+     *                     en la cabecera de la respuesta si se genera uno.
+     * @return ResponseEntity con la información del usuario logeado en el cuerpo de
+     *         la respuesta y un refresh token en la cabecera "X-Refresh-Token" si
+     *         se generó uno. Retorna 200 OK si la autenticación fue exitosa, o 401
+     *         UNAUTHORIZED si las credenciales son inválidas, o 403 FORBIDDEN si se
+     *         requiere rol de administrador y el usuario no lo tiene.
      */
     @PostMapping("/login")
     public ResponseEntity<UsuarioResponse> login(
@@ -73,11 +93,12 @@ public class AuthController {
             HttpServletResponse response) {
 
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.email(), loginRequest.password())
-        );
+                new UsernamePasswordAuthenticationToken(loginRequest.email(), loginRequest.password()));
 
-        boolean isAdmin = authentication.getAuthorities().stream().anyMatch(a -> "Administrador".equalsIgnoreCase(a.getAuthority()));
-        boolean isOrganizer = authentication.getAuthorities().stream().anyMatch(a -> "Organizador".equalsIgnoreCase(a.getAuthority()));
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> "Administrador".equalsIgnoreCase(a.getAuthority()));
+        boolean isOrganizer = authentication.getAuthorities().stream()
+                .anyMatch(a -> "Organizador".equalsIgnoreCase(a.getAuthority()));
 
         if (admin && !isAdmin) {
             throw new AccessDeniedException("Solo administradores pueden iniciar sesión");
@@ -105,14 +126,18 @@ public class AuthController {
     }
 
     /**
-     * Endpoint para verificar si el usuario tiene una sesión activa. Retorna 200 OK si el usuario está autenticado, o 401 UNAUTHORIZED si no lo está.
+     * Endpoint para verificar si el usuario tiene una sesión activa. Retorna 200 OK
+     * si el usuario está autenticado, o 401 UNAUTHORIZED si no lo está.
      *
-     * @param authentication objeto Authentication inyectado por Spring Security, representa la autenticación actual del usuario
-     * @return ResponseEntity sin cuerpo, con estado 200 OK si el usuario está autenticado o 401 UNAUTHORIZED si no lo está
+     * @param authentication objeto Authentication inyectado por Spring Security,
+     *                       representa la autenticación actual del usuario
+     * @return ResponseEntity sin cuerpo, con estado 200 OK si el usuario está
+     *         autenticado o 401 UNAUTHORIZED si no lo está
      */
     @GetMapping("/session")
     public ResponseEntity<Void> session(Authentication authentication) {
-        if (authentication == null || authentication instanceof AnonymousAuthenticationToken || !authentication.isAuthenticated()) {
+        if (authentication == null || authentication instanceof AnonymousAuthenticationToken
+                || !authentication.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
@@ -120,18 +145,26 @@ public class AuthController {
     }
 
     /**
-     * Endpoint para cerrar sesión. Limpia el contexto de seguridad e invalida la sesión HTTP.
-     *
-     * @param request objeto HttpServletRequest para gestionar la sesión
-     * @return ResponseEntity sin cuerpo, con estado 204 NO CONTENT después de cerrar sesión exitosamente
+     * Endpoint para cerrar sesión. Limpia el contexto de seguridad y revoca los
+     * tokens
+     * 
+     * @param request        objeto HttpServletRequest para gestionar la sesión y el
+     *                       contexto de seguridad.
+     * @param authentication objeto Authentication inyectado por Spring Security,
+     *                       representa la autenticación actual del usuario
+     * @return ResponseEntity sin cuerpo, con estado 204 NO CONTENT después de
+     *         cerrar sesión exitosamente. Retorna 401 UNAUTHORIZED si el usuario no
+     *         está autenticado.
      */
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(HttpServletRequest request, Authentication authentication) {
         SecurityContextHolder.clearContext();
         var session = request.getSession(false);
-        if (session != null) session.invalidate();
+        if (session != null)
+            session.invalidate();
 
-        if (authentication != null && !(authentication instanceof AnonymousAuthenticationToken) && authentication.isAuthenticated()) {
+        if (authentication != null && !(authentication instanceof AnonymousAuthenticationToken)
+                && authentication.isAuthenticated()) {
             Usuario usuario = usuarioRepository.findByEmail(authentication.getName()).orElse(null);
 
             if (usuario != null) {
@@ -143,10 +176,13 @@ public class AuthController {
     }
 
     /**
-     * Endpoint para recuperar contraseña a través del correo electrónico. Genera un token de recuperación, lo guarda en la base de datos y envía un correo al usuario con el enlace para restablecer su contraseña.
+     * Endpoint para recuperar contraseña a través del correo electrónico. Genera un
+     * token de recuperación, lo guarda en la base de datos y envía un correo al
+     * usuario con el enlace para restablecer su contraseña.
      *
      * @param email Correo electrónico del usuario que ha olvidado su contraseña
-     * @return ResponseEntity con mensaje de connfirmación de envío del correo o error si el usuario no se encuentra.
+     * @return ResponseEntity con mensaje de confirmación de envío del correo o
+     *         error si el usuario no se encuentra.
      */
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestParam String email) {
@@ -168,38 +204,52 @@ public class AuthController {
         emailService.enviarCorreoRecuperacion(
                 usuario.get().getEmail(),
                 resetToken.getToken(),
-                usuario.get().getNombre()
-        );
+                usuario.get().getNombre());
 
         return ResponseEntity.ok("Correo enviado");
     }
 
     /**
-     * Endpoint para establecer una nueva contraseña utilizando el token de recuperación. Verifica que el token sea válido y no haya expirado, y luego actualiza la contraseña del usuario.
+     * Endpoint para establecer una nueva contraseña utilizando el token de
+     * recuperación. Verifica que el token sea válido y no haya expirado, y luego
+     * actualiza la contraseña del usuario.
      *
-     * @param request DTO de solicitud que contiene el token de recuperación y la nueva contraseña. La nueva contraseña debe cumplir con los requisitos de seguridad establecidos.
-     * @return Devuelve un mensaje indicando el resultado de la operación, como "Contraseña actualizada correctamente" o errores específicos como "TOKEN inválido".
+     * @param request DTO de solicitud que contiene el token de recuperación y la
+     *                nueva contraseña. La nueva contraseña debe cumplir con los
+     *                requisitos de seguridad establecidos.
+     * @return Devuelve un mensaje indicando el resultado de la operación, como
+     *         "Contraseña actualizada correctamente" o errores específicos como
+     *         "TOKEN inválido".
      */
     @PostMapping("/reset-password")
     public String resetPassword(@RequestBody ResetPasswordRequest request) {
 
         return authService.resetPassword(
                 request.token(),
-                request.nuevaPassword()
-        );
+                request.nuevaPassword());
     }
 
     /**
-     * Endpoint para refrescar el token de autenticación utilizando un refresh token válido.
-     * Verifica el refresh token, autentica al usuario asociado y genera un nuevo refresh token, devolviéndolo en la cabecera de la respuesta.
+     * Endpoint para refrescar el token de autenticación utilizando un refresh token
+     * válido.
+     * Verifica el refresh token, autentica al usuario asociado y genera un nuevo
+     * refresh token, devolviéndolo en la cabecera de la respuesta.
      *
-     * @param refreshRequest DTO de solicitud que contiene el refresh token a validar. El token debe ser válido, no revocado y no haber expirado para que se genere un nuevo token.
-     * @param request objeto HttpServletRequest para gestionar la sesión y el contexto de seguridad.
-     * @param response objeto HttpServletResponse para agregar el nuevo refresh token en la cabecera de la respuesta.
-     * @return ResponseEntity sin cuerpo, con estado 200 OK y un nuevo refresh token en la cabecera "X-Refresh-Token" si el token de refresco es válido, o 401 UNAUTHORIZED si el token es inválido o el usuario no se encuentra.
+     * @param refreshRequest DTO de solicitud que contiene el refresh token a
+     *                       validar. El token debe ser válido, no revocado y no
+     *                       haber expirado para que se genere un nuevo token.
+     * @param request        objeto HttpServletRequest para gestionar la sesión y el
+     *                       contexto de seguridad.
+     * @param response       objeto HttpServletResponse para agregar el nuevo
+     *                       refresh token en la cabecera de la respuesta.
+     * @return ResponseEntity sin cuerpo, con estado 200 OK y un nuevo refresh token
+     *         en la cabecera "X-Refresh-Token" si el token de refresco es válido, o
+     *         401 UNAUTHORIZED si el token es inválido o el usuario no se
+     *         encuentra.
      */
     @PostMapping("/refresh")
-    public ResponseEntity<Void> refresh(@Valid @RequestBody RefreshTokenRequest refreshRequest, HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<Void> refresh(@Valid @RequestBody RefreshTokenRequest refreshRequest,
+            HttpServletRequest request, HttpServletResponse response) {
         RefreshToken refreshToken = authService.validarRefreshToken(refreshRequest.refreshToken());
         if (refreshToken == null || refreshToken.getUsuario() == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -209,8 +259,7 @@ public class AuthController {
         Authentication authentication = new UsernamePasswordAuthenticationToken(
                 userDetails,
                 null,
-                userDetails.getAuthorities()
-        );
+                userDetails.getAuthorities());
 
         SecurityContext context = SecurityContextHolder.createEmptyContext();
         context.setAuthentication(authentication);

@@ -38,31 +38,45 @@ public class UsuarioEventoService {
     /**
      * Guarda la relación entre un usuario y un evento.
      *
-     * <p>Busca el usuario por su correo electrónico y el evento por su título,
+     * <p>
+     * Busca el usuario por su correo electrónico y el evento por su título,
      * fecha de inicio y fecha de fin. Si la relación ya existe, lanza una
-     * excepción de conflicto para evitar duplicados.</p>
+     * excepción de conflicto para evitar duplicados.
+     * </p>
      *
-     * @param request DTO con el email del usuario y los datos necesarios para identificar el evento.
+     * @param request DTO con el email del usuario y los datos necesarios para
+     *                identificar el evento.
      */
     public void guardarUsuarioEvento(UsuarioEventoRequest request) {
-        // Buscar el usuario por email y el evento por título y fechaHora, lanzando excepciones si no se encuentran
+        // Buscar el usuario por email y el evento por título y fechaHora, lanzando
+        // excepciones si no se encuentran
         Usuario usuario = usuarioRepository.findByEmail(request.emailUsuario())
-                .orElseThrow(() -> new NoSuchElementException("Error en UsuarioEventoService.guardarUsuarioEvento: No se encontró el usuario con email " + request.emailUsuario()));
+                .orElseThrow(() -> new NoSuchElementException(
+                        "Error en UsuarioEventoService.guardarUsuarioEvento: No se encontró el usuario con email "
+                                + request.emailUsuario()));
 
-        Evento evento = eventoRepository.findByTituloAndFechaInicioAndFechaFin(request.tituloEvento(), request.fechaInicioEvento(), request.fechaFinEvento())
-                .orElseThrow(() -> new NoSuchElementException("Error en UsuarioEventoService.guardarUsuarioEvento: No se encontró el evento con título '" + request.tituloEvento()
-                        + "' y fechaInicio " + request.fechaInicioEvento() + " y fechaFin " + request.fechaFinEvento()));
+        Evento evento = eventoRepository
+                .findByTituloAndFechaInicioAndFechaFin(request.tituloEvento(), request.fechaInicioEvento(),
+                        request.fechaFinEvento())
+                .orElseThrow(() -> new NoSuchElementException(
+                        "Error en UsuarioEventoService.guardarUsuarioEvento: No se encontró el evento con título '"
+                                + request.tituloEvento()
+                                + "' y fechaInicio " + request.fechaInicioEvento() + " y fechaFin "
+                                + request.fechaFinEvento()));
 
-        // Verificar si la relación ya existe antes de guardarla, lanzando una excepción si es así
+        // Verificar si la relación ya existe antes de guardarla, lanzando una excepción
+        // si es así
         UsuarioEventoId id = new UsuarioEventoId();
         id.setIdUsuario(usuario.getId());
         id.setIdEvento(evento.getId());
 
         if (usuarioEventoRepository.existsById(id)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Error en UsuarioEventoService.guardarUsuarioEvento: El usuario ya tiene guardado este evento");
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Error en UsuarioEventoService.guardarUsuarioEvento: El usuario ya tiene guardado este evento");
         }
 
-        // Crear la relación entre el usuario y el evento y guardarla en la base de datos
+        // Crear la relación entre el usuario y el evento y guardarla en la base de
+        // datos
         UsuarioEvento relacion = new UsuarioEvento();
         relacion.setId(id);
         relacion.setUsuario(usuario);
@@ -74,28 +88,41 @@ public class UsuarioEventoService {
     /**
      * Elimina la relación entre un usuario y un evento guardado.
      *
-     * <p>Busca el usuario por su correo electrónico y el evento por su título,
+     * <p>
+     * Busca el usuario por su correo electrónico y el evento por su título,
      * fecha de inicio y fecha de fin. Si la relación no existe, lanza una
-     * excepción indicando que el usuario no tenía guardado ese evento.</p>
+     * excepción indicando que el usuario no tenía guardado ese evento.
+     * </p>
      *
-     * @param request DTO con el email del usuario y los datos necesarios para identificar el evento.
+     * @param request DTO con el email del usuario y los datos necesarios para
+     *                identificar el evento.
      */
     public void eliminarUsuarioEvento(UsuarioEventoRequest request) {
-        // Buscar el usuario por email y el evento por título y fechaHora, lanzando excepciones si no se encuentran
+        // Buscar el usuario por email y el evento por título y fechaHora, lanzando
+        // excepciones si no se encuentran
         Usuario usuario = usuarioRepository.findByEmail(request.emailUsuario())
-                .orElseThrow(() -> new NoSuchElementException("Error en UsuarioEventoService.eliminarUsuarioEvento: No se encontró el usuario con email " + request.emailUsuario()));
+                .orElseThrow(() -> new NoSuchElementException(
+                        "Error en UsuarioEventoService.eliminarUsuarioEvento: No se encontró el usuario con email "
+                                + request.emailUsuario()));
 
-        Evento evento = eventoRepository.findByTituloAndFechaInicioAndFechaFin(request.tituloEvento(), request.fechaInicioEvento(),  request.fechaFinEvento())
-                .orElseThrow(() -> new NoSuchElementException("Error en UsuarioEventoService.eliminarUsuarioEvento: No se encontró el evento con título '" + request.tituloEvento()
-                        + "' y fechaInicio " + request.fechaInicioEvento() + " y fechaFin " + request.fechaFinEvento()));
+        Evento evento = eventoRepository
+                .findByTituloAndFechaInicioAndFechaFin(request.tituloEvento(), request.fechaInicioEvento(),
+                        request.fechaFinEvento())
+                .orElseThrow(() -> new NoSuchElementException(
+                        "Error en UsuarioEventoService.eliminarUsuarioEvento: No se encontró el evento con título '"
+                                + request.tituloEvento()
+                                + "' y fechaInicio " + request.fechaInicioEvento() + " y fechaFin "
+                                + request.fechaFinEvento()));
 
-        // Verificar si la relación existe antes de eliminarla, lanzando una excepción si no es así
+        // Verificar si la relación existe antes de eliminarla, lanzando una excepción
+        // si no es así
         UsuarioEventoId id = new UsuarioEventoId();
         id.setIdUsuario(usuario.getId());
         id.setIdEvento(evento.getId());
 
         if (!usuarioEventoRepository.existsById(id)) {
-            throw new NoSuchElementException("Error en UsuarioEventoService.eliminarUsuarioEvento: El usuario no tenía guardado este evento");
+            throw new NoSuchElementException(
+                    "Error en UsuarioEventoService.eliminarUsuarioEvento: El usuario no tenía guardado este evento");
         }
 
         // Eliminar la relación entre el usuario y el evento de la base de datos
@@ -105,9 +132,11 @@ public class UsuarioEventoService {
     /**
      * Obtiene los eventos guardados por un usuario.
      *
-     * <p>Busca el usuario por su correo electrónico, obtiene las relaciones
+     * <p>
+     * Busca el usuario por su correo electrónico, obtiene las relaciones
      * usuario-evento asociadas a ese usuario y convierte cada evento a su DTO
-     * de respuesta.</p>
+     * de respuesta.
+     * </p>
      *
      * @param emailUsuario correo electrónico del usuario.
      * @return lista de eventos guardados por el usuario.
@@ -115,12 +144,16 @@ public class UsuarioEventoService {
     public List<EventoResponse> obtenerEventosGuardadosPorUsuario(String emailUsuario) {
         // Buscar el usuario por email, lanzando una excepción si no se encuentra
         Usuario usuario = usuarioRepository.findByEmail(emailUsuario)
-                .orElseThrow(() -> new NoSuchElementException("Error en UsuarioEventoService.obtenerEventosGuardadosPorUsuario: No se encontró el usuario con email " + emailUsuario));
+                .orElseThrow(() -> new NoSuchElementException(
+                        "Error en UsuarioEventoService.obtenerEventosGuardadosPorUsuario: No se encontró el usuario con email "
+                                + emailUsuario));
 
-        // Buscar las relaciones entre el usuario y los eventos guardados, lanzando una excepción si no se encuentran
+        // Buscar las relaciones entre el usuario y los eventos guardados, lanzando una
+        // excepción si no se encuentran
         List<UsuarioEvento> relaciones = usuarioEventoRepository.findByIdIdUsuario(usuario.getId());
 
-        // Convertir las entidades Evento a DTOs EventoResponse y devolver la lista resultante
+        // Convertir las entidades Evento a DTOs EventoResponse y devolver la lista
+        // resultante
         return relaciones.stream()
                 .map(relacion -> EventoMapper.convertirAResponse(relacion.getEvento()))
                 .toList();

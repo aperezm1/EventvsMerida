@@ -8,21 +8,23 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Clase que se encarga de la consulta y descarga de la imagen a través del protocolo CURL con una
- * URL recibidd devolviendo la imagen en un array de bytes.
+ * Clase que se encarga de la consulta y descarga de la imagen a través del
+ * protocolo CURL con una URL recibida devolviendo la imagen en un array de bytes.
  *
  * @author Eva Retamar
  * @author David Muñoz
  * @author Adrián Pérez
  */
 public final class CurlDownloader {
-    // Constructor vacío
-    private CurlDownloader() {}
+
+    private CurlDownloader() {
+    }
 
     /**
-     * Método que con el protocolo CURL realiza la peticion HTTP a la URL de la imagen obteniendo los bytes de esta.
+     * Método que con el protocolo CURL realiza la peticion HTTP a la URL de la
+     * imagen obteniendo los bytes de esta.
      *
-     * @param url URL de la imagen que se quiere descargar,
+     * @param url     URL de la imagen que se quiere descargar,
      * @param timeout Tiempo de respuesta establecido para realizar la acción.
      * @return
      */
@@ -39,8 +41,7 @@ public final class CurlDownloader {
                 "--fail",
                 "--max-time", String.valueOf(Math.max(1, timeout.toSeconds())),
                 "-o", "-",
-                url
-        );
+                url);
 
         // Se crea un proceso para ejecutar el comando CURL.
         Process p;
@@ -85,8 +86,8 @@ public final class CurlDownloader {
     }
 
     /**
-     * Método que se encarga de leer el flujo de de entrada de la descarga de la imagen y los devuelve
-     * en bytes para tratarlos.
+     * Método que se encarga de leer el flujo de de entrada de la descarga de la
+     * imagen y los devuelve en bytes para tratarlos.
      *
      * @param in Flujo de entrada de datos.
      * @return Array de bytes la imagen.
@@ -96,7 +97,8 @@ public final class CurlDownloader {
             // Buffer de 8KB
             byte[] buf = new byte[8192];
             int n;
-            while ((n = in.read(buf)) >= 0) out.write(buf, 0, n);
+            while ((n = in.read(buf)) >= 0)
+                out.write(buf, 0, n);
             return out.toByteArray();
         } catch (IOException e) {
             throw new RuntimeException("Error leyendo salida de curl", e);

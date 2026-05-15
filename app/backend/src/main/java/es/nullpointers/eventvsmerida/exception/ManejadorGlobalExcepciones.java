@@ -40,12 +40,11 @@ public class ManejadorGlobalExcepciones {
             Map.entry("crearCategoria", "Error en CategoriaService.crearCategoria: "),
             Map.entry("actualizarCategoria", "Error en CategoriaService.actualizarCategoria: "),
             Map.entry("login", "Error en UsuarioService.login: "),
-            Map.entry("guardarUsuarioEvento",  "Error en UsuarioService.guardarUsuarioEvento: "),
+            Map.entry("guardarUsuarioEvento", "Error en UsuarioService.guardarUsuarioEvento: "),
             Map.entry("Rol_nombre_key", "Nombre duplicado introducido"),
             Map.entry("Usuario_email_key", "Email duplicado introducido"),
             Map.entry("Usuario_telefono_key", "Teléfono duplicado introducido"),
-            Map.entry("Categoria_nombre_key", "Nombre duplicado introducido")
-    );
+            Map.entry("Categoria_nombre_key", "Nombre duplicado introducido"));
 
     // ========================
     // Métodos ExceptionHandler
@@ -66,7 +65,8 @@ public class ManejadorGlobalExcepciones {
     /**
      * Maneja la excepción MethodArgumentNotValidException.
      * Se lanza cuando la validación de los argumentos de un método falla,
-     * normalmente por anotaciones de validación en los DTOs (por ejemplo @NotNull, @Email, @Pattern).
+     * normalmente por anotaciones de validación en los DTOs (por
+     * ejemplo @NotNull, @Email, @Pattern).
      *
      * @param e La excepción capturada.
      * @return Una respuesta HTTP 400 Bad Request.
@@ -105,14 +105,16 @@ public class ManejadorGlobalExcepciones {
      * @return Una respuesta HTTP 400 Bad Request.
      */
     @ExceptionHandler(MissingServletRequestParameterException.class)
-    public ResponseEntity<ErrorResponse> manejadorMissingServletRequestParameterException(MissingServletRequestParameterException e) {
+    public ResponseEntity<ErrorResponse> manejadorMissingServletRequestParameterException(
+            MissingServletRequestParameterException e) {
         String mensajeUsuario = "Falta el parámetro obligatorio '" + e.getParameterName() + "'";
         return construirRespuesta(e.getStackTrace(), HttpStatus.BAD_REQUEST, mensajeUsuario, mensajeUsuario);
     }
 
     /**
      * Maneja la excepción ConstraintViolationException.
-     * Se lanza cuando fallan validaciones sobre parámetros simples (query/path params).
+     * Se lanza cuando fallan validaciones sobre parámetros simples (query/path
+     * params).
      *
      * @param e La excepción capturada.
      * @return Una respuesta HTTP 400 Bad Request.
@@ -125,8 +127,9 @@ public class ManejadorGlobalExcepciones {
 
     /**
      * Maneja la excepción HttpMessageNotReadableException.
-     * Se lanza cuando el cuerpo de la petición no puede deserializarse correctamente,
-     * normalmente por errores de formato en los datos recibidos (por ejemplo, fechas mal formateadas).
+     * Se lanza cuando el cuerpo de la petición no puede deserializarse
+     * correctamente, normalmente por errores de formato en los datos recibidos (por ejemplo,
+     * fechas mal formateadas).
      *
      * @param e La excepción capturada.
      * @return Una respuesta HTTP 400 Bad Request.
@@ -138,7 +141,8 @@ public class ManejadorGlobalExcepciones {
 
         if (causa instanceof DateTimeParseException) {
             String formatoEsperado = "dd/MM/yyyy";
-            mensajeUsuario = "Error de formato en la fecha. Formato esperado: '" + formatoEsperado + "'. Detalle: " + causa.getMessage();
+            mensajeUsuario = "Error de formato en la fecha. Formato esperado: '" + formatoEsperado + "'. Detalle: "
+                    + causa.getMessage();
         } else {
             mensajeUsuario = "Error de formato en los datos recibidos. Detalle: " + causa.getMessage();
         }
@@ -148,7 +152,8 @@ public class ManejadorGlobalExcepciones {
 
     /**
      * Maneja la excepción AuthenticationException.
-     * Se lanza cuando ocurre un error de autenticación, como credenciales inválidas.
+     * Se lanza cuando ocurre un error de autenticación, como credenciales
+     * inválidas.
      * 
      * @param e La excepción capturada.
      * @return Una respuesta HTTP 401 Unauthorized.
@@ -161,7 +166,8 @@ public class ManejadorGlobalExcepciones {
 
     /**
      * Maneja la excepción AccessDeniedException.
-     * Se lanza cuando un usuario autenticado intenta acceder a un recurso para el cual no tiene permisos.
+     * Se lanza cuando un usuario autenticado intenta acceder a un recurso para el
+     * cual no tiene permisos.
      * 
      * @param e La excepción capturada.
      * @return Una respuesta HTTP 403 Forbidden.
@@ -173,7 +179,8 @@ public class ManejadorGlobalExcepciones {
     }
 
     /**
-     * Maneja la excepción en caso de que se quiera insertar una imagen que ya está almacenada.
+     * Maneja la excepción en caso de que se quiera insertar una imagen que ya está
+     * almacenada.
      * 
      * @param e Excepción capturada.
      * @return Respuesta HTTP con el código 409.
@@ -181,7 +188,8 @@ public class ManejadorGlobalExcepciones {
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<ErrorResponse> manejadorResponseStatus(ResponseStatusException e) {
         String mensajeUsuario = e.getReason() != null ? e.getReason() : e.getMessage();
-        return construirRespuesta(e.getStackTrace(), HttpStatus.valueOf(e.getStatusCode().value()), mensajeUsuario, mensajeUsuario);
+        return construirRespuesta(e.getStackTrace(), HttpStatus.valueOf(e.getStatusCode().value()), mensajeUsuario,
+                mensajeUsuario);
     }
 
     /**
@@ -217,14 +225,17 @@ public class ManejadorGlobalExcepciones {
      * desde el stack trace de una excepción.
      *
      * @param stackTrace El stack trace de la excepción.
-     * @return Una cadena con el formato "Clase.Método" o "desconocido" si no se encuentra.
+     * @return Una cadena con el formato "Clase.Método" o "desconocido" si no se
+     *         encuentra.
      */
     private String obtenerClaseMetodoDesdeStackTrace(StackTraceElement[] stackTrace) {
         for (StackTraceElement ste : stackTrace) {
             String className = ste.getClassName();
 
-            // Filtrar solo las clases del paquete de la aplicación, excluyendo excepciones y clases internas
-            if (className.startsWith("es.nullpointers.eventvsmerida") && !className.contains("exception") && !className.contains("$")) {
+            // Filtrar solo las clases del paquete de la aplicación, excluyendo excepciones
+            // y clases internas
+            if (className.startsWith("es.nullpointers.eventvsmerida") && !className.contains("exception")
+                    && !className.contains("$")) {
                 return className.substring(className.lastIndexOf('.') + 1) + "." + ste.getMethodName();
             }
         }
@@ -238,7 +249,8 @@ public class ManejadorGlobalExcepciones {
      *
      * @param mensaje El mensaje original de la excepción.
      * @param errores Detalles adicionales de errores, si los hay.
-     * @return Un mensaje personalizado si se encuentra una coincidencia, o el mensaje original.
+     * @return Un mensaje personalizado si se encuentra una coincidencia, o el
+     *         mensaje original.
      */
     private String obtenerMensajePersonalizado(String mensaje, String errores) {
         for (Map.Entry<String, String> entry : ERRORES.entrySet()) {
@@ -272,13 +284,18 @@ public class ManejadorGlobalExcepciones {
     /**
      * Construye una respuesta HTTP de error a partir de la información recibida.
      *
-     * @param stackTrace traza del error utilizada para localizar la clase y el método donde se produjo.
-     * @param status estado HTTP que se devolverá en la respuesta.
-     * @param mensajeLog mensaje detallado que se registrará en el log interno.
-     * @param mensajeRespuesta mensaje que se devolverá al cliente en el cuerpo de la respuesta.
-     * @return ResponseEntity con el estado HTTP indicado y el mensaje de error correspondiente.
+     * @param stackTrace       traza del error utilizada para localizar la clase y
+     *                         el método donde se produjo.
+     * @param status           estado HTTP que se devolverá en la respuesta.
+     * @param mensajeLog       mensaje detallado que se registrará en el log
+     *                         interno.
+     * @param mensajeRespuesta mensaje que se devolverá al cliente en el cuerpo de
+     *                         la respuesta.
+     * @return ResponseEntity con el estado HTTP indicado y el mensaje de error
+     *         correspondiente.
      */
-    private ResponseEntity<ErrorResponse> construirRespuesta(StackTraceElement[] stackTrace, HttpStatus status, String mensajeLog, String mensajeRespuesta) {
+    private ResponseEntity<ErrorResponse> construirRespuesta(StackTraceElement[] stackTrace, HttpStatus status,
+            String mensajeLog, String mensajeRespuesta) {
         String claseMetodo = obtenerClaseMetodoDesdeStackTrace(stackTrace);
         log.error("Error en " + claseMetodo + ": " + mensajeLog);
         return ResponseEntity.status(status).body(new ErrorResponse(mensajeRespuesta));

@@ -58,10 +58,12 @@ public class CategoriaController {
      * Metodo POST que llama al servicio para crear una nueva categoria.
      *
      * @param categoriaCrearRequest DTO con los datos de la categoria a crear.
-     * @return ResponseEntity con la categoria creada y el estado HTTP 201 (CREATED).
+     * @return ResponseEntity con la categoria creada y el estado HTTP 201
+     *         (CREATED).
      */
     @PostMapping("/add")
-    public ResponseEntity<CategoriaResponse> crearCategoria(@Valid @RequestBody CategoriaRequest categoriaCrearRequest) {
+    public ResponseEntity<CategoriaResponse> crearCategoria(
+            @Valid @RequestBody CategoriaRequest categoriaCrearRequest) {
         CategoriaResponse categoriaNueva = categoriaService.crearCategoria(categoriaCrearRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(categoriaNueva);
     }
@@ -81,12 +83,15 @@ public class CategoriaController {
     /**
      * Metodo PUT que llama al servicio para actualizar una categoria por su ID.
      *
-     * @param id ID de la categoria a actualizar.
-     * @param categoriaActualizarRequest DTO con los datos de la categoria a actualizar.
-     * @return ResponseEntity con la categoria actualizada y el estado HTTP 200 (OK).
+     * @param id                         ID de la categoria a actualizar.
+     * @param categoriaActualizarRequest DTO con los datos de la categoria a
+     *                                   actualizar.
+     * @return ResponseEntity con la categoria actualizada y el estado HTTP 200
+     *         (OK).
      */
     @PutMapping("/update/{id}")
-    public ResponseEntity<CategoriaResponse> actualizarCategoria(@PathVariable Long id, @Valid @RequestBody CategoriaRequest categoriaActualizarRequest) {
+    public ResponseEntity<CategoriaResponse> actualizarCategoria(@PathVariable Long id,
+            @Valid @RequestBody CategoriaRequest categoriaActualizarRequest) {
         CategoriaResponse categoriaActualizada = categoriaService.actualizarCategoria(id, categoriaActualizarRequest);
         return ResponseEntity.ok(categoriaActualizada);
     }
@@ -98,7 +103,8 @@ public class CategoriaController {
     /**
      * Metodo GET que llama al servicio para contar el numero total de categorias.
      * 
-     * @return ResponseEntity con la cantidad de categorias y el estado HTTP 200 (OK).
+     * @return ResponseEntity con la cantidad de categorias y el estado HTTP 200
+     *         (OK).
      */
     @GetMapping("/count")
     public ResponseEntity<Long> contarCategorias() {

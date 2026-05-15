@@ -19,8 +19,9 @@ public class EdadValidaValidator implements ConstraintValidator<EdadValida, Loca
      * Comprueba si la fecha de nacimiento cumple el rango de edad permitido.
      *
      * @param fechaNacimiento fecha de nacimiento que se va a validar.
-     * @param context contexto de validación.
-     * @return true si la fecha es null o si la edad está entre 14 y 100 años; false en caso contrario.
+     * @param context         contexto de validación.
+     * @return true si la fecha es null o si la edad está entre 14 y 100 años; false
+     *         en caso contrario.
      */
     @Override
     public boolean isValid(LocalDate fechaNacimiento, ConstraintValidatorContext context) {
