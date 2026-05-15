@@ -1,0 +1,16 @@
+{
+  "pageTitle": "Réinitialiser le mot de passe - Eventvs Mérida",
+  "resetTitle": "Réinitialiser votre mot de passe",
+  "newPassword": "Nouveau mot de passe",
+  "confirmPassword": "Confirmer le nouveau mot de passe",
+  "passwordRequirements": "Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un symbole.",
+  "changePassword": "Changer le mot de passe",
+  "passwordChanged": "Mot de passe modifié",
+  "passwordChangedDescription": "Votre mot de passe a été mis à jour correctement. Vous pouvez maintenant retourner à l’application.",
+  "showPassword": "Afficher le mot de passe",
+  "hidePassword": "Masquer le mot de passe",
+  "passwordsMustMatch": "Les mots de passe doivent être identiques",
+  "invalidOrExpiredLink": "Le lien de réinitialisation est invalide ou a expiré",
+  "resetError": "Une erreur s’est produite lors de la réinitialisation du mot de passe",
+  "resetSuccess": "Mot de passe mis à jour correctement"
+}

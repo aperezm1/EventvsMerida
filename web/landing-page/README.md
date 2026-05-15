@@ -68,7 +68,7 @@ public/
 - **Orbs**: Esferas de luz animadas en fondos
 - **Language selector**: Menú personalizado con banderas SVG para cambiar idioma
 
-## � Idiomas
+## 🗣️ Idiomas
 
 El proyecto soporta múltiples idiomas con selector personalizado en la navbar:
 - **Español** (es.svg)
@@ -78,17 +78,17 @@ El proyecto soporta múltiples idiomas con selector personalizado en la navbar:
 
 El selector de idioma muestra la bandera del país y permite cambiar dinámicamente el idioma.
 
-## �🎨 Diseño
+## 🎨 Diseño
 
 - **Colores**: Dorado `#F5A623` + Azul `#2B6CB0` + Darkblue `#080C12`
 - **Tipografías**: Bebas Neue (títulos) + Barlow (cuerpo) + Barlow Condensed (UI)
 - **Tema**: Dark con efectos cinematográficos y glassmorphism en componentes
 - **UI Components**: Selector de idioma personalizado, navbar sticky, menú móvil hamburguesa
 
-## 📲 Links
+## 🔗 Links
 
 - **Repositorio**: https://github.com/Null-Pointers-Albarregas/EventvsMerida
-- **APK**: https://github.com/Null-Pointers-Albarregas/EventvsMerida/releases/download/Alpha/eventvs-merida.apk
+- **Despliegue**: https://eventvsmerida.vercel.app/
 
 ---
 

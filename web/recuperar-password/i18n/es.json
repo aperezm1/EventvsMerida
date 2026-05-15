@@ -1,0 +1,16 @@
+{
+  "pageTitle": "Restablecer contraseña - Eventvs Mérida",
+  "resetTitle": "Restablecer tu contraseña",
+  "newPassword": "Nueva contraseña",
+  "confirmPassword": "Confirmar nueva contraseña",
+  "passwordRequirements": "La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un símbolo.",
+  "changePassword": "Cambiar contraseña",
+  "passwordChanged": "Contraseña modificada",
+  "passwordChangedDescription": "Tu contraseña ha sido actualizada correctamente. Ya puedes volver a la app.",
+  "showPassword": "Mostrar contraseña",
+  "hidePassword": "Ocultar contraseña",
+  "passwordsMustMatch": "Las contraseñas tienen que ser iguales",
+  "invalidOrExpiredLink": "El enlace de restablecimiento es inválido o ha expirado",
+  "resetError": "Ocurrió un error al restablecer la contraseña",
+  "resetSuccess": "Contraseña actualizada correctamente"
+}
