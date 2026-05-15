@@ -2,7 +2,9 @@ package es.nullpointers.eventvsmerida.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -12,9 +14,11 @@ import java.time.LocalDateTime;;
 /**
  * Entidad que representa un evento dentro de la aplicación.
  *
- * <p>Contiene la información principal del evento, incluyendo título,
+ * <p>
+ * Contiene la información principal del evento, incluyendo título,
  * descripción, fechas, localización, coordenadas, imagen, usuario creador
- * y categoría asociada.</p>
+ * y categoría asociada.
+ * </p>
  *
  * @author Eva Retamar
  * @author David Muñoz
@@ -22,6 +26,8 @@ import java.time.LocalDateTime;;
  */
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Table(name = "\"Evento\"")
 public class Evento {

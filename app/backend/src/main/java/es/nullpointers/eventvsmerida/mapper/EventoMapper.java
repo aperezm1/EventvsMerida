@@ -5,7 +5,6 @@ import es.nullpointers.eventvsmerida.dto.response.EventoResponse;
 import es.nullpointers.eventvsmerida.entity.Categoria;
 import es.nullpointers.eventvsmerida.entity.Evento;
 import es.nullpointers.eventvsmerida.entity.Usuario;
-import es.nullpointers.eventvsmerida.repository.EventoRepository;
 import es.nullpointers.eventvsmerida.supabase.SupabaseStorage;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,14 +24,16 @@ public class EventoMapper {
      * Metodo que convierte un objeto EventoCrearRequest a una entidad Evento.
      * Maneja tanto URLs de imagen como archivos subidos.
      *
-     * @param request Objeto DTO con los datos del evento a crear.
-     * @param imagen MultipartFile opcional de la imagen (si es null, usa la URL del request).
-     * @param usuario Usuario organizador del evento.
-     * @param categoria Categoria del evento.
+     * @param request         Objeto DTO con los datos del evento a crear.
+     * @param imagen          MultipartFile opcional de la imagen (si es null, usa
+     *                        la URL del request).
+     * @param usuario         Usuario organizador del evento.
+     * @param categoria       Categoria del evento.
      * @param storageUploader Para subir la imagen al bucket de Supabase.
      * @return Entidad Evento creada a partir del DTO y las entidades relacionadas.
      */
-    public static Evento convertirAEntidad(EventoCrearRequest request, MultipartFile imagen, Usuario usuario, Categoria categoria, SupabaseStorage storageUploader) {
+    public static Evento convertirAEntidad(EventoCrearRequest request, MultipartFile imagen, Usuario usuario,
+            Categoria categoria, SupabaseStorage storageUploader) {
         Evento evento = new Evento();
 
         evento.setTitulo(request.titulo().trim());
@@ -42,11 +43,11 @@ public class EventoMapper {
         evento.setLocalizacion(request.localizacion().trim());
         evento.setLatitud(request.latitud());
         evento.setLongitud(request.longitud());
-        
-        String fotoUrl = (imagen != null && !imagen.isEmpty()) 
-            ? storageUploader.subirImagenEvento(null, imagen, request.titulo())
-            : storageUploader.subirImagenEvento(request.foto(), null, request.titulo());
-        
+
+        String fotoUrl = (imagen != null && !imagen.isEmpty())
+                ? storageUploader.subirImagenEvento(null, imagen, request.titulo())
+                : storageUploader.subirImagenEvento(request.foto(), null, request.titulo());
+
         evento.setFoto(fotoUrl);
         evento.setUsuario(usuario);
         evento.setCategoria(categoria);
@@ -73,6 +74,7 @@ public class EventoMapper {
         String emailOrganizador = evento.getUsuario().getEmail();
         String categoria = evento.getCategoria().getNombre();
 
-        return new EventoResponse(id, titulo, descripcion, fechaInicio, fechaFin, localizacion, latitud, longitud, urlFoto, emailOrganizador, categoria);
+        return new EventoResponse(id, titulo, descripcion, fechaInicio, fechaFin, localizacion, latitud, longitud,
+                urlFoto, emailOrganizador, categoria);
     }
 }

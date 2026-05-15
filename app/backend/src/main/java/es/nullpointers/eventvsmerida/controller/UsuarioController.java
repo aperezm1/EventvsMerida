@@ -70,11 +70,12 @@ public class UsuarioController {
      * Metodo POST que llama al servicio para crear un nuevo usuario.
      *
      * @param jsonUsuario DTO con los datos del usuario a crear.
-     * @param foto Imagen de perfil opcional.
+     * @param foto        Imagen de perfil opcional.
      * @return ResponseEntity con el usuario creado y el estado HTTP 201 (CREATED).
      */
     @PostMapping(value = "/add", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<UsuarioResponse> crearUsuario(@RequestPart("usuario") String jsonUsuario, @RequestPart(value = "foto", required = false) MultipartFile foto) throws JsonProcessingException {
+    public ResponseEntity<UsuarioResponse> crearUsuario(@RequestPart("usuario") String jsonUsuario,
+            @RequestPart(value = "foto", required = false) MultipartFile foto) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
 
@@ -104,13 +105,15 @@ public class UsuarioController {
     /**
      * Metodo PUT que llama al servicio para actualizar un usuario existente.
      *
-     * @param id ID del usuario a actualizar.
+     * @param id          ID del usuario a actualizar.
      * @param jsonUsuario DTO con los datos del usuario a actualizar.
-     * @param foto Imagen de perfil opcional.
+     * @param foto        Imagen de perfil opcional.
      * @return ResponseEntity con el usuario actualizado y el estado HTTP 200 (OK).
      */
     @PutMapping(value = "/update/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<UsuarioResponse> actualizarUsuario(@PathVariable Long id, @RequestPart("usuario") String jsonUsuario, @RequestPart(value = "foto", required = false) MultipartFile foto) throws JsonProcessingException {
+    public ResponseEntity<UsuarioResponse> actualizarUsuario(@PathVariable Long id,
+            @RequestPart("usuario") String jsonUsuario,
+            @RequestPart(value = "foto", required = false) MultipartFile foto) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
 
@@ -130,9 +133,11 @@ public class UsuarioController {
     // ============================
 
     /**
-     * Metodo GET que llama al servicio para contar el número de usuarios registrados en la plataforma.
+     * Metodo GET que llama al servicio para contar el número de usuarios
+     * registrados en la plataforma.
      * 
-     * @return ResponseEntity con la cantidad de usuarios registrados y el estado HTTP 200 (OK).
+     * @return ResponseEntity con la cantidad de usuarios registrados y el estado
+     *         HTTP 200 (OK).
      */
     @GetMapping("/count/registered")
     public ResponseEntity<Long> contarRegistrados() {
@@ -140,9 +145,11 @@ public class UsuarioController {
     }
 
     /**
-     * Metodo GET que llama al servicio para contar el número de organizadores registrados en la plataforma.
+     * Metodo GET que llama al servicio para contar el número de organizadores
+     * registrados en la plataforma.
      * 
-     * @return ResponseEntity con la cantidad de organizadores registrados y el estado HTTP 200 (OK).
+     * @return ResponseEntity con la cantidad de organizadores registrados y el
+     *         estado HTTP 200 (OK).
      */
     @GetMapping("/count/organizers")
     public ResponseEntity<Long> contarOrganizadores() {
@@ -150,9 +157,11 @@ public class UsuarioController {
     }
 
     /**
-     * Metodo GET que llama al servicio para obtener la lista de usuarios registrados en la plataforma.
+     * Metodo GET que llama al servicio para obtener la lista de usuarios
+     * registrados en la plataforma.
      * 
-     * @return ResponseEntity con la lista de usuarios registrados y el estado HTTP 200 (OK).
+     * @return ResponseEntity con la lista de usuarios registrados y el estado HTTP
+     *         200 (OK).
      */
     @GetMapping("/registered")
     public ResponseEntity<List<UsuarioResponse>> obtenerUsuariosRegistrados() {
@@ -161,9 +170,11 @@ public class UsuarioController {
     }
 
     /**
-     * Metodo GET que llama al servicio para obtener la lista de organizadores registrados en la plataforma.
+     * Metodo GET que llama al servicio para obtener la lista de organizadores
+     * registrados en la plataforma.
      * 
-     * @return ResponseEntity con la lista de organizadores registrados y el estado HTTP 200 (OK).
+     * @return ResponseEntity con la lista de organizadores registrados y el estado
+     *         HTTP 200 (OK).
      */
     @GetMapping("/organizers")
     public ResponseEntity<List<UsuarioResponse>> obtenerUsuariosOrganizadores() {

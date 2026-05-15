@@ -1,17 +1,33 @@
 package es.nullpointers.eventvsmerida.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
- * Entidad que representa un refresh token para extender sesiones en dispositivos móviles.
+ * Entidad que representa un refresh token para extender sesiones en
+ * dispositivos móviles.
+ * 
+ * <p>
+ * Esta entidad se utiliza para almacenar los refresh tokens generados cuando un
+ * usuario inicia sesión en un dispositivo móvil.
+ * Cada token tiene una fecha de expiración y un estado que indica si ha sido
+ * revocado o no.
+ * </p>
  *
  * @author Eva Retamar
  * @author David Muñoz
  * @author Adrián Pérez
  */
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Table(name = "refresh_tokens")
 public class RefreshToken {
@@ -32,44 +48,4 @@ public class RefreshToken {
     @ManyToOne
     @JoinColumn(name = "id_usuario")
     private Usuario usuario;
-
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
-
-    public LocalDateTime getExpiracion() {
-        return expiracion;
-    }
-
-    public void setExpiracion(LocalDateTime expiracion) {
-        this.expiracion = expiracion;
-    }
-
-    public Boolean getRevocado() {
-        return revocado;
-    }
-
-    public void setRevocado(Boolean revocado) {
-        this.revocado = revocado;
-    }
-
-    public Usuario getUsuario() {
-        return usuario;
-    }
-
-    public void setUsuario(Usuario usuario) {
-        this.usuario = usuario;
-    }
 }

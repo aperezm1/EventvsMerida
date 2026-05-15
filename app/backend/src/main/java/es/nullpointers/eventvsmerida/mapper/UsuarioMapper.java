@@ -25,12 +25,13 @@ public class UsuarioMapper {
      * capitalizando y normalizando los campos de texto.
      *
      * @param request Objeto DTO con los datos del usuario.
-     * @param rol Rol asignado al usuario.
-     * @param imagen Imagen de perfil (opcional).
+     * @param rol     Rol asignado al usuario.
+     * @param imagen  Imagen de perfil (opcional).
      * @param storage Servicio para subir imagen privada.
      * @return Entidad Usuario creada a partir del DTO.
      */
-    public static Usuario convertirAEntidad(UsuarioCrearRequest request, Rol rol, MultipartFile imagen, SupabaseStorage storage) {
+    public static Usuario convertirAEntidad(UsuarioCrearRequest request, Rol rol, MultipartFile imagen,
+            SupabaseStorage storage) {
         Usuario usuario = new Usuario();
 
         usuario.setNombre(TextoUtils.capitalizarTexto(request.nombre().trim()));

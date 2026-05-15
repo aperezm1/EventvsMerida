@@ -10,7 +10,8 @@ package es.nullpointers.eventvsmerida.utils;
 public class TextoUtils {
 
     /**
-     * Convierte el texto a minusculas y elimina espacios en blanco al inicio y al final.
+     * Convierte el texto a minusculas y elimina espacios en blanco al inicio y al
+     * final.
      *
      * @param texto Texto a normalizar.
      * @return Texto normalizado o null si el texto es nulo o vacio.

@@ -2,7 +2,9 @@ package es.nullpointers.eventvsmerida.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -12,8 +14,10 @@ import java.time.LocalDate;
 /**
  * Entidad que representa a un usuario de la aplicación.
  *
- * <p>Contiene los datos personales, credenciales de acceso, foto de perfil
- * y rol asociado al usuario.</p>
+ * <p>
+ * Contiene los datos personales, credenciales de acceso, foto de perfil
+ * y rol asociado al usuario.
+ * </p>
  *
  * @author Eva Retamar
  * @author David Muñoz
@@ -21,6 +25,8 @@ import java.time.LocalDate;
  */
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Table(name = "\"Usuario\"")
 public class Usuario {

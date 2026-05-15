@@ -18,6 +18,8 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface EdadValida {
     String message() default "La edad debe estar entre 14 y 100 años";
+
     Class<?>[] groups() default {};
+
     Class<? extends Payload>[] payload() default {};
 }

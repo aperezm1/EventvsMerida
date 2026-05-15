@@ -9,6 +9,11 @@ import lombok.Setter;
 
 /**
  * Entidad que representa un rol de usuario dentro de la aplicación.
+ * 
+ * <p>
+ * Contiene el nombre del rol, que define los permisos y funcionalidades
+ * asociados a los usuarios que lo poseen.
+ * </p>
  *
  * @author Eva Retamar
  * @author David Muñoz
