@@ -41,7 +41,7 @@ class _EventosGuardadosState extends State<EventosGuardados> {
 
   static const double _grosorScrollbar = 6;
   static const double _radioScrollbar = 20;
-  static const double _margenDerechoScrollbar = 2;
+  static const double _margenDerechoScrollbar = 4;
   static const double _altoMinimoScrollbar = 48;
 
   ColorScheme get _cs => Theme.of(context).colorScheme;
