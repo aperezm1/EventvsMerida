@@ -16,6 +16,9 @@ class _TerminosState extends State<Terminos> {
   // ===========================================================================
   // VARIABLES
   // ===========================================================================
+
+  final ScrollController _scrollController = ScrollController();
+
   ColorScheme get _cs => Theme.of(context).colorScheme;
 
   static const String _textoTerminos = '''
@@ -45,19 +48,27 @@ Estos términos se rigen por la legislación española. Para la resolución de c
 ''';
 
   // ===========================================================================
+  // CICLO DE VIDA
+  // ===========================================================================
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  // ===========================================================================
   // INTERFAZ
   // ===========================================================================
 
   Widget _contenidoTerminos() {
     return Padding(
-      padding: const EdgeInsets.all(24.0),
-      child: SingleChildScrollView(
-        child: Text(
-          _textoTerminos,
-          style: TextStyle(
-            color: _cs.onSurface,
-            fontSize: 16,
-          ),
+      padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+      child: Text(
+        _textoTerminos,
+        style: TextStyle(
+          color: _cs.onSurface,
+          fontSize: 16,
         ),
       ),
     );
@@ -99,6 +110,29 @@ Estos términos se rigen por la legislación española. Para la resolución de c
     );
   }
 
+  Widget _buildContenidoConScroll() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 24),
+      child: RawScrollbar(
+        controller: _scrollController,
+        thumbVisibility: true,
+        trackVisibility: true,
+        interactive: true,
+        thickness: 6,
+        radius: const Radius.circular(20),
+        mainAxisMargin: 0,
+        crossAxisMargin: 4,
+        thumbColor: _cs.primary,
+        trackColor: _cs.primary.withValues(alpha: 0.18),
+        trackBorderColor: Colors.transparent,
+        child: SingleChildScrollView(
+          controller: _scrollController,
+          child: _contenidoTerminos(),
+        ),
+      ),
+    );
+  }
+
   // ===========================================================================
   // BUILD
   // ===========================================================================
@@ -110,7 +144,9 @@ Estos términos se rigen por la legislación española. Para la resolución de c
       body: Column(
         children: [
           _buildHeader(),
-          Expanded(child: _contenidoTerminos()),
+          Expanded(
+            child: _buildContenidoConScroll(),
+          ),
         ],
       ),
     );
