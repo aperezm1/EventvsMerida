@@ -14,7 +14,7 @@ import '../services/shared_preferences_service.dart';
 import '../utils/validation_utils.dart';
 import '../widgets/componentes_compartidos.dart';
 
-/// Pantalla del formulairo para crear o editar un evento.
+/// Pantalla del formulario para crear o editar un evento.
 /// En caso de la edición los datos del evento se rellenan automáticamente.
 ///
 /// @author: Eva Retamar
@@ -37,10 +37,13 @@ class _FormularioEventoState extends State<FormularioEvento> {
   // ===========================================================================
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey<FormFieldState<String>> _ubicacionFieldKey =
+  GlobalKey<FormFieldState<String>>();
 
   final TextEditingController _tituloController = TextEditingController();
   final TextEditingController _descripcionController = TextEditingController();
   final TextEditingController _localizacionController = TextEditingController();
+
   final ScrollController _categoriasScrollController = ScrollController();
   final ScrollController _formularioScrollController = ScrollController();
 
@@ -61,8 +64,9 @@ class _FormularioEventoState extends State<FormularioEvento> {
   List<Categoria> _categorias = [];
   Categoria? _categoriaSeleccionada;
   bool _cargandoCategorias = true;
-  FechaUtils fu = FechaUtils();
   bool modalCategoriaAbierto = false;
+
+  final FechaUtils fu = FechaUtils();
 
   ColorScheme get _cs => Theme.of(context).colorScheme;
 
@@ -83,6 +87,7 @@ class _FormularioEventoState extends State<FormularioEvento> {
     _tituloController.dispose();
     _descripcionController.dispose();
     _localizacionController.dispose();
+    _categoriasScrollController.dispose();
     _formularioScrollController.dispose();
     super.dispose();
   }
@@ -121,7 +126,6 @@ class _FormularioEventoState extends State<FormularioEvento> {
     }
 
     final categorias = respuesta.datos ?? [];
-
     Categoria? categoriaDelEvento;
 
     if (widget.evento != null) {
@@ -156,13 +160,11 @@ class _FormularioEventoState extends State<FormularioEvento> {
     _localizacionController.text = evento.localizacion;
     _latitudSeleccionada = evento.latitud;
     _longitudSeleccionada = evento.longitud;
-
     _ultimaLocalizacionBuscada = evento.localizacion.trim();
   }
 
   Future<void> _actualizarTextoUbicacion(LatLng punto) async {
     final idPeticion = ++_peticionTextoUbicacion;
-
     final textoManual = _localizacionController.text.trim();
 
     final texto = await GeocodingService.buscarDireccionDesdeCoordenadas(
@@ -177,12 +179,15 @@ class _FormularioEventoState extends State<FormularioEvento> {
     setState(() {
       if (texto != null && texto.trim().isNotEmpty) {
         final direccion = texto.trim();
+
         final combinado =
-            textoManual.isNotEmpty &&
-                !direccion.toLowerCase().contains(textoManual.toLowerCase())
+        textoManual.isNotEmpty &&
+            !direccion.toLowerCase().contains(textoManual.toLowerCase())
             ? '$textoManual, $direccion'
             : direccion;
+
         final normalizado = _normalizarLocalizacion(combinado);
+
         _localizacionController.text = normalizado;
         _ultimaLocalizacionBuscada = normalizado;
       }
@@ -191,6 +196,7 @@ class _FormularioEventoState extends State<FormularioEvento> {
 
   String _normalizarLocalizacion(String texto) {
     final limpio = texto.trim();
+
     if (limpio.isEmpty) return limpio;
 
     final palabras = limpio.split(RegExp(r'\s+'));
@@ -202,41 +208,54 @@ class _FormularioEventoState extends State<FormularioEvento> {
         RegExp(r'[\.,;:]+'),
         '',
       );
+
       if (normalizada.isEmpty) {
         continue;
       }
+
       if (normalizada == anteriorNormalizada) {
         continue;
       }
+
       resultado.add(palabra);
       anteriorNormalizada = normalizada;
     }
 
     var combinado = resultado.join(' ').replaceAll(RegExp(r'\s+'), ' ').trim();
+
     final partes = combinado
         .split(',')
         .map((parte) => parte.trim())
         .where((parte) => parte.isNotEmpty)
         .toList();
+
     final partesLimpias = <String>[];
     String? anteriorParte;
+
     for (final parte in partes) {
       final normalizada = parte.toLowerCase();
+
       if (normalizada == anteriorParte) {
         continue;
       }
+
       partesLimpias.add(parte);
       anteriorParte = normalizada;
     }
+
     if (partesLimpias.length > 2) {
       partesLimpias.removeRange(2, partesLimpias.length);
     }
+
     combinado = partesLimpias.join(', ').trim();
+
     final lower = combinado.toLowerCase();
     final contieneMerida = lower.contains('mérida') || lower.contains('merida');
+
     if (!contieneMerida) {
       combinado = '$combinado, Mérida';
     }
+
     return combinado;
   }
 
@@ -305,7 +324,7 @@ class _FormularioEventoState extends State<FormularioEvento> {
         icon: Icons.image_not_supported_outlined,
         color: Colors.red,
       );
-      return null;
+      return;
     }
 
     final extension = imagen.path.toLowerCase();
@@ -337,6 +356,8 @@ class _FormularioEventoState extends State<FormularioEvento> {
       _longitudSeleccionada = punto.longitude;
       _ultimaLocalizacionBuscada = _localizacionController.text.trim();
     });
+
+    _ubicacionFieldKey.currentState?.didChange('seleccionada');
 
     await _actualizarTextoUbicacion(punto);
   }
@@ -380,6 +401,8 @@ class _FormularioEventoState extends State<FormularioEvento> {
         _ultimaLocalizacionBuscada = _localizacionController.text.trim();
       });
 
+      _ubicacionFieldKey.currentState?.didChange('seleccionada');
+
       await _actualizarTextoUbicacion(puntoManual);
 
       return;
@@ -397,6 +420,8 @@ class _FormularioEventoState extends State<FormularioEvento> {
       _longitudSeleccionada = puntoConfirmado.longitude;
       _ultimaLocalizacionBuscada = _localizacionController.text.trim();
     });
+
+    _ubicacionFieldKey.currentState?.didChange('seleccionada');
 
     await _actualizarTextoUbicacion(puntoConfirmado);
   }
@@ -455,7 +480,7 @@ class _FormularioEventoState extends State<FormularioEvento> {
       Mensaje.mostrarSnackBar(
         context: context,
         mensaje:
-            'Solo los usuarios organizadores o administradores pueden crear eventos',
+        'Solo los usuarios organizadores o administradores pueden crear eventos',
         icon: Icons.person,
         color: _cs.error,
       );
@@ -522,7 +547,7 @@ class _FormularioEventoState extends State<FormularioEvento> {
       Mensaje.mostrarSnackBar(
         context: context,
         mensaje:
-            'Has cambiado la localización. Vuelve a buscar o seleccionar el punto en el mapa.',
+        'Has cambiado la localización. Vuelve a buscar o seleccionar el punto en el mapa.',
         icon: Icons.map,
         color: _cs.error,
       );
@@ -545,14 +570,14 @@ class _FormularioEventoState extends State<FormularioEvento> {
 
     final respuesta = widget.esEdicion
         ? await ApiService.actualizarEventoConImagen(
-            widget.evento!.id,
-            _crearBody(),
-            _imagenSeleccionada,
-          )
+      widget.evento!.id,
+      _crearBody(),
+      _imagenSeleccionada,
+    )
         : await ApiService.crearEventoConImagen(
-            _crearBody(),
-            _imagenSeleccionada!,
-          );
+      _crearBody(),
+      _imagenSeleccionada!,
+    );
 
     if (!mounted) return;
 
@@ -584,6 +609,14 @@ class _FormularioEventoState extends State<FormularioEvento> {
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
         borderSide: BorderSide(color: _cs.primary, width: 2),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide(color: _cs.error, width: 1.5),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide(color: _cs.error, width: 2),
       ),
     );
   }
@@ -629,23 +662,29 @@ class _FormularioEventoState extends State<FormularioEvento> {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
-      child: FormField<String>(
-        validator: (_) {
-          if (_categoriaSeleccionada == null) {
+      child: FormField<Categoria>(
+        autovalidateMode: AutovalidateMode.onUserInteraction,
+        initialValue: _categoriaSeleccionada,
+        validator: (value) {
+          if (value == null) {
             return 'Selecciona una categoría';
           }
 
           return null;
         },
-        builder: (FormFieldState<String> state) {
+        builder: (FormFieldState<Categoria> state) {
           return InkWell(
             borderRadius: BorderRadius.circular(16),
-            onTap: () {
+            onTap: () async {
               setState(() {
                 modalCategoriaAbierto = true;
               });
 
-              _buildModalSeleccionarCategoria();
+              await _buildModalSeleccionarCategoria(
+                onCategoriaSeleccionada: (categoria) {
+                  state.didChange(categoria);
+                },
+              );
             },
             child: InputDecorator(
               decoration: _decoracion(
@@ -737,6 +776,7 @@ class _FormularioEventoState extends State<FormularioEvento> {
         keyboardType: keyboardType,
         maxLines: maxLines,
         validator: obligatorio ? _validarObligatorio : null,
+        autovalidateMode: AutovalidateMode.onUserInteraction,
         decoration: _decoracion(
           label,
           labelWidget: _etiquetaCampo(label, obligatorio: obligatorio),
@@ -754,8 +794,9 @@ class _FormularioEventoState extends State<FormularioEvento> {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
-      child: FormField(
+      child: FormField<XFile>(
         autovalidateMode: AutovalidateMode.onUserInteraction,
+        initialValue: _imagenSeleccionada,
         validator: (_) {
           if (!widget.esEdicion && _imagenSeleccionada == null) {
             return 'Selecciona una imagen';
@@ -763,12 +804,11 @@ class _FormularioEventoState extends State<FormularioEvento> {
 
           return null;
         },
-        builder: (FormFieldState state) {
+        builder: (FormFieldState<XFile> state) {
           return InkWell(
             borderRadius: BorderRadius.circular(16),
             onTap: () async {
               await _seleccionarImagen();
-
               state.didChange(_imagenSeleccionada);
             },
             child: InputDecorator(
@@ -809,29 +849,59 @@ class _FormularioEventoState extends State<FormularioEvento> {
     final texto = _latitudSeleccionada == null || _longitudSeleccionada == null
         ? 'Seleccionar ubicación en el mapa'
         : 'Lat: ${_latitudSeleccionada!.toStringAsFixed(6)} · '
-              'Lng: ${_longitudSeleccionada!.toStringAsFixed(6)}';
+        'Lng: ${_longitudSeleccionada!.toStringAsFixed(6)}';
+
+    final ubicacionSeleccionada =
+        _latitudSeleccionada != null && _longitudSeleccionada != null;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: _abrirSelectorUbicacion,
-        child: InputDecorator(
-          decoration: _decoracion(
-            'Punto en el mapa',
-            labelWidget: _etiquetaCampo('Punto en el mapa', obligatorio: true),
-          ),
-          child: Row(
-            children: [
-              Icon(Icons.map, color: _cs.primary),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(texto, style: TextStyle(color: _cs.onSurface)),
+      child: FormField<String>(
+        key: _ubicacionFieldKey,
+        autovalidateMode: AutovalidateMode.onUserInteraction,
+        initialValue: ubicacionSeleccionada ? 'seleccionada' : null,
+        validator: (_) {
+          if (_latitudSeleccionada == null || _longitudSeleccionada == null) {
+            return 'Selecciona el punto exacto en el mapa';
+          }
+
+          return null;
+        },
+        builder: (FormFieldState<String> state) {
+          return InkWell(
+            borderRadius: BorderRadius.circular(16),
+            onTap: () async {
+              await _abrirSelectorUbicacion();
+
+              final seleccionada =
+                  _latitudSeleccionada != null && _longitudSeleccionada != null;
+
+              state.didChange(seleccionada ? 'seleccionada' : null);
+            },
+            child: InputDecorator(
+              decoration: _decoracion(
+                'Punto en el mapa',
+                labelWidget: _etiquetaCampo(
+                  'Punto en el mapa',
+                  obligatorio: true,
+                ),
+              ).copyWith(errorText: state.errorText),
+              child: Row(
+                children: [
+                  Icon(Icons.map, color: _cs.primary),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      texto,
+                      style: TextStyle(color: _cs.onSurface),
+                    ),
+                  ),
+                  Icon(Icons.location_on, color: _cs.primary),
+                ],
               ),
-              Icon(Icons.location_on, color: _cs.primary),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -877,7 +947,6 @@ class _FormularioEventoState extends State<FormularioEvento> {
   Widget _buildFormulario() {
     return Form(
       key: _formKey,
-      autovalidateMode: AutovalidateMode.onUserInteractionIfError,
       child: Column(
         children: [
           _seccionFormulario(
@@ -896,7 +965,6 @@ class _FormularioEventoState extends State<FormularioEvento> {
               _selectorCategoria(),
             ],
           ),
-
           _seccionFormulario(
             titulo: 'Fecha del evento',
             children: [
@@ -945,16 +1013,16 @@ class _FormularioEventoState extends State<FormularioEvento> {
               onPressed: _guardando ? null : _guardarEvento,
               icon: _guardando
                   ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
                   : const Icon(Icons.save),
               label: Text(
                 _guardando
                     ? widget.esEdicion
-                          ? 'Actualizando...'
-                          : 'Guardando...'
+                    ? 'Actualizando...'
+                    : 'Guardando...'
                     : widget.esEdicion
                     ? 'Actualizar evento'
                     : 'Añadir evento',
@@ -970,7 +1038,9 @@ class _FormularioEventoState extends State<FormularioEvento> {
     );
   }
 
-  Future<void> _buildModalSeleccionarCategoria() async {
+  Future<void> _buildModalSeleccionarCategoria({
+    ValueChanged<Categoria>? onCategoriaSeleccionada,
+  }) async {
     await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -979,7 +1049,6 @@ class _FormularioEventoState extends State<FormularioEvento> {
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         side: BorderSide(color: _cs.primary.withValues(alpha: 0.4), width: 1.5),
       ),
-
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setModalState) {
@@ -1011,9 +1080,7 @@ class _FormularioEventoState extends State<FormularioEvento> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-
                     const SizedBox(height: 20),
-
                     Expanded(
                       child: RawScrollbar(
                         controller: _categoriasScrollController,
@@ -1030,7 +1097,7 @@ class _FormularioEventoState extends State<FormularioEvento> {
                           padding: const EdgeInsets.only(right: 14),
                           itemCount: _categorias.length,
                           separatorBuilder: (_, __) =>
-                              const SizedBox(height: 6),
+                          const SizedBox(height: 6),
                           itemBuilder: (context, index) {
                             final categoria = _categorias[index];
 
@@ -1045,6 +1112,7 @@ class _FormularioEventoState extends State<FormularioEvento> {
                                 });
 
                                 setState(() {});
+                                onCategoriaSeleccionada?.call(categoria);
                               },
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
@@ -1094,9 +1162,7 @@ class _FormularioEventoState extends State<FormularioEvento> {
                         ),
                       ),
                     ),
-
                     const SizedBox(height: 20),
-
                     Row(
                       children: [
                         Expanded(
