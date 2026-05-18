@@ -29,6 +29,7 @@ class _EventosGuardadosState extends State<EventosGuardados> {
   List<Evento> _eventos = [];
   bool _cargando = true;
   FechaUtils fu = FechaUtils();
+  final ScrollController _eventosScrollController = ScrollController();
 
   ColorScheme get _cs => Theme.of(context).colorScheme;
 
@@ -40,6 +41,12 @@ class _EventosGuardadosState extends State<EventosGuardados> {
   void initState() {
     super.initState();
     _cargarDatos();
+  }
+
+  @override
+  void dispose() {
+    _eventosScrollController.dispose();
+    super.dispose();
   }
 
   // ===========================================================================
@@ -59,7 +66,12 @@ class _EventosGuardadosState extends State<EventosGuardados> {
     });
 
     if (!respuesta.exito) {
-      Mensaje.mostrarSnackBar(context: context, mensaje: respuesta.mensaje, icon: Icons.event_busy, color: _cs.error);
+      Mensaje.mostrarSnackBar(
+        context: context,
+        mensaje: respuesta.mensaje,
+        icon: Icons.event_busy,
+        color: _cs.error,
+      );
     }
   }
 
@@ -100,7 +112,12 @@ class _EventosGuardadosState extends State<EventosGuardados> {
     }
 
     if (!mounted) return;
-    Mensaje.mostrarSnackBar(context: context, mensaje: respuesta.mensaje, icon: Icons.event_busy, color: _cs.error);
+    Mensaje.mostrarSnackBar(
+      context: context,
+      mensaje: respuesta.mensaje,
+      icon: Icons.event_busy,
+      color: _cs.error,
+    );
   }
 
   // ===========================================================================
@@ -180,18 +197,11 @@ class _EventosGuardadosState extends State<EventosGuardados> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            Icons.event_busy,
-            size: 64,
-            color: _cs.primary,
-          ),
+          Icon(Icons.event_busy, size: 64, color: _cs.primary),
           const SizedBox(height: 16),
           Text(
             'No tienes eventos guardados',
-            style: TextStyle(
-              color: _cs.onSurface,
-              fontSize: 16,
-            ),
+            style: TextStyle(color: _cs.onSurface, fontSize: 16),
             textAlign: TextAlign.center,
           ),
         ],
@@ -214,21 +224,43 @@ class _EventosGuardadosState extends State<EventosGuardados> {
           width: 100,
           height: 110,
           color: _cs.secondary.withAlpha(51),
-          child: Icon(
-            Icons.image,
-            color: _cs.primary,
-          ),
+          child: Icon(Icons.image, color: _cs.primary),
         ),
       ),
     );
   }
 
+  Widget _buildListaEventosGuardados() {
+    final mostrarBarraScroll = _eventos.length >= 4;
+
+    final lista = ListView.builder(
+      controller: _eventosScrollController,
+      padding: const EdgeInsets.only(top: 16, bottom: 16),
+      itemCount: _eventos.length,
+      itemBuilder: (context, index) => _tarjetaEvento(_eventos[index]),
+    );
+
+    if (!mostrarBarraScroll) {
+      return lista;
+    }
+
+    return RawScrollbar(
+      controller: _eventosScrollController,
+      thumbVisibility: true,
+      trackVisibility: false,
+      interactive: true,
+      thickness: 6,
+      radius: const Radius.circular(20),
+      mainAxisMargin: 0,
+      crossAxisMargin: 4,
+      thumbColor: _cs.primary,
+      child: lista,
+    );
+  }
+
   Widget _tarjetaEvento(Evento evento) {
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 10,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
@@ -238,10 +270,7 @@ class _EventosGuardadosState extends State<EventosGuardados> {
             decoration: BoxDecoration(
               color: _cs.surface,
               borderRadius: BorderRadius.circular(18),
-              border: Border.all(
-                color: _cs.primary,
-                width: 1,
-              ),
+              border: Border.all(color: _cs.primary, width: 1),
               boxShadow: [
                 BoxShadow(
                   color: _cs.onPrimary.withAlpha(64),
@@ -321,19 +350,15 @@ class _EventosGuardadosState extends State<EventosGuardados> {
       body: _cargando
           ? const Center(child: CircularProgressIndicator())
           : Column(
-        children: [
-          _buildHeader(),
-          Expanded(
-            child: _eventos.isEmpty
-                ? _contenidoVacio()
-                : ListView.builder(
-              padding: const EdgeInsets.only(top: 16, bottom: 16),
-              itemCount: _eventos.length,
-              itemBuilder: (context, index) => _tarjetaEvento(_eventos[index]),
+              children: [
+                _buildHeader(),
+                Expanded(
+                  child: _eventos.isEmpty
+                      ? _contenidoVacio()
+                      : _buildListaEventosGuardados(),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
     );
   }
 }
