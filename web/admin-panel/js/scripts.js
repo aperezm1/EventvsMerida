@@ -277,7 +277,7 @@ async function requireAuth() {
 }
 
 // Función para realizar fetch con manejo de redirecciones por autenticación
-const fetchConAuth = async (url, options = {}) => {
+const fetchConAuth = async (url, options = {credentials: "include"}) => {
   const resp = await fetch(url, options);
 
   let data = null;
