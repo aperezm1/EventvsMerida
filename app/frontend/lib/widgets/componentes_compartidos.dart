@@ -1228,7 +1228,8 @@ Future<XFile?> elegirImagen(BuildContext context) async {
               const SizedBox(height: 8),
 
               Text(
-                'Formatos permitidos: PNG, JPG o JPEG · Tamaño máximo: 1,5 MB',
+                'Formatos permitidos: PNG, JPG o JPEG \n Tamaño máximo: 1,5 MB',
+                textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 12,
                   color: cs.onSurface.withValues(alpha: 0.6),
