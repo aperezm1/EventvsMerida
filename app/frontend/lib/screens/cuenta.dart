@@ -466,8 +466,10 @@ class _CuentaState extends State<Cuenta> {
                         titulo: 'Cerrar sesión',
                         mensaje: '¿Seguro que quieres cerrar sesión?',
                         icono: Icons.logout,
+                        iconoColor: Colors.white,
                         textoConfirmar: 'Cerrar sesión',
                         colorConfirmar: _cs.error,
+                        colorTextoConfirmar: Colors.white
                       );
 
                       if (!confirmar) return;
@@ -656,7 +658,7 @@ class _CuentaState extends State<Cuenta> {
                             foregroundColor: _cs.onPrimary,
                             minimumSize: const Size.fromHeight(48),
                           ),
-                          child: Text('Editar datos', style: TextStyle(color: _cs.surface)),
+                          child: Text('Guardar', style: TextStyle(color: _cs.surface)),
                         ),
                       ),
                     ],

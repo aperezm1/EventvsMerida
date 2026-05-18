@@ -843,7 +843,9 @@ class SalidaApp {
     required IconData icono,
     String textoCancelar = 'Cancelar',
     String textoConfirmar = 'Continuar',
+    Color? colorTextoConfirmar,
     Color? colorConfirmar,
+    Color? iconoColor
   }) async {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
@@ -996,11 +998,11 @@ class SalidaApp {
                                     icon: Icon(
                                       icono,
                                       size: 18,
-                                      color: cs.surface,
+                                      color: iconoColor ?? cs.surface,
                                     ),
                                     label: Text(
                                       textoConfirmar,
-                                      style: TextStyle(color: cs.surface),
+                                      style: TextStyle(color: colorTextoConfirmar ?? cs.surface),
                                     ),
                                     style: FilledButton.styleFrom(
                                       backgroundColor:
