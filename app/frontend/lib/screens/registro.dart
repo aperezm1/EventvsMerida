@@ -455,7 +455,6 @@ class _RegistroState extends State<Registro> {
   Widget _buildFormulario() {
     return Form(
       key: _formKey,
-      autovalidateMode: AutovalidateMode.onUserInteractionIfError,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -498,6 +497,15 @@ class _RegistroState extends State<Registro> {
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
           ),
 
+          Text(
+            'Fecha de nacimiento',
+            style: TextStyle(
+              color: _cs.onSurface,
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
           SelectorFecha.buildFilaFecha(context: context, diaController: _diaController, mesController: _mesController, anioController: _anioController, onSeleccionarMes: seleccionarMes, validator: _validarCampo, obligatorio: true),
           const SizedBox(height: 8),
           _buildSelectorImagen(),

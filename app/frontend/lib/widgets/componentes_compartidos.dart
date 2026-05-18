@@ -104,6 +104,7 @@ class _ModalEventoState extends State<ModalEvento> {
   final Map<int, ScrollController> _scrollControllers = {};
 
   ColorScheme get _cs => Theme.of(context).colorScheme;
+
   TextTheme get _tt => Theme.of(context).textTheme;
 
   FechaUtils fu = FechaUtils();
@@ -151,10 +152,7 @@ class _ModalEventoState extends State<ModalEvento> {
   }
 
   ScrollController _obtenerScrollController(int index) {
-    return _scrollControllers.putIfAbsent(
-      index,
-          () => ScrollController(),
-    );
+    return _scrollControllers.putIfAbsent(index, () => ScrollController());
   }
 
   String _textoFechaHoraDetalle(Evento evento) {
@@ -223,11 +221,10 @@ class _ModalEventoState extends State<ModalEvento> {
       '\n\n',
     );
 
-    const enlaceLanding =
-        'https://eventvsmerida.vercel.app/';
+    const enlaceLanding = 'https://eventvsmerida.vercel.app/';
 
     final texto =
-    '''
+        '''
 🎟️ ${evento.titulo}
 
 📍 Ubicación:
@@ -245,7 +242,7 @@ $descripcionLimpia
 Compartido desde Eventvs Mérida
 Descubre más eventos, planes y actividades de Mérida como este.
 
-📲 Échale un vistazo aquí:
+📲 Échale un vistazo  aquí:
 $enlaceLanding
 ''';
 
@@ -270,17 +267,17 @@ $enlaceLanding
 
     final respuesta = yaGuardado
         ? await ApiService.eliminarEventoUsuario(
-      usuario.email,
-      evento.titulo,
-      evento.fechaInicio,
-      evento.fechaFin,
-    )
+            usuario.email,
+            evento.titulo,
+            evento.fechaInicio,
+            evento.fechaFin,
+          )
         : await ApiService.guardarEventoUsuario(
-      usuario.email,
-      evento.titulo,
-      evento.fechaInicio,
-      evento.fechaFin,
-    );
+            usuario.email,
+            evento.titulo,
+            evento.fechaInicio,
+            evento.fechaFin,
+          );
 
     if (!mounted) return;
 
@@ -312,7 +309,7 @@ $enlaceLanding
     if (urlLimpia.isEmpty) return;
 
     final urlConEsquema =
-    urlLimpia.startsWith('http://') || urlLimpia.startsWith('https://')
+        urlLimpia.startsWith('http://') || urlLimpia.startsWith('https://')
         ? urlLimpia
         : 'https://$urlLimpia';
 
@@ -411,13 +408,18 @@ $enlaceLanding
                         child: FilledButton(
                           onPressed: () {
                             final router = GoRouter.of(context);
+                            final nav = Navigator.of(
+                              context,
+                              rootNavigator: true,
+                            );
 
                             Navigator.of(
                               dialogContext,
                               rootNavigator: true,
                             ).pop();
 
-                            Navigator.of(context).pop();
+                            if (nav.canPop()) nav.pop();
+                            if (nav.canPop()) nav.pop();
 
                             router.push(AppRoutes.registro);
                           },
@@ -432,13 +434,18 @@ $enlaceLanding
                         child: FilledButton(
                           onPressed: () {
                             final router = GoRouter.of(context);
+                            final nav = Navigator.of(
+                              context,
+                              rootNavigator: true,
+                            );
 
                             Navigator.of(
                               dialogContext,
                               rootNavigator: true,
                             ).pop();
 
-                            Navigator.of(context).pop();
+                            if (nav.canPop()) nav.pop();
+                            if (nav.canPop()) nav.pop();
 
                             router.push(AppRoutes.login);
                           },
@@ -480,9 +487,7 @@ $enlaceLanding
               Expanded(
                 child: Text(
                   evento.titulo,
-                  style: _tt.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: _tt.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -838,7 +843,9 @@ class SalidaApp {
     required IconData icono,
     String textoCancelar = 'Cancelar',
     String textoConfirmar = 'Continuar',
+    Color? colorTextoConfirmar,
     Color? colorConfirmar,
+    Color? iconoColor
   }) async {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
@@ -991,11 +998,11 @@ class SalidaApp {
                                     icon: Icon(
                                       icono,
                                       size: 18,
-                                      color: cs.surface,
+                                      color: iconoColor ?? cs.surface,
                                     ),
                                     label: Text(
                                       textoConfirmar,
-                                      style: TextStyle(color: cs.surface),
+                                      style: TextStyle(color: colorTextoConfirmar ?? cs.surface),
                                     ),
                                     style: FilledButton.styleFrom(
                                       backgroundColor:
@@ -1278,20 +1285,21 @@ typedef ValidadorCampo = String? Function(String label, String? value);
 
 class CampoTexto {
   static Widget buildCampoTexto(
-    String label, {
-    required BuildContext context,
-    required TextEditingController controller,
-    required ValidadorCampo validator,
-    TextInputType? keyboardType,
-    bool isPassword = false,
-    bool obscureText = false,
-    VoidCallback? onToggle,
-    bool readOnly = false,
-    bool isDropdown = false,
-    bool obligatorio = false,
-    int? maxLength,
-    List<TextInputFormatter>? inputFormatters,
-  }) {
+      String label, {
+        required BuildContext context,
+        required TextEditingController controller,
+        required ValidadorCampo validator,
+        TextInputType? keyboardType,
+        bool isPassword = false,
+        bool obscureText = false,
+        VoidCallback? onToggle,
+        bool readOnly = false,
+        bool isDropdown = false,
+        bool obligatorio = false,
+        int? maxLength,
+        List<TextInputFormatter>? inputFormatters,
+        AutovalidateMode autovalidateMode = AutovalidateMode.onUserInteraction,
+      }) {
     final cs = Theme.of(context).colorScheme;
 
     return Padding(
@@ -1302,18 +1310,19 @@ class CampoTexto {
         readOnly: readOnly,
         style: TextStyle(color: cs.onSurface),
         validator: (value) => validator(label, value),
+        autovalidateMode: autovalidateMode,
         decoration: buildDecoration(
           context: context,
           label: label,
           obligatorio: obligatorio,
           suffixIcon: isPassword
               ? IconButton(
-                  icon: Icon(
-                    obscureText ? Icons.visibility_off : Icons.visibility,
-                    color: cs.primary.withValues(alpha: 0.6),
-                  ),
-                  onPressed: onToggle,
-                )
+            icon: Icon(
+              obscureText ? Icons.visibility_off : Icons.visibility,
+              color: cs.primary.withValues(alpha: 0.6),
+            ),
+            onPressed: onToggle,
+          )
               : (isDropdown ? const Icon(Icons.arrow_drop_down) : null),
         ).copyWith(counterText: maxLength != null ? '' : null),
         obscureText: isPassword ? obscureText : false,
@@ -1332,7 +1341,7 @@ class CampoTexto {
     final cs = Theme.of(context).colorScheme;
 
     return InputDecoration(
-      errorMaxLines: 2,
+      errorMaxLines: 4,
       label: RichText(
         text: TextSpan(
           text: label,
@@ -1342,14 +1351,14 @@ class CampoTexto {
           ),
           children: obligatorio
               ? const [
-                  TextSpan(
-                    text: ' *',
-                    style: TextStyle(
-                      color: Colors.red,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ]
+            TextSpan(
+              text: ' *',
+              style: TextStyle(
+                color: Colors.red,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ]
               : [],
         ),
       ),
@@ -1361,6 +1370,14 @@ class CampoTexto {
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(20),
         borderSide: BorderSide(color: cs.primary, width: 2),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(20),
+        borderSide: BorderSide(color: cs.error, width: 1.5),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(20),
+        borderSide: BorderSide(color: cs.error, width: 2),
       ),
     );
   }
