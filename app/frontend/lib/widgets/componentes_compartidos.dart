@@ -104,6 +104,7 @@ class _ModalEventoState extends State<ModalEvento> {
   final Map<int, ScrollController> _scrollControllers = {};
 
   ColorScheme get _cs => Theme.of(context).colorScheme;
+
   TextTheme get _tt => Theme.of(context).textTheme;
 
   FechaUtils fu = FechaUtils();
@@ -151,10 +152,7 @@ class _ModalEventoState extends State<ModalEvento> {
   }
 
   ScrollController _obtenerScrollController(int index) {
-    return _scrollControllers.putIfAbsent(
-      index,
-          () => ScrollController(),
-    );
+    return _scrollControllers.putIfAbsent(index, () => ScrollController());
   }
 
   String _textoFechaHoraDetalle(Evento evento) {
@@ -223,11 +221,10 @@ class _ModalEventoState extends State<ModalEvento> {
       '\n\n',
     );
 
-    const enlaceLanding =
-        'https://eventvsmerida.vercel.app/';
+    const enlaceLanding = 'https://eventvsmerida.vercel.app/';
 
     final texto =
-    '''
+        '''
 🎟️ ${evento.titulo}
 
 📍 Ubicación:
@@ -245,7 +242,7 @@ $descripcionLimpia
 Compartido desde Eventvs Mérida
 Descubre más eventos, planes y actividades de Mérida como este.
 
-📲 Échale un vistazo aquí:
+📲 Échale un vistazo  aquí:
 $enlaceLanding
 ''';
 
@@ -270,17 +267,17 @@ $enlaceLanding
 
     final respuesta = yaGuardado
         ? await ApiService.eliminarEventoUsuario(
-      usuario.email,
-      evento.titulo,
-      evento.fechaInicio,
-      evento.fechaFin,
-    )
+            usuario.email,
+            evento.titulo,
+            evento.fechaInicio,
+            evento.fechaFin,
+          )
         : await ApiService.guardarEventoUsuario(
-      usuario.email,
-      evento.titulo,
-      evento.fechaInicio,
-      evento.fechaFin,
-    );
+            usuario.email,
+            evento.titulo,
+            evento.fechaInicio,
+            evento.fechaFin,
+          );
 
     if (!mounted) return;
 
@@ -312,7 +309,7 @@ $enlaceLanding
     if (urlLimpia.isEmpty) return;
 
     final urlConEsquema =
-    urlLimpia.startsWith('http://') || urlLimpia.startsWith('https://')
+        urlLimpia.startsWith('http://') || urlLimpia.startsWith('https://')
         ? urlLimpia
         : 'https://$urlLimpia';
 
@@ -411,13 +408,18 @@ $enlaceLanding
                         child: FilledButton(
                           onPressed: () {
                             final router = GoRouter.of(context);
+                            final nav = Navigator.of(
+                              context,
+                              rootNavigator: true,
+                            );
 
                             Navigator.of(
                               dialogContext,
                               rootNavigator: true,
                             ).pop();
 
-                            Navigator.of(context).pop();
+                            if (nav.canPop()) nav.pop();
+                            if (nav.canPop()) nav.pop();
 
                             router.push(AppRoutes.registro);
                           },
@@ -432,13 +434,18 @@ $enlaceLanding
                         child: FilledButton(
                           onPressed: () {
                             final router = GoRouter.of(context);
+                            final nav = Navigator.of(
+                              context,
+                              rootNavigator: true,
+                            );
 
                             Navigator.of(
                               dialogContext,
                               rootNavigator: true,
                             ).pop();
 
-                            Navigator.of(context).pop();
+                            if (nav.canPop()) nav.pop();
+                            if (nav.canPop()) nav.pop();
 
                             router.push(AppRoutes.login);
                           },
@@ -480,9 +487,7 @@ $enlaceLanding
               Expanded(
                 child: Text(
                   evento.titulo,
-                  style: _tt.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: _tt.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
