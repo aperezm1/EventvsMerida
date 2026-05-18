@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 /// Pantalla de la Política de Privacidad de la app.
@@ -18,6 +19,18 @@ class _PrivacidadState extends State<Privacidad> {
   // ===========================================================================
 
   final ScrollController _scrollController = ScrollController();
+  final ValueNotifier<int> _actualizadorScrollbar = ValueNotifier<int>(0);
+
+  static const double _paddingSuperiorContenido = 24;
+  static const double _paddingHorizontalContenido = 24;
+  static const double _paddingInferiorContenido = 24;
+
+  static const double _grosorScrollbar = 6;
+  static const double _radioScrollbar = 20;
+  static const double _altoMinimoScrollbar = 48;
+  static const double _margenVerticalScrollbar = 0;
+  static const double _margenDerechoScrollbar =
+      (_paddingHorizontalContenido - _grosorScrollbar) / 2;
 
   ColorScheme get _cs => Theme.of(context).colorScheme;
 
@@ -61,6 +74,7 @@ Esta política podrá ser actualizada en función de cambios legales o mejoras d
   @override
   void dispose() {
     _scrollController.dispose();
+    _actualizadorScrollbar.dispose();
     super.dispose();
   }
 
@@ -70,7 +84,12 @@ Esta política podrá ser actualizada en función de cambios legales o mejoras d
 
   Widget _contenidoPrivacidad() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+      padding: const EdgeInsets.fromLTRB(
+        _paddingHorizontalContenido,
+        0,
+        _paddingHorizontalContenido,
+        _paddingInferiorContenido,
+      ),
       child: Text(
         _textoPrivacidad,
         style: TextStyle(
@@ -118,25 +137,107 @@ Esta política podrá ser actualizada en función de cambios legales o mejoras d
   }
 
   Widget _buildContenidoConScroll() {
-    return Padding(
-      padding: const EdgeInsets.only(top: 24),
-      child: RawScrollbar(
-        controller: _scrollController,
-        thumbVisibility: true,
-        trackVisibility: true,
-        interactive: true,
-        thickness: 6,
-        radius: const Radius.circular(20),
-        mainAxisMargin: 0,
-        crossAxisMargin: 4,
-        thumbColor: _cs.primary,
-        trackColor: _cs.primary.withValues(alpha: 0.18),
-        trackBorderColor: Colors.transparent,
+    final contenido = Padding(
+      padding: const EdgeInsets.only(top: _paddingSuperiorContenido),
+      child: NotificationListener<ScrollMetricsNotification>(
+        onNotification: (_) {
+          _actualizadorScrollbar.value++;
+          return false;
+        },
         child: SingleChildScrollView(
           controller: _scrollController,
           child: _contenidoPrivacidad(),
         ),
       ),
+    );
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Stack(
+          children: [
+            contenido,
+            Positioned(
+              top: _paddingSuperiorContenido,
+              right: _margenDerechoScrollbar,
+              bottom: _paddingInferiorContenido,
+              child: IgnorePointer(
+                child: AnimatedBuilder(
+                  animation: Listenable.merge([
+                    _scrollController,
+                    _actualizadorScrollbar,
+                  ]),
+                  builder: (context, child) {
+                    if (!_scrollController.hasClients) {
+                      return const SizedBox.shrink();
+                    }
+
+                    final posicion = _scrollController.position;
+
+                    if (!posicion.hasContentDimensions) {
+                      return const SizedBox.shrink();
+                    }
+
+                    final maxScroll = posicion.maxScrollExtent;
+
+                    if (maxScroll <= 0) {
+                      return const SizedBox.shrink();
+                    }
+
+                    final altoDisponible = constraints.maxHeight -
+                        _paddingSuperiorContenido -
+                        _paddingInferiorContenido;
+
+                    final altoCarril =
+                        altoDisponible - (_margenVerticalScrollbar * 2);
+
+                    if (altoCarril <= 0) {
+                      return const SizedBox.shrink();
+                    }
+
+                    final altoContenido = posicion.extentInside + maxScroll;
+
+                    final altoScrollbar =
+                    (posicion.extentInside / altoContenido * altoCarril)
+                        .clamp(_altoMinimoScrollbar, altoCarril)
+                        .toDouble();
+
+                    final porcentajeScroll =
+                    (_scrollController.offset / maxScroll)
+                        .clamp(0.0, 1.0)
+                        .toDouble();
+
+                    final desplazamientoScrollbar =
+                        (altoCarril - altoScrollbar) * porcentajeScroll;
+
+                    return SizedBox(
+                      width: _grosorScrollbar,
+                      height: altoDisponible,
+                      child: Stack(
+                        children: [
+                          Positioned(
+                            top: _margenVerticalScrollbar +
+                                desplazamientoScrollbar,
+                            right: 0,
+                            child: Container(
+                              width: _grosorScrollbar,
+                              height: altoScrollbar,
+                              decoration: BoxDecoration(
+                                color: _cs.primary,
+                                borderRadius:
+                                BorderRadius.circular(_radioScrollbar),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
