@@ -59,8 +59,7 @@ DEFAULT_API_URL = "https://eventvsmerida-x2t1.onrender.com/api/eventos/add"
 DEFAULT_HTTP_TIMEOUT_SECONDS = 10
 DEFAULT_IMAGE_TIMEOUT_SECONDS = 20
 DEFAULT_GEOCODER_NAV_TIMEOUT_MS = 8_000
-DEFAULT_USER_ID_MIN = 1
-DEFAULT_USER_ID_MAX = 5
+DEFAULT_USER_IDS = (4, 5, 61)
 DEFAULT_CATEGORY_ID = 12
 
 REQUEST_HEADERS = {"User-Agent": "Mozilla/5.0"}
@@ -505,7 +504,7 @@ def build_prepared_event(
             session=session,
             timeout=DEFAULT_IMAGE_TIMEOUT_SECONDS,
         ),
-        "idUsuario": random.randint(DEFAULT_USER_ID_MIN, DEFAULT_USER_ID_MAX),
+        "idUsuario": random.choice(DEFAULT_USER_IDS),
         "idCategoria": extract_category_id(event),
     }
 
