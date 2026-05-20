@@ -38,7 +38,9 @@ class _FormularioEventoState extends State<FormularioEvento> {
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final GlobalKey<FormFieldState<String>> _ubicacionFieldKey =
-  GlobalKey<FormFieldState<String>>();
+      GlobalKey<FormFieldState<String>>();
+  final GlobalKey<FormFieldState<XFile>> _imagenFieldKey =
+      GlobalKey<FormFieldState<XFile>>();
 
   final TextEditingController _tituloController = TextEditingController();
   final TextEditingController _descripcionController = TextEditingController();
@@ -65,6 +67,7 @@ class _FormularioEventoState extends State<FormularioEvento> {
   Categoria? _categoriaSeleccionada;
   bool _cargandoCategorias = true;
   bool modalCategoriaAbierto = false;
+  String? _errorImagen;
 
   final FechaUtils fu = FechaUtils();
 
@@ -310,10 +313,58 @@ class _FormularioEventoState extends State<FormularioEvento> {
   Future<void> _seleccionarImagen() async {
     final imagen = await _imagePicker.pickImage(
       source: ImageSource.gallery,
-      imageQuality: 85,
     );
 
     if (imagen == null || !mounted) return;
+
+    final mime = imagen.mimeType?.toLowerCase();
+    if (mime != null && mime.contains('gif')) {
+      setState(() {
+        _errorImagen = 'Formato no válido. Usa PNG, JPG o JPEG';
+        _imagenSeleccionada = null;
+      });
+      _imagenFieldKey.currentState?.validate();
+      Mensaje.mostrarSnackBar(
+        context: context,
+        mensaje: 'Formato no válido. Usa PNG, JPG o JPEG',
+        icon: Icons.image_not_supported_outlined,
+        color: _cs.error,
+      );
+      return;
+    }
+
+    final esGif = await ValidationImageType.esGif(imagen);
+    if (esGif) {
+      setState(() {
+        _errorImagen = 'Formato no válido. Usa PNG, JPG o JPEG';
+        _imagenSeleccionada = null;
+      });
+      _imagenFieldKey.currentState?.validate();
+      Mensaje.mostrarSnackBar(
+        context: context,
+        mensaje: 'Formato no válido. Usa PNG, JPG o JPEG',
+        icon: Icons.image_not_supported_outlined,
+        color: _cs.error,
+      );
+      return;
+    }
+
+    final extensionValida = ValidationImageType.validarExtensionImagenValida(imagen);
+
+    if (!extensionValida) {
+      setState(() {
+        _errorImagen = 'Formato no válido. Usa PNG, JPG o JPEG';
+        _imagenSeleccionada = null;
+      });
+      _imagenFieldKey.currentState?.validate();
+      Mensaje.mostrarSnackBar(
+        context: context,
+        mensaje: 'Formato no válido. Usa PNG, JPG o JPEG',
+        icon: Icons.image_not_supported_outlined,
+        color: _cs.error,
+      );
+      return;
+    }
 
     final ok = await ImageSize.validarTamanioImagen(imagen);
 
@@ -327,23 +378,11 @@ class _FormularioEventoState extends State<FormularioEvento> {
       return;
     }
 
-    final extension = imagen.path.toLowerCase();
-
-    if (!extension.endsWith('.png') &&
-        !extension.endsWith('.jpg') &&
-        !extension.endsWith('.jpeg')) {
-      Mensaje.mostrarSnackBar(
-        context: context,
-        mensaje: 'Formato no válido. Usa PNG, JPG o JPEG',
-        icon: Icons.image_not_supported_outlined,
-        color: _cs.error,
-      );
-      return;
-    }
-
     setState(() {
       _imagenSeleccionada = imagen;
+      _errorImagen = null;
     });
+    _imagenFieldKey.currentState?.validate();
   }
 
   Future<void> _abrirSelectorUbicacion() async {
@@ -549,6 +588,16 @@ class _FormularioEventoState extends State<FormularioEvento> {
         mensaje:
         'Has cambiado la localización. Vuelve a buscar o seleccionar el punto en el mapa.',
         icon: Icons.map,
+        color: _cs.error,
+      );
+      return;
+    }
+
+    if (_errorImagen != null) {
+      Mensaje.mostrarSnackBar(
+        context: context,
+        mensaje: _errorImagen!,
+        icon: Icons.image_not_supported_outlined,
         color: _cs.error,
       );
       return;
@@ -795,11 +844,23 @@ class _FormularioEventoState extends State<FormularioEvento> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
       child: FormField<XFile>(
+        key: _imagenFieldKey,
         autovalidateMode: AutovalidateMode.onUserInteraction,
         initialValue: _imagenSeleccionada,
         validator: (_) {
+          if (_errorImagen != null) {
+            return _errorImagen;
+          }
           if (!widget.esEdicion && _imagenSeleccionada == null) {
             return 'Selecciona una imagen';
+          }
+          final mime = _imagenSeleccionada?.mimeType?.toLowerCase();
+          if (mime != null && mime.contains('gif')) {
+            return 'Formato no válido. Usa PNG, JPG o JPEG';
+          }
+          if (_imagenSeleccionada != null &&
+              !ValidationImageType.validarExtensionImagenValida(_imagenSeleccionada!)) {
+            return 'Formato no válido. Usa PNG, JPG o JPEG';
           }
 
           return null;

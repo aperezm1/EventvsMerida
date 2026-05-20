@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 /// Pantalla de Términos y Condiciones de Uso de la app.
@@ -16,6 +17,21 @@ class _TerminosState extends State<Terminos> {
   // ===========================================================================
   // VARIABLES
   // ===========================================================================
+
+  final ScrollController _scrollController = ScrollController();
+  final ValueNotifier<int> _actualizadorScrollbar = ValueNotifier<int>(0);
+
+  static const double _paddingSuperiorContenido = 24;
+  static const double _paddingHorizontalContenido = 24;
+  static const double _paddingInferiorContenido = 24;
+
+  static const double _grosorScrollbar = 6;
+  static const double _radioScrollbar = 20;
+  static const double _altoMinimoScrollbar = 48;
+  static const double _margenVerticalScrollbar = 0;
+  static const double _margenDerechoScrollbar =
+      (_paddingHorizontalContenido - _grosorScrollbar) / 2;
+
   ColorScheme get _cs => Theme.of(context).colorScheme;
 
   static const String _textoTerminos = '''
@@ -45,19 +61,33 @@ Estos términos se rigen por la legislación española. Para la resolución de c
 ''';
 
   // ===========================================================================
+  // CICLO DE VIDA
+  // ===========================================================================
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _actualizadorScrollbar.dispose();
+    super.dispose();
+  }
+
+  // ===========================================================================
   // INTERFAZ
   // ===========================================================================
 
   Widget _contenidoTerminos() {
     return Padding(
-      padding: const EdgeInsets.all(24.0),
-      child: SingleChildScrollView(
-        child: Text(
-          _textoTerminos,
-          style: TextStyle(
-            color: _cs.onSurface,
-            fontSize: 16,
-          ),
+      padding: const EdgeInsets.fromLTRB(
+        _paddingHorizontalContenido,
+        0,
+        _paddingHorizontalContenido,
+        _paddingInferiorContenido,
+      ),
+      child: Text(
+        _textoTerminos,
+        style: TextStyle(
+          color: _cs.onSurface,
+          fontSize: 16,
         ),
       ),
     );
@@ -99,6 +129,111 @@ Estos términos se rigen por la legislación española. Para la resolución de c
     );
   }
 
+  Widget _buildContenidoConScroll() {
+    final contenido = Padding(
+      padding: const EdgeInsets.only(top: _paddingSuperiorContenido),
+      child: NotificationListener<ScrollMetricsNotification>(
+        onNotification: (_) {
+          _actualizadorScrollbar.value++;
+          return false;
+        },
+        child: SingleChildScrollView(
+          controller: _scrollController,
+          child: _contenidoTerminos(),
+        ),
+      ),
+    );
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Stack(
+          children: [
+            contenido,
+            Positioned(
+              top: _paddingSuperiorContenido,
+              right: _margenDerechoScrollbar,
+              bottom: _paddingInferiorContenido,
+              child: IgnorePointer(
+                child: AnimatedBuilder(
+                  animation: Listenable.merge([
+                    _scrollController,
+                    _actualizadorScrollbar,
+                  ]),
+                  builder: (context, child) {
+                    if (!_scrollController.hasClients) {
+                      return const SizedBox.shrink();
+                    }
+
+                    final posicion = _scrollController.position;
+
+                    if (!posicion.hasContentDimensions) {
+                      return const SizedBox.shrink();
+                    }
+
+                    final maxScroll = posicion.maxScrollExtent;
+
+                    if (maxScroll <= 0) {
+                      return const SizedBox.shrink();
+                    }
+
+                    final altoDisponible = constraints.maxHeight -
+                        _paddingSuperiorContenido -
+                        _paddingInferiorContenido;
+
+                    final altoCarril =
+                        altoDisponible - (_margenVerticalScrollbar * 2);
+
+                    if (altoCarril <= 0) {
+                      return const SizedBox.shrink();
+                    }
+
+                    final altoContenido = posicion.extentInside + maxScroll;
+
+                    final altoScrollbar =
+                    (posicion.extentInside / altoContenido * altoCarril)
+                        .clamp(_altoMinimoScrollbar, altoCarril)
+                        .toDouble();
+
+                    final porcentajeScroll =
+                    (_scrollController.offset / maxScroll)
+                        .clamp(0.0, 1.0)
+                        .toDouble();
+
+                    final desplazamientoScrollbar =
+                        (altoCarril - altoScrollbar) * porcentajeScroll;
+
+                    return SizedBox(
+                      width: _grosorScrollbar,
+                      height: altoDisponible,
+                      child: Stack(
+                        children: [
+                          Positioned(
+                            top: _margenVerticalScrollbar +
+                                desplazamientoScrollbar,
+                            right: 0,
+                            child: Container(
+                              width: _grosorScrollbar,
+                              height: altoScrollbar,
+                              decoration: BoxDecoration(
+                                color: _cs.primary,
+                                borderRadius:
+                                BorderRadius.circular(_radioScrollbar),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   // ===========================================================================
   // BUILD
   // ===========================================================================
@@ -110,7 +245,9 @@ Estos términos se rigen por la legislación española. Para la resolución de c
       body: Column(
         children: [
           _buildHeader(),
-          Expanded(child: _contenidoTerminos()),
+          Expanded(
+            child: _buildContenidoConScroll(),
+          ),
         ],
       ),
     );

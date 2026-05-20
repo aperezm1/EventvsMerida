@@ -27,3 +27,22 @@ class ImageSize {
     return bytes <= maxImagenBytes;
   }
 }
+
+class ValidationImageType {
+  static bool validarExtensionImagenValida(XFile imagen) {
+    final nombre = imagen.name.toLowerCase().trim();
+
+    return nombre.endsWith('.png') ||
+        nombre.endsWith('.jpg') ||
+        nombre.endsWith('.jpeg');
+  }
+
+  static Future<bool> esGif(XFile imagen) async {
+    final bytes = await imagen.readAsBytes();
+    if (bytes.length < 6) {
+      return false;
+    }
+    final header = String.fromCharCodes(bytes.sublist(0, 6));
+    return header == 'GIF87a' || header == 'GIF89a';
+  }
+}

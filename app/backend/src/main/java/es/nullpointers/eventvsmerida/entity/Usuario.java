@@ -2,6 +2,7 @@ package es.nullpointers.eventvsmerida.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -36,11 +37,11 @@ public class Usuario {
     private Long id;
 
     @NotNull
-    @Column(name = "nombre", nullable = false, length = Integer.MAX_VALUE)
+    @Column(name = "nombre", nullable = false, length = 50)
     private String nombre;
 
     @NotNull
-    @Column(name = "apellidos", nullable = false, length = Integer.MAX_VALUE)
+    @Column(name = "apellidos", nullable = false, length = 150)
     private String apellidos;
 
     @NotNull
@@ -48,18 +49,19 @@ public class Usuario {
     private LocalDate fechaNacimiento;
 
     @NotNull
-    @Column(name = "email", nullable = false, length = Integer.MAX_VALUE)
+    @Column(name = "email", nullable = false, length = 255)
     private String email;
 
     @NotNull
-    @Column(name = "telefono", nullable = false, length = Integer.MAX_VALUE)
+    @Column(name = "telefono", nullable = false, length = 9)
     private String telefono;
 
     @NotNull
-    @Column(name = "password", nullable = false, length = Integer.MAX_VALUE)
+    @Size(min = 8, max = 128)
+    @Column(name = "password", nullable = false, length = 128)
     private String password;
 
-    @Column(name = "foto_path", length = 1024)
+    @Column(name = "foto_path", length = 100)
     private String fotoPath;
 
     @NotNull

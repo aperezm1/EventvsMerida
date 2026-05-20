@@ -1,4 +1,5 @@
 import 'package:eventvsmerida/utils/fecha_utils.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../models/evento.dart';
@@ -30,6 +31,19 @@ class _EventosGuardadosState extends State<EventosGuardados> {
   bool _cargando = true;
   FechaUtils fu = FechaUtils();
 
+  final ScrollController _eventosScrollController = ScrollController();
+  final ValueNotifier<int> _actualizadorScrollbar = ValueNotifier<int>(0);
+
+  static const double _paddingVerticalLista = 16;
+  static const double _paddingVerticalTarjeta = 10;
+  static const double _margenVerticalScrollbar =
+      _paddingVerticalLista + _paddingVerticalTarjeta;
+
+  static const double _grosorScrollbar = 6;
+  static const double _radioScrollbar = 20;
+  static const double _margenDerechoScrollbar = 4;
+  static const double _altoMinimoScrollbar = 48;
+
   ColorScheme get _cs => Theme.of(context).colorScheme;
 
   // ===========================================================================
@@ -40,6 +54,13 @@ class _EventosGuardadosState extends State<EventosGuardados> {
   void initState() {
     super.initState();
     _cargarDatos();
+  }
+
+  @override
+  void dispose() {
+    _eventosScrollController.dispose();
+    _actualizadorScrollbar.dispose();
+    super.dispose();
   }
 
   // ===========================================================================
@@ -59,7 +80,12 @@ class _EventosGuardadosState extends State<EventosGuardados> {
     });
 
     if (!respuesta.exito) {
-      Mensaje.mostrarSnackBar(context: context, mensaje: respuesta.mensaje, icon: Icons.event_busy, color: _cs.error);
+      Mensaje.mostrarSnackBar(
+        context: context,
+        mensaje: respuesta.mensaje,
+        icon: Icons.event_busy,
+        color: _cs.error,
+      );
     }
   }
 
@@ -100,7 +126,13 @@ class _EventosGuardadosState extends State<EventosGuardados> {
     }
 
     if (!mounted) return;
-    Mensaje.mostrarSnackBar(context: context, mensaje: respuesta.mensaje, icon: Icons.event_busy, color: _cs.error);
+
+    Mensaje.mostrarSnackBar(
+      context: context,
+      mensaje: respuesta.mensaje,
+      icon: Icons.event_busy,
+      color: _cs.error,
+    );
   }
 
   // ===========================================================================
@@ -180,18 +212,11 @@ class _EventosGuardadosState extends State<EventosGuardados> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            Icons.event_busy,
-            size: 64,
-            color: _cs.primary,
-          ),
+          Icon(Icons.event_busy, size: 64, color: _cs.primary),
           const SizedBox(height: 16),
           Text(
             'No tienes eventos guardados',
-            style: TextStyle(
-              color: _cs.onSurface,
-              fontSize: 16,
-            ),
+            style: TextStyle(color: _cs.onSurface, fontSize: 16),
             textAlign: TextAlign.center,
           ),
         ],
@@ -214,12 +239,119 @@ class _EventosGuardadosState extends State<EventosGuardados> {
           width: 100,
           height: 110,
           color: _cs.secondary.withAlpha(51),
-          child: Icon(
-            Icons.image,
-            color: _cs.primary,
-          ),
+          child: Icon(Icons.image, color: _cs.primary),
         ),
       ),
+    );
+  }
+
+  Widget _buildListaEventosGuardados() {
+    final mostrarBarraScroll = _eventos.length >= 4;
+
+    final lista = NotificationListener<ScrollMetricsNotification>(
+      onNotification: (_) {
+        _actualizadorScrollbar.value++;
+        return false;
+      },
+      child: ListView.builder(
+        controller: _eventosScrollController,
+        padding: const EdgeInsets.only(
+          top: _paddingVerticalLista,
+          bottom: _paddingVerticalLista,
+        ),
+        itemCount: _eventos.length,
+        itemBuilder: (context, index) => _tarjetaEvento(_eventos[index]),
+      ),
+    );
+
+    if (!mostrarBarraScroll) {
+      return lista;
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Stack(
+          children: [
+            lista,
+            Positioned(
+              top: 0,
+              right: _margenDerechoScrollbar,
+              bottom: 0,
+              child: IgnorePointer(
+                child: AnimatedBuilder(
+                  animation: Listenable.merge([
+                    _eventosScrollController,
+                    _actualizadorScrollbar,
+                  ]),
+                  builder: (context, child) {
+                    if (!_eventosScrollController.hasClients) {
+                      return const SizedBox.shrink();
+                    }
+
+                    final posicion = _eventosScrollController.position;
+
+                    if (!posicion.hasContentDimensions) {
+                      return const SizedBox.shrink();
+                    }
+
+                    final maxScroll = posicion.maxScrollExtent;
+
+                    if (maxScroll <= 0) {
+                      return const SizedBox.shrink();
+                    }
+
+                    final altoDisponible = constraints.maxHeight;
+                    final altoCarril =
+                        altoDisponible - (_margenVerticalScrollbar * 2);
+
+                    if (altoCarril <= 0) {
+                      return const SizedBox.shrink();
+                    }
+
+                    final altoContenido = posicion.extentInside + maxScroll;
+
+                    final altoScrollbar =
+                    (posicion.extentInside / altoContenido * altoCarril)
+                        .clamp(_altoMinimoScrollbar, altoCarril)
+                        .toDouble();
+
+                    final porcentajeScroll =
+                    (_eventosScrollController.offset / maxScroll)
+                        .clamp(0.0, 1.0)
+                        .toDouble();
+
+                    final desplazamientoScrollbar =
+                        (altoCarril - altoScrollbar) * porcentajeScroll;
+
+                    return SizedBox(
+                      width: _grosorScrollbar,
+                      height: altoDisponible,
+                      child: Stack(
+                        children: [
+                          Positioned(
+                            top: _margenVerticalScrollbar +
+                                desplazamientoScrollbar,
+                            right: 0,
+                            child: Container(
+                              width: _grosorScrollbar,
+                              height: altoScrollbar,
+                              decoration: BoxDecoration(
+                                color: _cs.primary,
+                                borderRadius:
+                                BorderRadius.circular(_radioScrollbar),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -227,7 +359,7 @@ class _EventosGuardadosState extends State<EventosGuardados> {
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: 16,
-        vertical: 10,
+        vertical: _paddingVerticalTarjeta,
       ),
       child: Material(
         color: Colors.transparent,
@@ -238,10 +370,7 @@ class _EventosGuardadosState extends State<EventosGuardados> {
             decoration: BoxDecoration(
               color: _cs.surface,
               borderRadius: BorderRadius.circular(18),
-              border: Border.all(
-                color: _cs.primary,
-                width: 1,
-              ),
+              border: Border.all(color: _cs.primary, width: 1),
               boxShadow: [
                 BoxShadow(
                   color: _cs.onPrimary.withAlpha(64),
@@ -326,11 +455,7 @@ class _EventosGuardadosState extends State<EventosGuardados> {
           Expanded(
             child: _eventos.isEmpty
                 ? _contenidoVacio()
-                : ListView.builder(
-              padding: const EdgeInsets.only(top: 16, bottom: 16),
-              itemCount: _eventos.length,
-              itemBuilder: (context, index) => _tarjetaEvento(_eventos[index]),
-            ),
+                : _buildListaEventosGuardados(),
           ),
         ],
       ),

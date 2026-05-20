@@ -251,7 +251,7 @@ public class EventoService {
         Pageable pageableOrdenado = PageRequest.of(
                 pageable.getPageNumber(),
                 pageable.getPageSize(),
-                Sort.by(Sort.Order.asc("id")));
+                Sort.by(Sort.Order.asc("fechaInicio")));
 
         Page<Evento> page;
 

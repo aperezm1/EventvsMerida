@@ -1228,7 +1228,8 @@ Future<XFile?> elegirImagen(BuildContext context) async {
               const SizedBox(height: 8),
 
               Text(
-                'Tamaño máximo: 1,5 MB',
+                'Formatos permitidos: PNG, JPG o JPEG \n Tamaño máximo: 1,5 MB',
+                textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 12,
                   color: cs.onSurface.withValues(alpha: 0.6),
@@ -1253,26 +1254,48 @@ Future<XFile?> elegirImagen(BuildContext context) async {
 
     if (imagen == null) return null;
 
+    final extensionValida =
+    ValidationImageType.validarExtensionImagenValida(imagen);
+
+    if (!extensionValida) {
+      if (!context.mounted) return null;
+
+      Mensaje.mostrarSnackBar(
+        context: context,
+        mensaje: 'Formato no válido. Usa PNG, JPG o JPEG',
+        icon: Icons.image_not_supported_outlined,
+        color: Theme.of(context).colorScheme.error,
+      );
+
+      return null;
+    }
+
     final ok = await ImageSize.validarTamanioImagen(imagen);
 
     if (!ok) {
+      if (!context.mounted) return null;
+
       Mensaje.mostrarSnackBar(
         context: context,
         mensaje: 'La imagen no puede superar 1,5 MB',
         icon: Icons.image_not_supported_outlined,
         color: Colors.red,
       );
+
       return null;
     }
 
     return imagen;
   } catch (e) {
+    if (!context.mounted) return null;
+
     Mensaje.mostrarSnackBar(
       context: context,
       mensaje: 'Error al seleccionar la imagen',
       icon: Icons.image_not_supported_outlined,
       color: Colors.red,
     );
+
     return null;
   }
 }
