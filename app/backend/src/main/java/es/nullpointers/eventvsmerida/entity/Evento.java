@@ -37,11 +37,11 @@ public class Evento {
     private Long id;
 
     @NotNull
-    @Column(name = "titulo", nullable = false, length = Integer.MAX_VALUE)
+    @Column(name = "titulo", nullable = false, length = 200)
     private String titulo;
 
     @NotNull
-    @Column(name = "descripcion", nullable = false, length = Integer.MAX_VALUE)
+    @Column(name = "descripcion", nullable = false, length = 5000)
     private String descripcion;
 
     @NotNull
@@ -53,7 +53,7 @@ public class Evento {
     private LocalDateTime fechaFin;
 
     @NotNull
-    @Column(name = "localizacion", nullable = false, length = Integer.MAX_VALUE)
+    @Column(name = "localizacion", nullable = false, length = 255)
     private String localizacion;
 
     @Column(name = "latitud", nullable = false)
@@ -63,7 +63,7 @@ public class Evento {
     private Double longitud;
 
     @NotNull
-    @Column(name = "foto", nullable = false, length = Integer.MAX_VALUE)
+    @Column(name = "foto", nullable = false, length = 300)
     private String foto;
 
     @NotNull
