@@ -17,7 +17,7 @@
 [🌐 Landing page](https://eventvsmerida.vercel.app) · [🎨 Prototipo Figma](https://www.figma.com/design/7KZIZqLMFp8ICrSPDZ2oKz/Prototipo----Eventvs-M%C3%A9rida?node-id=0-1&t=dXFZVgvSh53g5oPN-1)
 
 </div>
-
+ 
 ---
 
 ## 📖 Descripción
