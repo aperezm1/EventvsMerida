@@ -7,7 +7,7 @@
 **Aplicación móvil que centraliza toda la información cultural y de ocio de Mérida en un único espacio digital.**
 
 [![Versión](https://img.shields.io/github/v/release/Null-Pointers-Albarregas/EventvsMerida)](https://github.com/Null-Pointers-Albarregas/EventvsMerida/releases/latest)
-[![Licencia: GPL v3](https://img.shields.io/badge/Licencia-GPLv3-blue.svg)](https://github.com/Null-Pointers-Albarregas/EventvsMerida/blob/main/LICENSE)
+[![Licencia: Propietaria](https://img.shields.io/badge/Licencia-Propietaria-red.svg)](https://github.com/Null-Pointers-Albarregas/EventvsMerida/blob/main/LICENSE.md)
 [![Base de datos: Supabase](https://img.shields.io/badge/Base%20de%20datos-Supabase-181818?logo=supabase&logoColor=white)](https://supabase.com)
 [![Backend: Spring Boot](https://img.shields.io/badge/Backend-Spring%20Boot-6DB33F?logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
 [![Interfaz: Flutter](https://img.shields.io/badge/Interfaz-Flutter-02569B?logo=flutter)](https://flutter.dev)
