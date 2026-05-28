@@ -96,24 +96,29 @@ EventvsMerida/
 
 ## 📄 Licencia
 
-Este proyecto se distribuye bajo la licencia **GNU General Public License v3.0 (GPL v3)**. Consulta el fichero [LICENSE](https://github.com/Null-Pointers-Albarregas/EventvsMerida/blob/main/LICENSE) para más detalles.
+Este proyecto está protegido bajo una **Licencia de Software Propietario - Null Pointers**.
+
+El software se proporciona únicamente para fines de **evaluación académica y uso personal**. No está permitido copiar, modificar, redistribuir, publicar, vender, utilizar comercialmente ni crear obras derivadas del software sin autorización previa y por escrito de los titulares de la propiedad intelectual.
+
+Consulta el fichero [LICENSE.md](https://github.com/Null-Pointers-Albarregas/EventvsMerida/blob/main/LICENSE.md) para más detalles.
 
 <details>
-<summary>Resumen de permisos y condiciones</summary>
+<summary>Resumen de permisos y restricciones</summary>
 
 <div align="center">
 
 | | Condición |
 |:-:|:----------|
-| ✅ | Uso comercial permitido |
-| ✅ | Modificación permitida |
-| ✅ | Distribución permitida |
-| ✅ | Uso privado permitido |
-| ✅ | Uso de patentes permitido |
-| ⚠️ | Debes divulgar el código fuente |
-| ⚠️ | Debes mantener la licencia y los avisos de copyright |
-| ❌ | Sin responsabilidad |
+| ✅ | Descarga, instalación y ejecución para evaluación académica y uso personal |
+| ❌ | Uso comercial |
+| ❌ | Modificación del código |
+| ❌ | Redistribución del código fuente o binario |
+| ❌ | Publicación del código fuente o binario en otras plataformas |
+| ❌ | Creación de obras derivadas |
+| ❌ | Ingeniería inversa, descompilación o desensamblado |
+| ⚠️ | Cualquier uso no autorizado requiere permiso previo y por escrito |
 | ❌ | Sin garantía |
+| ❌ | Sin responsabilidad |
 
 </div>
 
