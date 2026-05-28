@@ -77,8 +77,8 @@ EventvsMerida/
       </a>
     </td>
     <td align="center">
-      <a href="https://github.com/aperezm1">
-        <img src="https://avatars.githubusercontent.com/u/212538335?v=4" width="80" style="border-radius:50%"/><br/>
+      <a href="https://github.com/adrianpmdev">
+        <img src="https://avatars.githubusercontent.com/u/150019522?v=4" width="80" style="border-radius:50%"/><br/>
         <sub><b>Adrián Pérez</b></sub>
       </a>
     </td>
