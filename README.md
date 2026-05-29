@@ -83,8 +83,8 @@ EventvsMerida/
       </a>
     </td>
     <td align="center">
-      <a href="https://github.com/dmunozc04-albarregas">
-        <img src="https://avatars.githubusercontent.com/u/190772324?v=4" width="80" style="border-radius:50%"/><br/>
+      <a href="https://github.com/davidmcdev">
+        <img src="https://avatars.githubusercontent.com/u/82410442?v=4" width="80" style="border-radius:50%"/><br/>
         <sub><b>David Muñoz</b></sub>
       </a>
     </td>
